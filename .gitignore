@@ -9,3 +9,5 @@
 /GDItemSearchUtil/bin/Debug/netstandard1.4
 /GDItemSearchUtil/obj
 /.vs/GDItemSearch/v15
+/GDItemSearch.FileUtils/obj
+/GDItemSearch.FileUtils/bin/Debug/netstandard1.4

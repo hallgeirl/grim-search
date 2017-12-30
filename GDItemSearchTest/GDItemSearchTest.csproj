@@ -52,7 +52,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GDItemSearchUtil\GDItemSearch.FileUtils.csproj">
+    <ProjectReference Include="..\GDItemSearch.FileUtils\GDItemSearch.FileUtils.csproj">
       <Project>{6aa783ae-c669-48bd-923a-bd852116fcfe}</Project>
       <Name>GDItemSearch.FileUtils</Name>
     </ProjectReference>

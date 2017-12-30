@@ -1,4 +1,4 @@
-﻿using GDItemSearchUtilFileUtils;
+﻿using GDItemSearch.FileUtils.CharacterFiles;
 using System;
 using System.Collections.Generic;
 using System.IO;

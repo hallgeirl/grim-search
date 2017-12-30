@@ -2,12 +2,13 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/GDItemSearch/bin/Debug
-/GDItemSearch/obj/Debug
-/GDItemSearchTest/bin/Debug
-/GDItemSearchTest/obj/Debug
-/GDItemSearchUtil/bin/Debug/netstandard1.4
+/GDItemSearch/bin
+/GDItemSearch/obj
+/GDItemSearchTest/bin
+/GDItemSearchTest/obj
+/GDItemSearchUtil/bin
 /GDItemSearchUtil/obj
 /.vs/GDItemSearch/v15
 /GDItemSearch.FileUtils/obj
-/GDItemSearch.FileUtils/bin/Debug/netstandard1.4
+/GDItemSearch.FileUtils/bin
+/packages

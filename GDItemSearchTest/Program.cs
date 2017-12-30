@@ -1,4 +1,6 @@
-﻿using GDItemSearch.FileUtils.CharacterFiles;
+﻿using GDItemSearch.FileUtils;
+using GDItemSearch.FileUtils.CharacterFiles;
+using GDItemSearch.FileUtils.DBFiles;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,9 +17,18 @@ namespace GDItemSearchTest
             using (var s = File.OpenRead("player.gdc"))
             {
                 var file = new CharacterFile();
-
-
                 file.Read(s);
+
+                var itemCache = new ItemCache();
+                itemCache.LoadAllItems();
+
+                //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\database\\database.arz");
+                //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\resources\\UI.arc");
+                //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\database\\templates.arc");
+                //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\gdx1\\database\\GDX1.arz");
+                
+
+
             }
         }
     }

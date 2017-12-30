@@ -7,7 +7,7 @@ namespace GDItemSearch.FileUtils.CharacterFiles
 {
     public class InventorySack
     {
-        public List<InventoryItem> items = new List<InventoryItem>();
+        public List<InventoryItem> Items = new List<InventoryItem>();
         byte tempBool;
 
         public void Read(GDFileReader file)
@@ -18,7 +18,7 @@ namespace GDItemSearch.FileUtils.CharacterFiles
                 throw new Exception();
 
             tempBool = file.ReadByte();
-            items = GDArray<InventoryItem>.Read(file);
+            Items = GDArray<InventoryItem>.Read(file);
 
             file.ReadBlockEnd(b);
         }

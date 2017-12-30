@@ -7,10 +7,10 @@ namespace GDItemSearch.FileUtils.CharacterFiles
 {
     public class Inventory
     {
-        public List<InventorySack> sacks = new List<InventorySack>();
-        public InventoryEquipment[] equipment = new InventoryEquipment[12];
-        public InventoryEquipment[] weapon1 = new InventoryEquipment[2];
-        public InventoryEquipment[] weapon2 = new InventoryEquipment[2];
+        public List<InventorySack> Sacks = new List<InventorySack>();
+        public InventoryEquipment[] Equipment = new InventoryEquipment[12];
+        public InventoryEquipment[] Weapon1 = new InventoryEquipment[2];
+        public InventoryEquipment[] Weapon2 = new InventoryEquipment[2];
         public UInt32 focused;
         public UInt32 selected;
         public byte flag;
@@ -38,31 +38,31 @@ namespace GDItemSearch.FileUtils.CharacterFiles
 		        {
                     var invSack = new InventorySack();
                     invSack.Read(file);
-                    sacks.Add(invSack);
+                    Sacks.Add(invSack);
                 }
 
                 useAlternate = file.ReadByte();
 
 		        for (var i = 0; i < 12; i++)
 		        {
-                    equipment[i] = new InventoryEquipment();
-                    equipment[i].Read(file);
+                    Equipment[i] = new InventoryEquipment();
+                    Equipment[i].Read(file);
                 }
 
                 alternate1 = file.ReadByte();
 
 		        for (var i = 0; i< 2; i++)
 		        {
-                    weapon1[i] = new InventoryEquipment();
-                    weapon1[i].Read(file);
+                    Weapon1[i] = new InventoryEquipment();
+                    Weapon1[i].Read(file);
 		        }
 
 		        alternate2 = file.ReadByte();
 
 		        for (var i = 0; i< 2; i++)
 		        {
-                    weapon2[i] = new InventoryEquipment();
-                    weapon2[i].Read(file);
+                    Weapon2[i] = new InventoryEquipment();
+                    Weapon2[i].Read(file);
 		        }
 	        }
 

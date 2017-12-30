@@ -16,17 +16,24 @@ namespace GDItemSearchTest
         {
             using (var s = File.OpenRead("player.gdc"))
             {
-                var file = new CharacterFile();
-                file.Read(s);
+//                var file = new CharacterFile();
+  //              file.Read(s);
 
-                var itemCache = new ItemCache();
-                itemCache.LoadAllItems();
+                Index index = new Index();
+                index.Build();
+
+                var res = index.Find("ultos", new IndexFilter());
+                var res2 = index.Find("ultos", new IndexFilter() { MaxLevel = 80 });
+
+
+                //var itemCache = new ItemCache();
+                //itemCache.LoadAllItems();
 
                 //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\database\\database.arz");
                 //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\resources\\UI.arc");
                 //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\database\\templates.arc");
                 //var path = new ArzExtractor().Extract(Settings.GrimDawnDirectory + "\\gdx1\\database\\GDX1.arz");
-                
+
 
 
             }

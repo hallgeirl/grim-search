@@ -41,8 +41,8 @@ namespace GDItemSearch.FileUtils.CharacterFiles
         public UInt32 greatestSurvivalScore;
         public UInt32 cooldownRemaining;
         public UInt32 cooldownTotal;
-        public UInt32 unknown1;
-        public UInt32 unknown2;
+        public UInt32 uniqueItemsFound;
+        public UInt32 randomizedItemsFound;
 
         public void Read(GDFileReader file)
         {
@@ -51,7 +51,8 @@ namespace GDItemSearch.FileUtils.CharacterFiles
             if (file.ReadBlockStart(b) != 16)
                 throw new Exception();
 
-            if (file.ReadInt() != 9) // version
+            var version = file.ReadInt();
+            if (version != 9 && version != 7) // version
                 throw new Exception();
 
             playTime = file.ReadInt();
@@ -94,13 +95,16 @@ namespace GDItemSearch.FileUtils.CharacterFiles
                 bossKills[i] = file.ReadInt();
             }
 
-            survivalWaveTier = file.ReadInt();
-            greatestSurvivalScore = file.ReadInt();
-            cooldownRemaining = file.ReadInt();
-            cooldownTotal = file.ReadInt();
+            if (version >= 9)
+            {
+                survivalWaveTier = file.ReadInt();
+                greatestSurvivalScore = file.ReadInt();
+                cooldownRemaining = file.ReadInt();
+                cooldownTotal = file.ReadInt();
+            }
 
-            unknown1 = file.ReadInt();
-            unknown2 = file.ReadInt();
+            uniqueItemsFound = file.ReadInt();
+            randomizedItemsFound = file.ReadInt();
 
             file.ReadBlockEnd(b);
         }

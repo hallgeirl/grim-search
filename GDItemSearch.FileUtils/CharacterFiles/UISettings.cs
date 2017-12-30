@@ -7,7 +7,7 @@ namespace GDItemSearch.FileUtils.CharacterFiles
 {
     public class UISettings
     {
-        public HotSlot[] slots = new HotSlot[46];
+        public HotSlot[] slots;
         public string[] unknown4 = new string[5];
 	    public string[] unknown5 = new string[5];
 	    public UInt32 unknown2;
@@ -23,8 +23,9 @@ namespace GDItemSearch.FileUtils.CharacterFiles
             if (file.ReadBlockStart(b) != 14)
                 throw new Exception();
 
-            if (file.ReadInt() != 5) // version
-                throw new Exception();
+            var version = file.ReadInt();
+            if (version != 5 && version != 4) // version
+                throw new Exception("Invalid save file version.");
 
             unknown1 = file.ReadByte();
             unknown2 = file.ReadInt();
@@ -37,7 +38,12 @@ namespace GDItemSearch.FileUtils.CharacterFiles
                 unknown6[i] = file.ReadByte();
             }
 
-            for (var i = 0; i < 46; i++)
+            int numberOfSlots = 46;
+            if (version == 4)
+                numberOfSlots = 36;
+            slots = new HotSlot[numberOfSlots];
+
+            for (var i = 0; i < numberOfSlots; i++)
             {
                 slots[i] = new HotSlot();
                 slots[i].Read(file);

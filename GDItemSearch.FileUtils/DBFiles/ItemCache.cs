@@ -12,6 +12,15 @@ namespace GDItemSearch.FileUtils.DBFiles
     {
         Dictionary<string, ItemRaw> AllItems = new Dictionary<string, ItemRaw>();
         string cacheFilename = "ItemsCache.json";
+
+        public ItemRaw GetItem(string path)
+        {
+            if (AllItems.ContainsKey(path))
+                return AllItems[path];
+
+            return null;
+        }
+
         public void LoadAllItems()
         {
             if (File.Exists(cacheFilename))
@@ -22,6 +31,14 @@ namespace GDItemSearch.FileUtils.DBFiles
                 File.WriteAllText(cacheFilename, JsonConvert.SerializeObject(AllItems));
             }
 
+        }
+
+        public void ClearCache()
+        {
+            if (File.Exists(cacheFilename))
+            {
+                File.Delete(cacheFilename);
+            }
         }
 
         private void ReadItemsFromFiles()

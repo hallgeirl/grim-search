@@ -7,23 +7,23 @@ namespace GDItemSearch.FileUtils.CharacterFiles
 {
     public class CharacterFile
     {
-        public Header hdr = new Header();
-        public Uid id = new Uid();
-        public CharacterInfo info = new CharacterInfo();
-        public CharacterBio bio = new CharacterBio();
-        public Inventory inv = new Inventory();
-        public CharacterStash stash = new CharacterStash();
-        public RespawnList respawns = new RespawnList();
-        public TeleportList teleports = new TeleportList();
-        public MarkerList markers = new MarkerList();
-        public ShrineList shrines = new ShrineList();
-        public CharacterSkills skills = new CharacterSkills();
-        public LoreNotes notes = new LoreNotes();
-        public FactionPack factions = new FactionPack();
-        public UISettings ui = new UISettings();
-        public TutorialPages tutorials = new TutorialPages();
-        public PlayStats stats = new PlayStats();
-        public TriggerTokens tokens = new TriggerTokens();
+        public Header Header = new Header();
+        public Uid Id = new Uid();
+        public CharacterInfo Info = new CharacterInfo();
+        public CharacterBio Bio = new CharacterBio();
+        public Inventory Inventory = new Inventory();
+        public CharacterStash Stash = new CharacterStash();
+        private RespawnList respawns = new RespawnList();
+        private TeleportList teleports = new TeleportList();
+        private MarkerList markers = new MarkerList();
+        private ShrineList shrines = new ShrineList();
+        private CharacterSkills skills = new CharacterSkills();
+        private LoreNotes notes = new LoreNotes();
+        private FactionPack factions = new FactionPack();
+        private UISettings ui = new UISettings();
+        private TutorialPages tutorials = new TutorialPages();
+        private PlayStats stats = new PlayStats();
+        private TriggerTokens tokens = new TriggerTokens();
 
         public void Read(Stream f)
         {
@@ -34,23 +34,21 @@ namespace GDItemSearch.FileUtils.CharacterFiles
             if (file.ReadInt() != 0x58434447)
                 throw new Exception();
 
-            if (file.ReadInt() != 2) // Header version. Must be 2.
-                throw new Exception();
-
-            hdr.Read(file);
+            Header.Read(file);
 
             if (file.NextInt() != 0) //Checksum(?)
                 throw new Exception();
 
-            if (file.ReadInt() != 8) // version (6, 7 and 8 - only 8 supported here)
-                throw new Exception();
+            var fileVersion = file.ReadInt();
+            if (fileVersion < 6 || fileVersion > 8) // version (6, 7 and 8 - only 8 supported here)
+                throw new Exception("Invalid file version: " + fileVersion);
 
-            id.Read(file);
+            Id.Read(file);
 
-            info.Read(file);
-            bio.Read(file);
-            inv.Read(file);
-            stash.Read(file);
+            Info.Read(file);
+            Bio.Read(file);
+            Inventory.Read(file);
+            Stash.Read(file);
             respawns.Read(file);
             teleports.Read(file);
             markers.Read(file);
@@ -61,7 +59,10 @@ namespace GDItemSearch.FileUtils.CharacterFiles
             ui.Read(file);
             tutorials.Read(file);
             stats.Read(file);
-            tokens.Read(file);
+
+            if (fileVersion >= 7)
+                tokens.Read(file);
+
 
             file.EndRead();
         }

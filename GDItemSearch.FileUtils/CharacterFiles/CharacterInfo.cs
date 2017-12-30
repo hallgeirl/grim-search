@@ -28,16 +28,21 @@ namespace GDItemSearch.FileUtils.CharacterFiles
             if (file.ReadBlockStart(b) != 1)
                 throw new Exception();
 
-            if (file.ReadInt() != 4) // version
-                throw new Exception();
+            var version = file.ReadInt();
+            if (version != 3 && version != 4) // version
+                throw new Exception("Invalid character info version");
 
             isInMainQuest = file.ReadByte();
             hasBeenInGame = file.ReadByte();
             difficulty = file.ReadByte();
             greatestDifficulty = file.ReadByte();
             money = file.ReadInt();
-            greatestSurvivalDifficulty = file.ReadByte();
-            currentTribute = file.ReadInt();
+            if (version == 4)
+            {
+                greatestSurvivalDifficulty = file.ReadByte();
+                currentTribute = file.ReadInt();    
+            }
+            
             compassState = file.ReadByte();
             lootMode = file.ReadInt();
             skillWindowShowHelp = file.ReadByte();

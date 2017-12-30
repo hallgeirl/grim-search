@@ -80,6 +80,9 @@
     <Compile Include="DBFiles\ArzExtractor.cs" />
     <Compile Include="DBFiles\ItemCache.cs" />
     <Compile Include="DBFiles\ItemRaw.cs" />
+    <Compile Include="Index.cs" />
+    <Compile Include="IndexFilter.cs" />
+    <Compile Include="IndexItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>

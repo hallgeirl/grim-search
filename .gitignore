@@ -3,3 +3,8 @@
 ################################################################################
 
 /GDItemSearch/bin/Debug
+/GDItemSearch/obj/Debug
+/GDItemSearchTest/bin/Debug
+/GDItemSearchTest/obj/Debug
+/GDItemSearchUtil/bin/Debug/netstandard1.4
+/GDItemSearchUtil/obj

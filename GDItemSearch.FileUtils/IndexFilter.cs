@@ -14,5 +14,9 @@ namespace GDItemSearch.FileUtils
         public bool? IsEquipped { get; set; }
 
         public int? PageSize { get; set; }
+
+        public string ItemType { get; set; }
+
+        public string Rarity { get; set; }
     }
 }

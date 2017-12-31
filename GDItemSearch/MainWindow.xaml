@@ -16,6 +16,7 @@
         
         <TabControl Name="MainTabControl">
             <TabItem Header="Search" Name="SearchTab">
+                <ScrollViewer>
                 <StackPanel Margin="24,19,24,19">
                     <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="This little app lets you search for items across all your Grim Dawn characters! Wow!" VerticalAlignment="Top"/>
                     <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Just type in something to search for (e.g. an item name, or parts of it), select some filters (if you want), and go nuts!" VerticalAlignment="Top"/>
@@ -45,7 +46,7 @@
                             </Grid.RowDefinitions>
 
                             <Label Content="Include equipped" />
-                            <CheckBox Name="IncludeEquippedCheckBox" VerticalAlignment="Center" Grid.Column="1" Checked="IncludeEquippedCheckBox_Checked" />
+                            <CheckBox Name="IncludeEquippedCheckBox" VerticalAlignment="Center" Grid.Column="1" Checked="IncludeEquippedCheckBox_Checked" Unchecked="IncludeEquippedCheckBox_Checked" IsChecked="True" />
 
                             <Label Content="Level range" Grid.Row="1" />
                             <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
@@ -56,21 +57,27 @@
 
                             <Label Content="Type of gear" Grid.Row="0" Grid.Column="2"/>
                             <ComboBox Name="TypeOfGearCombo" VerticalAlignment="Center" Grid.Column="3" SelectionChanged="TypeOfGearCombo_SelectionChanged" />
+                            
+                            <Label Content="Rarity" Grid.Row="1" Grid.Column="2"/>
+                            <ComboBox Name="RarityCombo" VerticalAlignment="Center" Grid.Row="1" Grid.Column="3" SelectionChanged="TypeOfGearCombo_SelectionChanged" />
                         </Grid>
                      </Grid>
                     
-                    <Label Content="Results (max. 50)" FontWeight="Bold" />
-                    <ListView Height="Auto" Name="ResultsListView">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="Item name" DisplayMemberBinding="{Binding ItemName}"/>
-                                <GridViewColumn Header="Character" DisplayMemberBinding="{Binding Owner}"/>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                    <Label Content="Results (max. 50 displayed at once)" FontWeight="Bold" />
+                    <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
+                        <ListView Height="Auto" MinHeight="200"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" SelectionChanged="ResultsListView_SelectionChanged" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Item name" DisplayMemberBinding="{Binding Name}" Width="Auto"/>
+                                    <GridViewColumn Header="Character" DisplayMemberBinding="{Binding Owner}" Width="100"/>
+                                    <GridViewColumn Header="Level" DisplayMemberBinding="{Binding LevelRequirement}" Width="50"/>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    
 
                 </StackPanel>
-                
+                </ScrollViewer>
             </TabItem>
             <TabItem Header="Settings" Name="SettingsTab">
                 <StackPanel Margin="24,19,24,19">

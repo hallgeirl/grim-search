@@ -12,14 +12,13 @@ namespace GDItemSearch.FileUtils
     public class Index
     {
         ItemCache _itemCache = new ItemCache();
+        StringsCache _stringsCache = StringsCache.Instance;
         List<CharacterFile> _characters = new List<CharacterFile>();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
-        
-
         public List<IndexItem> Find(string search, IndexFilter filter)
         {
-            var result = _index.Where(x => x.Searchable.Contains(search) && FilterMatch(x, filter));
+            var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
 
             if (filter.PageSize != null)
                 return result.Take(filter.PageSize.Value).ToList();
@@ -30,14 +29,17 @@ namespace GDItemSearch.FileUtils
         public void ClearCache()
         {
             _itemCache.ClearCache();
+            _stringsCache.ClearCache();
         }
 
-        public void Build()
+        public IndexSummary Build()
         {
             LoadAllCharacters();
             _itemCache.LoadAllItems();
+            _stringsCache.LoadAllStrings();
+            var summary = BuildIndex();
 
-            BuildIndex();
+            return summary;
         }
 
         private void LoadAllCharacters()
@@ -62,37 +64,31 @@ namespace GDItemSearch.FileUtils
             }
         }
 
-        private void BuildIndex()
-       {
+        private IndexSummary BuildIndex()
+        {
+            var summary = new IndexSummary();
+
             foreach (var c in _characters)
             {
-                BuildEquippedIndexItems(c, c.Inventory.Equipment);
-                BuildEquippedIndexItems(c, c.Inventory.Weapon1);
-                BuildEquippedIndexItems(c, c.Inventory.Weapon2);
+                BuildEquippedIndexItems(c, c.Inventory.Equipment, summary);
+                BuildEquippedIndexItems(c, c.Inventory.Weapon1, summary);
+                BuildEquippedIndexItems(c, c.Inventory.Weapon2, summary);
 
                 foreach (var e in c.Inventory.Sacks)
                 {
-                    foreach (var item in e.Items)
-                    {
-                        var iitem = BuildIndexItem(item, c);
-                        if (iitem != null)
-                            _index.Add(iitem);
-                    }
+                    BuildUnequippedIndexItems(c, e.Items.ToArray(), summary);
                 }
 
                 foreach (var e in c.Stash.stashPages)
                 {
-                    foreach (var item in e.items)
-                    {
-                        var iitem = BuildIndexItem(item, c);
-                        if (iitem != null)
-                            _index.Add(iitem);
-                    }
+                    BuildUnequippedIndexItems(c, e.items.ToArray(), summary);
                 }
             }
+
+            return summary;
         }
 
-        private void BuildEquippedIndexItems(CharacterFile c, InventoryEquipment[] equipment)
+        private void BuildEquippedIndexItems(CharacterFile c, Item[] equipment, IndexSummary summary)
         {
             foreach (var e in equipment)
             {
@@ -100,8 +96,37 @@ namespace GDItemSearch.FileUtils
                     continue;
 
                 var item = BuildEquippedIndexItem(e, c);
-                if (item != null)
-                    _index.Add(item);
+                AddIndexItem(item, summary);
+            }
+        }
+
+        private void BuildUnequippedIndexItems(CharacterFile c, Item[] items, IndexSummary summary)
+        {
+            foreach (var e in items)
+            {
+                if (e == null)
+                    continue;
+
+                var item = BuildIndexItem(e, c);
+                AddIndexItem(item, summary);
+            }
+        }
+
+        private void AddIndexItem(IndexItem item, IndexSummary summary)
+        {
+            if (item != null)
+            {
+                summary.Entries++;
+
+                var rarity = ItemHelper.GetItemRarity(item.Source);
+                if (rarity != null)
+                    summary.ItemRarities.Add(rarity);
+
+                var itemType = ItemHelper.GetItemType(item.Source);
+                if (itemType != null)
+                    summary.ItemTypes.Add(itemType);
+
+                _index.Add(item);
             }
         }
 
@@ -123,15 +148,18 @@ namespace GDItemSearch.FileUtils
 
             var itemDef = _itemCache.GetItem(item.baseName);
 
-            if (itemDef == null || string.IsNullOrEmpty(itemDef.Name))
+            if (itemDef == null)
                 return null;
 
             var indexItem = new IndexItem();
             indexItem.Owner = character.Header.name;
-            indexItem.LevelRequirement = itemDef.LevelRequirement;
-            indexItem.Searchable = itemDef.Name.ToLower();
+            if (itemDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
+                indexItem.LevelRequirement = (int)itemDef.NumericalParametersRaw["levelRequirement"];
+
+            indexItem.Rarity = ItemHelper.GetItemRarity(itemDef);
+            indexItem.ItemType = ItemHelper.GetItemType(itemDef);
+            indexItem.Searchable = BuildSearchableString(item, itemDef);
             indexItem.Source = itemDef;
-            indexItem.ItemName = itemDef.Name;
             indexItem.SourceInstance = item;
             return indexItem;
         }
@@ -147,7 +175,22 @@ namespace GDItemSearch.FileUtils
             if (filter.IsEquipped != null && item.IsEquipped != filter.IsEquipped)
                 return false;
 
+            if (filter.Rarity != null && item.Rarity != filter.Rarity)
+                return false;
+
+            if (filter.ItemType != null && item.ItemType != filter.ItemType)
+                return false;
+
             return true;
+        }
+
+        private string BuildSearchableString(Item item, ItemRaw itemDef)
+        {
+            List<string> searchableStrings = new List<string>();
+
+            searchableStrings.Add(ItemHelper.GetFullItemName(item, itemDef).ToLower());
+
+            return string.Join(" ", searchableStrings);
         }
     }
 }

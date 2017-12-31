@@ -10,41 +10,8 @@ namespace GDItemSearch.FileUtils.DBFiles
 {
     public class ItemRaw
     {
-        private string _name;
-        public string Name
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(ItemStyle))
-                    return ItemStyle + " " + _name;
-
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
-        public string Type { get; set; }
-        public string ItemStyle { get; set; }
-        public int LevelRequirement { get; set; }
-        public string ItemClassification { get; set; }
-
         public Dictionary<string, float> NumericalParametersRaw = new Dictionary<string, float>();
-
-        private static string[] ignoredProperties =
-        {
-            "templateName",
-            "actorHeight",
-            "actorRadius",
-            "allowTransparency",
-            "armorFemaleMesh",
-            "armorMaleMesh",
-            "attributeScalePercent",
-            "baseTexture",
-            "bitmap",
-            "bumpTexture"
-        };
+        public Dictionary<string, string> StringParametersRaw = new Dictionary<string, string>();
 
         public void Read(string dbrPath)
         {
@@ -57,10 +24,10 @@ namespace GDItemSearch.FileUtils.DBFiles
                 if (ShouldIgnore(splitLine))
                     continue;
 
-                if (ParseSpecials(splitLine))
+                if (ParseNumerical(splitLine))
                     continue;
 
-                ParseNumerical(splitLine);
+                ParseAny(splitLine);
             }
         }
 
@@ -68,45 +35,6 @@ namespace GDItemSearch.FileUtils.DBFiles
         {
             if (line.Length == 0)
                 return true;
-
-            return ignoredProperties.Contains(line[0]);
-        }
-
-        private bool ParseSpecials(string[] line)
-        {
-            switch (line[0])
-            {
-                case "Class":
-                    Type = line[1];
-                    return true;
-
-                case "FileDescription":
-                    Name = line[1];
-                    return true;
-
-                case "itemStyleTag":
-                    switch (line[1])
-                    {
-                        case "tagStyleUniqueTier2":
-                            ItemStyle = "Empowered";
-                            break;
-
-                        case "tagStyleUniqueTier3":
-                            ItemStyle = "Mythical";
-                            break;
-
-                        case "tagStyleFactionTier2":
-                            ItemStyle = "Elite";
-                            break;
-                    }
-                    return true;
-                case "levelRequirement":
-                    LevelRequirement = int.Parse(line[1]);
-                    return true;
-                case "itemClassification":
-                    ItemClassification = line[1];
-                    return true;
-            }
 
             return false;
         }
@@ -120,6 +48,17 @@ namespace GDItemSearch.FileUtils.DBFiles
                 NumericalParametersRaw[line[0]] = res;
 
             return success;
+        }
+
+        private bool ParseAny(string[] line)
+        {
+            if (line != null && line.Length >= 2)
+            {
+                StringParametersRaw[line[0]] = String.Join(",", line.Skip(1).ToArray());
+                return true;
+            }
+
+            return false;
         }
     }
 }

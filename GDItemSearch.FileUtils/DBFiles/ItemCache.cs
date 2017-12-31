@@ -31,6 +31,7 @@ namespace GDItemSearch.FileUtils.DBFiles
                 File.WriteAllText(cacheFilename, JsonConvert.SerializeObject(AllItems));
             }
 
+            
         }
 
         public void ClearCache()

@@ -18,7 +18,9 @@ namespace GDItemSearch.FileUtils
 
         public string Searchable { get; set; }
         
-        public string ItemName { get; set; }
+        public string ItemType { get; set; }
+
+        public string Rarity { get; set; }
 
         public ItemRaw Source { get; set; }
         public Item SourceInstance { get; set; }

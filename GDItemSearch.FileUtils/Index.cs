@@ -169,11 +169,11 @@ namespace GDItemSearch.FileUtils
 
             indexItem.Rarity = ItemHelper.GetItemRarity(itemDef);
             indexItem.ItemType = ItemHelper.GetItemType(itemDef);
-            indexItem.Searchable = BuildSearchableString(item, itemDef);
             indexItem.Source = itemDef;
             indexItem.SourceInstance = item;
+            indexItem.ItemStats = ItemHelper.GetStats(item, itemDef).Select(x=>x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "")).ToList();
+            indexItem.Searchable = BuildSearchableString(item, itemDef, indexItem.ItemStats);
 
-            indexItem.ItemStats = ItemHelper.GetStats(item, itemDef);
             return indexItem;
         }
 
@@ -197,13 +197,14 @@ namespace GDItemSearch.FileUtils
             return true;
         }
 
-        private string BuildSearchableString(Item item, ItemRaw itemDef)
+        private string BuildSearchableString(Item item, ItemRaw itemDef, List<string> itemStats)
         {
             List<string> searchableStrings = new List<string>();
 
             searchableStrings.Add(ItemHelper.GetFullItemName(item, itemDef).ToLower());
+            searchableStrings.AddRange(itemStats);
 
-            return string.Join(" ", searchableStrings);
+            return string.Join(" ", searchableStrings).ToLower();
         }
     }
 }

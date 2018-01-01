@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace GDItemSearch.FileUtils.DBFiles
@@ -113,14 +114,18 @@ namespace GDItemSearch.FileUtils.DBFiles
             }
         }
 
+        //"Cheat sheet" for item parameters:
+        //offensiveAetherGlobal: Damage type Aether is given a chance to be afflicted among other global damage types. For instance - prismatic eviscerator: "10% chance of: X, Y or Z" (where X, Y or Z are all global)
+        //offensiveAetherChance: Chance component of flat damage(?)
+        //offensiveAetherMin X/offensiveAetherMax Y: flat damage (between X and Y)
+        //offensiveAetherModifier X: +X% to Aether damage
+        //offensiveAetherModifierChance Y: Y% chance of +X% to Aether damage
+        //offensiveAetherXOR: Who knows??
         public static List<string> GetStats(Item item, ItemRaw itemDef)
         {
             var combinedStats = GetCombinedNumericalParameters(item, itemDef);
 
-            return new List<string>();
-            //return GetDamageModifierStats(combinedStats);
-
-            //return new Dictionary<string, string>();
+            return GetDamageModifierStats(combinedStats);
         }
 
         private static Dictionary<string, List<float>> GetCombinedNumericalParameters(Item item, ItemRaw itemDef)
@@ -157,9 +162,63 @@ namespace GDItemSearch.FileUtils.DBFiles
             return combinedStats;
         }
 
-        private static List<string> GetDamageModifierStats(Dictionary<string, float> itemParameters)
+        private static List<string> GetDamageModifierStats(Dictionary<string, List<float>> itemParameters)
         {
-            return new List<string>();
+            //Dictionary<string, string> damageTypesMapping = new Dictionary<string, string>();
+            var offensiveStats = new HashSet<KeyValuePair<string, List<float>>>(itemParameters.Where(x => x.Key.StartsWith("offensive")));
+            List<string> modifiers = new List<string>();
+
+            //GlobalPercentChanceOfAllTag
+            //Parameter name = offensive[Slow]<type>Modifier
+            //Tag name = Damage[Duration]Modifier<type> -- format: {%+.0f0}% {^E}<type> Damage
+            foreach (var stat in offensiveStats)
+            {
+                //% modifier
+                var match = Regex.Match(stat.Key, "offensive([a-zA-Z]+)Modifier");
+                if (match.Success)
+                {
+                    string tagName = "";
+
+                    var matchedDmg = match.Groups[1].Value;
+                    if (matchedDmg.StartsWith("Slow"))
+                    {
+                        tagName = "DamageDurationModifier" + matchedDmg.Replace("Slow", "");
+                    }
+                    else
+                    {
+                        tagName = "DamageModifier" + matchedDmg;
+                    }
+
+                    var s = StringsCache.Instance.GetString(tagName);
+                    if (s != null)
+                        modifiers.Add(s);
+                }
+
+                match = Regex.Match(stat.Key, "offensive([a-zA-Z]+)Min");
+                if (match.Success)
+                {
+                    string tagName = "";
+
+                    var matchedDmg = match.Groups[1].Value;
+                    if (matchedDmg.StartsWith("Slow"))
+                    {
+                        tagName = "DamageDuration" + matchedDmg.Replace("Slow", "");
+                    }
+                    else
+                    {
+                        tagName = "Damage" + matchedDmg;
+                    }
+
+                    var s = StringsCache.Instance.GetString(tagName);
+                    if (s != null)
+                        modifiers.Add(s);
+                }
+
+
+                //flat damage
+            }
+
+            return modifiers;
         }
 
         private static string GetAffixName(ItemRaw itemDef)

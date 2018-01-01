@@ -73,6 +73,7 @@
                                     <GridViewColumn Header="Item name" DisplayMemberBinding="{Binding Name}" Width="200"/>
                                     <GridViewColumn Header="Character" DisplayMemberBinding="{Binding Owner}" Width="150"/>
                                     <GridViewColumn Header="Level" DisplayMemberBinding="{Binding LevelRequirement}" Width="50"/>
+                                    <GridViewColumn Header="Core stats" DisplayMemberBinding="{Binding CoreStats}" Width="400"/>
                                 </GridView>
                             </ListView.View>
                         </ListView>

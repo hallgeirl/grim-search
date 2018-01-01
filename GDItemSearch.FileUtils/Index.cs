@@ -11,7 +11,7 @@ namespace GDItemSearch.FileUtils
 {
     public class Index
     {
-        ItemCache _itemCache = new ItemCache();
+        ItemCache _itemCache = ItemCache.Instance;
         StringsCache _stringsCache = StringsCache.Instance;
         List<CharacterFile> _characters = new List<CharacterFile>();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
@@ -172,6 +172,8 @@ namespace GDItemSearch.FileUtils
             indexItem.Searchable = BuildSearchableString(item, itemDef);
             indexItem.Source = itemDef;
             indexItem.SourceInstance = item;
+
+            indexItem.ItemStats = ItemHelper.GetStats(item, itemDef);
             return indexItem;
         }
 

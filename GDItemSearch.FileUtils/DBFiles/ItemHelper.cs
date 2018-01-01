@@ -33,9 +33,27 @@ namespace GDItemSearch.FileUtils.DBFiles
 
             List<string> nameComponents = new List<string>();
             nameComponents.Add(upgradeLevel);
+
+            if (!itemDef.NumericalParametersRaw.ContainsKey("hidePrefixName") || itemDef.NumericalParametersRaw["hidePrefixName"] != 0)
+                AddAffixNameToNameComponents(item.prefixName, nameComponents);
+
             nameComponents.Add(baseName);
 
-            return string.Join(" ", nameComponents.Where(x=>x != null));
+            if (!itemDef.NumericalParametersRaw.ContainsKey("hideSuffixName") || itemDef.NumericalParametersRaw["hideSuffixName"] != 0)
+                AddAffixNameToNameComponents(item.suffixName, nameComponents);
+
+            return string.Join(" ", nameComponents.Where(x => x != null));
+        }
+
+        private static void AddAffixNameToNameComponents(string affixPath, List<string> nameComponents)
+        {
+            if (!string.IsNullOrEmpty(affixPath))
+            {
+                var affix = ItemCache.Instance.GetItem(affixPath);
+                var affixName = GetAffixName(affix);
+                if (!string.IsNullOrEmpty(affixName))
+                    nameComponents.Add(affixName);
+            }
         }
 
         public static string GetItemTypeDisplayName(string itemType)
@@ -93,6 +111,65 @@ namespace GDItemSearch.FileUtils.DBFiles
                 default:
                     return itemType;
             }
+        }
+
+        public static List<string> GetStats(Item item, ItemRaw itemDef)
+        {
+            var combinedStats = GetCombinedNumericalParameters(item, itemDef);
+
+            return new List<string>();
+            //return GetDamageModifierStats(combinedStats);
+
+            //return new Dictionary<string, string>();
+        }
+
+        private static Dictionary<string, List<float>> GetCombinedNumericalParameters(Item item, ItemRaw itemDef)
+        {
+            Dictionary<string, List<float>> combinedStats = new Dictionary<string, List<float>>();
+            foreach (var s in itemDef.NumericalParametersRaw)
+                combinedStats.Add(s.Key, new List<float>() { s.Value });
+
+            if (!string.IsNullOrEmpty(item.prefixName))
+            {
+                var prefix = ItemCache.Instance.GetItem(item.prefixName);
+                foreach (var s in prefix.NumericalParametersRaw)
+                {
+                    if (!combinedStats.ContainsKey(s.Key))
+                        combinedStats[s.Key] = new List<float>();
+
+                    combinedStats[s.Key].Add(s.Value); 
+                }
+                    
+            }
+
+            if (!string.IsNullOrEmpty(item.suffixName))
+            {
+                var suffix = ItemCache.Instance.GetItem(item.suffixName);
+                foreach (var s in suffix.NumericalParametersRaw)
+                {
+                    if (!combinedStats.ContainsKey(s.Key))
+                        combinedStats[s.Key] = new List<float>();
+
+                    combinedStats[s.Key].Add(s.Value);
+                }
+            }
+
+            return combinedStats;
+        }
+
+        private static List<string> GetDamageModifierStats(Dictionary<string, float> itemParameters)
+        {
+            return new List<string>();
+        }
+
+        private static string GetAffixName(ItemRaw itemDef)
+        {
+            if (!itemDef.StringParametersRaw.ContainsKey("lootRandomizerName"))
+                return null;
+
+            var tagName = itemDef.StringParametersRaw["lootRandomizerName"];
+
+            return StringsCache.Instance.GetString(tagName);
         }
 
         private static string GetItemBasename(Item item, ItemRaw itemDef)

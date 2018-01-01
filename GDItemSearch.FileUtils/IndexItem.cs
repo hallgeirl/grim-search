@@ -22,6 +22,8 @@ namespace GDItemSearch.FileUtils
 
         public string Rarity { get; set; }
 
+        public List<string> ItemStats { get; set; }
+
         public ItemRaw Source { get; set; }
         public Item SourceInstance { get; set; }
     }

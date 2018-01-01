@@ -1,6 +1,7 @@
 ﻿using GDItemSearch.FileUtils;
 using GDItemSearch.FileUtils.DBFiles;
 using GDItemSearch.ViewModels;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -94,14 +95,78 @@ namespace GDItemSearch
             }
             else
             {
-
                 Settings.GrimDawnDirectory = "";
                 Settings.SavesDirectory = "";
+
                 SettingsTab.IsSelected = true;
             }
         }
 
+        private async void DetectGDSettings_Click(object sender, RoutedEventArgs e)
+        {
+            await TryDetectGDSettings();
+        }
+
+        private async Task TryDetectGDSettings()
+        {
+            string steamPath = GetRegistryValue<string>("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath");
+            int activeUser = GetRegistryValue<int>("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\ActiveProcess", "ActiveUser");
+
+            if (!Directory.Exists(steamPath))
+                throw new InvalidOperationException("Steam path was not found. Is it installed?");
+
+            if (activeUser == 0)
+                throw new InvalidOperationException("Steam is not running, or you are not logged in.");
+
+            string errors = "";
+
+            string gdDir = System.IO.Path.Combine(steamPath, "SteamApps", "common", "Grim Dawn").Replace('/', '\\');
+            string savesDir = System.IO.Path.Combine(steamPath, "userdata", activeUser.ToString(), "219990", "remote", "save").Replace('/', '\\');
+
+            if (!File.Exists(System.IO.Path.Combine(gdDir, "ArchiveTool.exe")))
+            {
+                errors += "The Grim Dawn directory was not found in the default install location for Steam games. Please specify this manually.";
+            }
+            else
+            {
+                GDDirTextBox.Text = gdDir;
+            }
+
+            if (!Directory.Exists(System.IO.Path.Combine(savesDir, "main")))
+            {
+                errors += "Grim Dawn saves directory was not found at " + savesDir + ". Please specify this manually.";
+            }
+            else
+            {
+                GDSavesTextBox.Text = savesDir;
+            }
+
+            if (!string.IsNullOrEmpty(errors))
+                throw new InvalidOperationException(errors);
+            else
+            {
+                var answer = MessageBox.Show("The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (answer == MessageBoxResult.Yes)
+                    await SaveSettings();
+            }
+        }
+
+        private T GetRegistryValue<T>(string path, string valueName)
+        {
+            var value = Registry.GetValue(path, valueName, null);
+
+            if (value == null)
+                return default(T);
+
+            return (T)value;
+        }
+
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            await SaveSettings();
+        }
+
+        private async Task SaveSettings()
         {
             Settings.GrimDawnDirectory = GDDirTextBox.Text;
             Settings.SavesDirectory = GDSavesTextBox.Text;

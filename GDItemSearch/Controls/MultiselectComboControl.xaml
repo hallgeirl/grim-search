@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="GDItemSearch.Controls.MultiselectComboControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GDItemSearch.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid Name="LayoutRoot">
+        <Expander IsExpanded="False" Header="{Binding Header}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <Button Name="SelectAllItemTypes" Click="SelectAllItemTypes_Click" Padding="5,2,5,2">Select all</Button>
+                    <Button Name="DeselectAllItemTypes" Click="DeselectAllItemTypes_Click" Padding="5,2,5,2" Margin="5,0,0,0">Deselect all</Button>
+                </StackPanel>
+                <ListView Name="SelectorListView"  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding Selected}" Checked="CheckBox_Checked"  Unchecked="CheckBox_Checked">
+                                <TextBlock Text="{Binding DisplayText}" />
+                            </CheckBox>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+        </Expander>
+    </Grid>
+</UserControl>

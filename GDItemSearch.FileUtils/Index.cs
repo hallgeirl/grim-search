@@ -116,13 +116,24 @@ namespace GDItemSearch.FileUtils
         {
             if (item != null)
             {
+                var itemType = ItemHelper.GetItemType(item.Source);
+                if (new string[] {
+                    "OneShot_PotionMana",
+                    "OneShot_PotionHealth",
+                    "OneShot_Scroll",
+                    "ItemEnchantment",
+                    "QuestItem",
+                    "ItemTransmuter",
+                    "ItemNote"
+                }.Contains(itemType))
+                    return;
+
                 summary.Entries++;
 
                 var rarity = ItemHelper.GetItemRarity(item.Source);
                 if (rarity != null)
                     summary.ItemRarities.Add(rarity);
 
-                var itemType = ItemHelper.GetItemType(item.Source);
                 if (itemType != null)
                     summary.ItemTypes.Add(itemType);
 
@@ -175,10 +186,10 @@ namespace GDItemSearch.FileUtils
             if (filter.IsEquipped != null && item.IsEquipped != filter.IsEquipped)
                 return false;
 
-            if (filter.Rarity != null && item.Rarity != filter.Rarity)
+            if (filter.ItemQualities != null && !filter.ItemQualities.Contains(item.Rarity))
                 return false;
 
-            if (filter.ItemType != null && item.ItemType != filter.ItemType)
+            if (filter.ItemTypes != null && !filter.ItemTypes.Contains(item.ItemType))
                 return false;
 
             return true;

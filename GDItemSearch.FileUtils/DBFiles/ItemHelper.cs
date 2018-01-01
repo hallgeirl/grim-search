@@ -38,6 +38,63 @@ namespace GDItemSearch.FileUtils.DBFiles
             return string.Join(" ", nameComponents.Where(x=>x != null));
         }
 
+        public static string GetItemTypeDisplayName(string itemType)
+        {
+            switch(itemType)
+            {
+                case "ArmorProtective_Head":
+                    return "Helm";
+                case "ArmorProtective_Chest":
+                    return "Chest Armor";
+                case "ArmorProtective_Feet":
+                    return "Boots";
+                case "ArmorProtective_Legs":
+                    return "Leg armor";
+                case "ArmorProtective_Hands":
+                    return "Gloves";
+                case "ArmorJewelry_Amulet":
+                    return "Amulets";
+                case "ArmorJewelry_Ring":
+                    return "Rings";
+                case "ArmorProtective_Waist":
+                    return "Belts";
+                case "ArmorProtective_Shoulders":
+                    return "Shoulders";
+                case "ArmorJewelry_Medal":
+                    return "Medals";
+                case "ItemArtifact":
+                    return "Relics";
+                case "ItemRelic":
+                    return "Components";
+                case "WeaponMelee_Sword":
+                    return "Swords";
+                case "WeaponMelee_Dagger":
+                    return "Daggers";
+                case "WeaponMelee_Mace":
+                    return "Mace";
+                case "WeaponMelee_Scepter":
+                    return "Scepters";
+                case "WeaponArmor_Shield":
+                    return "Shields";
+                case "WeaponMelee_Mace2h":
+                    return "Two-Handed Maces";
+                case "WeaponMelee_Axe2h":
+                    return "Two-Handed Axes";
+                case "WeaponMelee_Sword2h":
+                    return "Two-Handed Swords";
+                case "WeaponHunting_Ranged1h":
+                    return "One-Handed Ranged";
+                case "WeaponHunting_Ranged2h":
+                    return "Two-Handed Ranged";
+                case "ItemDevotionReset":
+                    return "Devotion Reset Potion";
+                case "ItemAttributeReset":
+                    return "Attribute Reset Potion";
+                default:
+                    return itemType;
+            }
+        }
+
         private static string GetItemBasename(Item item, ItemRaw itemDef)
         {
             if (itemDef.StringParametersRaw.ContainsKey("itemNameTag"))

@@ -15,8 +15,8 @@ namespace GDItemSearch.FileUtils
 
         public int? PageSize { get; set; }
 
-        public string ItemType { get; set; }
+        public string[] ItemTypes { get; set; }
 
-        public string Rarity { get; set; }
+        public string[] ItemQualities { get; set; }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using GDItemSearch.FileUtils;
+using GDItemSearch.FileUtils.DBFiles;
 using GDItemSearch.ViewModels;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -32,6 +34,8 @@ namespace GDItemSearch
         const string settingsFile = "GDItemSearchSettings.json";
         bool _initialized = false;
 
+        public ObservableCollection<MultiselectComboItem> ItemTypes = new ObservableCollection<MultiselectComboItem>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -42,6 +46,8 @@ namespace GDItemSearch
             await LoadSettings();
 
             ResultsListView.PreviewMouseWheel += ResultsListView_PreviewMouseWheel;
+
+            ItemTypesSelector.ItemsSource = ItemTypes;
         }
 
         private void ResultsListView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -130,20 +136,12 @@ namespace GDItemSearch
             SetStatusBarText("Loading characters and items...");
             var result = await Task.Run<IndexSummary>(() => _index.Build());
 
-            var rarities = new List<string>();
-            rarities.Add("Any");
-            rarities.AddRange(result.ItemRarities);
-            RarityCombo.ItemsSource = rarities;
-            if (RarityCombo.SelectedItem == null)
-                RarityCombo.SelectedItem = "Any";
+            var rarities = new List<MultiselectComboItem>();
+            rarities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = x }));
+            RaritySelector.ItemsSource = rarities;
 
-            var gearTypes = new List<string>();
-            gearTypes.Add("Any");
-            gearTypes.AddRange(result.ItemTypes);
-            TypeOfGearCombo.ItemsSource = gearTypes;
-
-            if (TypeOfGearCombo.SelectedItem == null)
-                TypeOfGearCombo.SelectedItem = "Any";
+            ItemTypes.Clear();
+            ItemTypes.AddRange(result.ItemTypes.Select(x=>new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
         }
 
         private void SetStatusBarText(string s)
@@ -172,27 +170,18 @@ namespace GDItemSearch
             MessageBox.Show(errorMessage + " Details: " + exText, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private async void MinimumLevelTextBox_TextChanged(object sender, TextChangedEventArgs e)
+
+        private async void Search_CheckboxChecked(object sender, RoutedEventArgs e)
         {
             await Search();
         }
 
-        private async void MaximumLevelTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void Search_TextBoxChanged(object sender, TextChangedEventArgs e)
         {
             await Search();
         }
 
-        private async void IncludeEquippedCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            await Search();
-        }
-
-        private async void TypeOfGearCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            await Search();
-        }
-
-        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void Search_FilterSelectionChanged(object sender, EventArgs e)
         {
             await Search();
         }
@@ -230,13 +219,13 @@ namespace GDItemSearch
             if (!IncludeEquippedCheckBox.IsChecked.HasValue || !IncludeEquippedCheckBox.IsChecked.Value)
                 filter.IsEquipped = false;
 
-            var rarity = RarityCombo.SelectedItem as string;
-            if (rarity != null && rarity != "Any")
-                filter.Rarity = rarity;
+            var rarityItems = RaritySelector.ItemsSource as IEnumerable<MultiselectComboItem>;
+            if (rarityItems != null)
+                filter.ItemQualities = rarityItems.Where(x => x.Selected).Select(x => x.Value).ToArray();
 
-            var gearType = TypeOfGearCombo.SelectedItem as string;
-            if (gearType != null && gearType != "Any")
-                filter.ItemType = gearType;
+            var itemTypes = ItemTypesSelector.ItemsSource as IEnumerable<MultiselectComboItem>;
+            if (itemTypes != null)
+                filter.ItemTypes = itemTypes.Where(x => x.Selected).Select(x => x.Value).ToArray();
 
             filter.PageSize = 50;
             return filter;

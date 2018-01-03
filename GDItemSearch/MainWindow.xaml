@@ -70,7 +70,13 @@
                         <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" SelectionChanged="ResultsListView_SelectionChanged" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                             <ListView.View>
                                 <GridView>
-                                    <GridViewColumn Header="Item name" DisplayMemberBinding="{Binding Name}" Width="200"/>
+                                    <GridViewColumn Header="Item name" Width="200">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Foreground="{Binding ItemColor}" FontWeight="DemiBold" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
                                     <GridViewColumn Header="Character" DisplayMemberBinding="{Binding Owner}" Width="150"/>
                                     <GridViewColumn Header="Level" DisplayMemberBinding="{Binding LevelRequirement}" Width="50"/>
                                     <GridViewColumn Header="Core stats" DisplayMemberBinding="{Binding CoreStats}" Width="400"/>

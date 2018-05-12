@@ -10,6 +10,7 @@ namespace GDItemSearch.FileUtils
 {
     public class IndexItem
     {
+        public string ItemName { get; set; }
         public bool IsEquipped { get; set; }
 
         public int LevelRequirement { get; set; }
@@ -21,6 +22,10 @@ namespace GDItemSearch.FileUtils
         public string ItemType { get; set; }
 
         public string Rarity { get; set; }
+
+        public string Bag { get; set; }
+
+        public List<string> DuplicatesOnCharacters { get; set; }
 
         public List<string> ItemStats { get; set; }
 

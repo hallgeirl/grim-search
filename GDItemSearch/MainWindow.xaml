@@ -44,7 +44,8 @@
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
                                 <Label Content="Include equipped" VerticalAlignment="Top" />
@@ -57,11 +58,14 @@
                                     <TextBox Name="MaximumLevelTextBox" Width="30" Height="20" TextChanged="Search_TextBoxChanged" />
                                 </StackPanel>
 
-                                <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="2">
-                                <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" SelectionChanged="Search_FilterSelectionChanged" />
+                                <Label Content="Search mode" Grid.Row="2"></Label>
+                                <ComboBox Text="Search mode" x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes}" SelectionChanged="Search_FilterSelectionChanged" />
 
-                                <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" ItemsSource="{Binding ItemQualities}" SelectionChanged="Search_FilterSelectionChanged" />
+                                <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3">
+                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" SelectionChanged="Search_FilterSelectionChanged" />
+                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" ItemsSource="{Binding ItemQualities}" SelectionChanged="Search_FilterSelectionChanged" />
                                 </StackPanel>
+
                             </Grid>
                         </Grid>
 
@@ -80,6 +84,8 @@
                                     <GridViewColumn Header="Character" DisplayMemberBinding="{Binding Owner}" Width="150"/>
                                     <GridViewColumn Header="Level" DisplayMemberBinding="{Binding LevelRequirement}" Width="50"/>
                                     <GridViewColumn Header="Core stats" DisplayMemberBinding="{Binding CoreStats}" Width="400"/>
+                                    <GridViewColumn Header="Bag" DisplayMemberBinding="{Binding Bag}" Width="100"/>
+                                    <GridViewColumn Header="Also exists on" DisplayMemberBinding="{Binding DuplicatesOn}" Width="100" />
                                 </GridView>
                             </ListView.View>
                         </ListView>

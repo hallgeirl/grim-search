@@ -36,6 +36,7 @@ namespace GDItemSearch
         bool _initialized = false;
 
         public ObservableCollection<MultiselectComboItem> ItemTypes = new ObservableCollection<MultiselectComboItem>();
+        public ObservableCollection<string> SearchModes = new ObservableCollection<string>() { "Regular", "Duplicate search" };
 
         public MainWindow()
         {
@@ -49,6 +50,8 @@ namespace GDItemSearch
             ResultsListView.PreviewMouseWheel += ResultsListView_PreviewMouseWheel;
 
             ItemTypesSelector.ItemsSource = ItemTypes;
+            SearchModeSelector.ItemsSource = SearchModes;
+            SearchModeSelector.SelectedItem = "Regular";
         }
 
         private void ResultsListView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -258,11 +261,16 @@ namespace GDItemSearch
 
             var filter = CreateIndexFilter();
             var searchText = SearchTextBox.Text;
+            string searchMode = SearchModeSelector.SelectedValue as string;
             SetStatusBarText("Searching for " + searchText);
 
             await Task.Run(() =>
             {
-                var items = _index.Find(searchText, filter);
+                List<IndexItem> items;
+                if (searchMode == "Duplicate search")
+                    items = _index.FindDuplicates(searchText, filter);
+                else
+                    items = _index.Find(searchText, filter);
 
                 Dispatcher.Invoke(() =>
                 {

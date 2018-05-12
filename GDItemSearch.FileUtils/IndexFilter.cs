@@ -18,5 +18,7 @@ namespace GDItemSearch.FileUtils
         public string[] ItemTypes { get; set; }
 
         public string[] ItemQualities { get; set; }
+
+        public string SearchMode { get; set; }
     }
 }

@@ -14,6 +14,8 @@ namespace GDItemSearch.ViewModels
         public int LevelRequirement { get; set; }
         public string Owner { get; set; }
         public string CoreStats { get; set; }
+        public string Bag { get; set; }
+        public string DuplicatesOn { get; set; }
 
         public string ItemColor
         {
@@ -46,7 +48,9 @@ namespace GDItemSearch.ViewModels
                 LevelRequirement = item.LevelRequirement,
                 Owner = item.Owner,
                 CoreStats = string.Join(", ", item.ItemStats),
-                ItemColor = itemColor
+                ItemColor = itemColor,
+                Bag = item.Bag,
+                DuplicatesOn = (item.DuplicatesOnCharacters != null ? string.Join(", ", item.DuplicatesOnCharacters) : "")
             };
         }
     }

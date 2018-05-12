@@ -31,7 +31,8 @@ namespace GDItemSearch.FileUtils.CharacterFiles
 
             file.BeginRead();
 
-            if (file.ReadInt() != 0x58434447)
+            uint temp = file.ReadInt();
+            if (temp != 0x58434447)
                 throw new Exception();
 
             Header.Read(file);

@@ -2,6 +2,7 @@
 using GDItemSearch.FileUtils.DBFiles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,25 @@ namespace GDItemSearch.FileUtils
                 return result.Take(filter.PageSize.Value).ToList();
 
             return result.ToList();
+        }
+
+        public List<IndexItem> FindDuplicates(string search, IndexFilter filter)
+        {
+            var characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+            List<IndexItem> results = new List<IndexItem>();
+
+            foreach (var item in characterItems)
+            {
+                var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
+                var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
+
+                if (dupe.Count() > 0)
+                {
+                    results.Add(item);
+                    item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
+                }
+            }
+            return results;
         }
 
         public void ClearCache()
@@ -56,11 +76,19 @@ namespace GDItemSearch.FileUtils
                 if (!File.Exists(characterFile))
                     continue;
                 var character = new CharacterFile();
-                using (var s = File.OpenRead(characterFile))
+                try
                 {
-                    character.Read(s);
+                    using (var s = File.OpenRead(characterFile))
+                    {
+                        character.Read(s);
+                    }
+                    _characters.Add(character);
                 }
-                _characters.Add(character);
+                catch (Exception ex)
+                {
+                    Trace.TraceError(ex.ToString());
+                }
+                
             }
         }
 
@@ -74,14 +102,16 @@ namespace GDItemSearch.FileUtils
                 BuildEquippedIndexItems(c, c.Inventory.Weapon1, summary);
                 BuildEquippedIndexItems(c, c.Inventory.Weapon2, summary);
 
+                int bagIndex = 1;
                 foreach (var e in c.Inventory.Sacks)
                 {
-                    BuildUnequippedIndexItems(c, e.Items.ToArray(), summary);
+                    BuildUnequippedIndexItems(c, e.Items.ToArray(), summary, "Bag " + (bagIndex++));
                 }
 
+                bagIndex = 1;
                 foreach (var e in c.Stash.stashPages)
                 {
-                    BuildUnequippedIndexItems(c, e.items.ToArray(), summary);
+                    BuildUnequippedIndexItems(c, e.items.ToArray(), summary, "Stash " + (bagIndex++));
                 }
             }
 
@@ -95,12 +125,19 @@ namespace GDItemSearch.FileUtils
                 if (e == null)
                     continue;
 
-                var item = BuildEquippedIndexItem(e, c);
+                var item = BuildIndexItem(e, c);
+                if (item != null)
+                {
+                    item.Bag = "Equipped";
+                    item.IsEquipped = true;
+                }
+                    
+
                 AddIndexItem(item, summary);
             }
         }
 
-        private void BuildUnequippedIndexItems(CharacterFile c, Item[] items, IndexSummary summary)
+        private void BuildUnequippedIndexItems(CharacterFile c, Item[] items, IndexSummary summary, string bagName)
         {
             foreach (var e in items)
             {
@@ -108,6 +145,9 @@ namespace GDItemSearch.FileUtils
                     continue;
 
                 var item = BuildIndexItem(e, c);
+                if (item != null)
+                    item.Bag = bagName;
+
                 AddIndexItem(item, summary);
             }
         }
@@ -141,17 +181,6 @@ namespace GDItemSearch.FileUtils
             }
         }
 
-        private IndexItem BuildEquippedIndexItem(Item item, CharacterFile character)
-        {
-            var i = BuildIndexItem(item, character);
-
-            if (i == null)
-                return null;
-
-            i.IsEquipped = true;
-            return i;
-        }
-
         private IndexItem BuildIndexItem(Item item, CharacterFile character)
         {
             if (string.IsNullOrEmpty(item.baseName))
@@ -163,6 +192,7 @@ namespace GDItemSearch.FileUtils
                 return null;
 
             var indexItem = new IndexItem();
+            indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);
             indexItem.Owner = character.Header.name;
             if (itemDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
                 indexItem.LevelRequirement = (int)itemDef.NumericalParametersRaw["levelRequirement"];

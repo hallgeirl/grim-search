@@ -43,7 +43,7 @@ namespace GDItemSearch.FileUtils
                     item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
                 }
             }
-            return results;
+            return results.OrderBy(x=>x.Bag).ToList();
         }
 
         public void ClearCache()
@@ -64,6 +64,8 @@ namespace GDItemSearch.FileUtils
 
         private void LoadAllCharacters()
         {
+            _characters.Clear();
+
             var charactersDirectory = Path.Combine(Settings.SavesDirectory, "main");
             if (!Directory.Exists(charactersDirectory))
                 throw new InvalidOperationException("Saves directory not found: " + charactersDirectory);
@@ -94,6 +96,7 @@ namespace GDItemSearch.FileUtils
 
         private IndexSummary BuildIndex()
         {
+            _index.Clear();
             var summary = new IndexSummary();
 
             foreach (var c in _characters)

@@ -65,11 +65,15 @@
                                     <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" SelectionChanged="Search_FilterSelectionChanged" />
                                     <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" ItemsSource="{Binding ItemQualities}" SelectionChanged="Search_FilterSelectionChanged" />
                                 </StackPanel>
+                                
 
                             </Grid>
                         </Grid>
 
-                        <Label Content="Results (max. 50 displayed at once)" FontWeight="Bold" />
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Results (max. 50 displayed at once)" FontWeight="Bold" />
+                            <Button Margin="10,0,0,0" Click="Button_Click">(Refresh)</Button>
+                        </StackPanel>
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
                         <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" SelectionChanged="ResultsListView_SelectionChanged" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                             <ListView.View>

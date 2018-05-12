@@ -199,17 +199,20 @@ namespace GDItemSearch
             }
         }
 
-        private async Task BuildIndex()
+        private async Task BuildIndex(bool skipItemTypesReload = false)
         {
             SetStatusBarText("Loading characters and items...");
             var result = await Task.Run<IndexSummary>(() => _index.Build());
 
-            var rarities = new List<MultiselectComboItem>();
-            rarities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x!= "Rare" && x != "Magical"), Value = x, DisplayText = x }));
-            RaritySelector.ItemsSource = rarities;
+            if (!skipItemTypesReload)
+            {
+                var rarities = new List<MultiselectComboItem>();
+                rarities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x != "Rare" && x != "Magical"), Value = x, DisplayText = x }));
+                RaritySelector.ItemsSource = rarities;
 
-            ItemTypes.Clear();
-            ItemTypes.AddRange(result.ItemTypes.Select(x=>new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+                ItemTypes.Clear();
+                ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+            }
         }
 
         private void SetStatusBarText(string s)
@@ -318,6 +321,13 @@ namespace GDItemSearch
 
             var searchNameInURL = HttpUtility.UrlEncode(selected.Name);
             Process.Start("https://www.grimtools.com/db/search?query=" + searchNameInURL + "&in_description=0&exact_match=1");
+        }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            await BuildIndex(true);
+            await Search();
+            ResetStatusBarText();
         }
     }
 }

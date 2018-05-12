@@ -205,7 +205,7 @@ namespace GDItemSearch
             var result = await Task.Run<IndexSummary>(() => _index.Build());
 
             var rarities = new List<MultiselectComboItem>();
-            rarities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = x }));
+            rarities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x!= "Rare" && x != "Magical"), Value = x, DisplayText = x }));
             RaritySelector.ItemsSource = rarities;
 
             ItemTypes.Clear();

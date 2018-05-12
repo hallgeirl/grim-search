@@ -7,7 +7,7 @@
         xmlns:c="clr-namespace:GDItemSearch.Controls"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="Grim Dawn Item Search" Height="600" Width="1135">
+        Title="Grim Dawn Item Search" Height="800" Width="1335">
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
@@ -85,7 +85,7 @@
                                     <GridViewColumn Header="Level" DisplayMemberBinding="{Binding LevelRequirement}" Width="50"/>
                                     <GridViewColumn Header="Core stats" DisplayMemberBinding="{Binding CoreStats}" Width="400"/>
                                     <GridViewColumn Header="Bag" DisplayMemberBinding="{Binding Bag}" Width="100"/>
-                                    <GridViewColumn Header="Also exists on" DisplayMemberBinding="{Binding DuplicatesOn}" Width="100" />
+                                    <GridViewColumn Header="Also exists on" DisplayMemberBinding="{Binding DuplicatesOn}" Width="200" />
                                 </GridView>
                             </ListView.View>
                         </ListView>

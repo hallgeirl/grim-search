@@ -17,8 +17,7 @@ namespace GDItemSearch.Tests.FileUtils
         {
             TransferStashFile stash = new TransferStashFile();
 
-            //using (var s = File.OpenRead("Resources\\Saves\\transfer.gst"))
-            using (var s = File.OpenRead("C:\\Users\\hallg_000\\Desktop\\gdbackup\\save\\transfer.gst"))
+            using (var s = File.OpenRead("Resources\\Saves\\transfer.gst"))
             {
                 stash.Read(s);
             }

@@ -273,7 +273,8 @@ namespace GDItemSearch
 
                 Dispatcher.Invoke(() =>
                 {
-                    ResultsListView.ItemsSource = items.Select(x=>ItemViewModel.FromModel(x));
+                    _viewModel.SearchResults.Clear();
+                    _viewModel.SearchResults.AddRange(items.Select(x => ItemViewModel.FromModel(x)));
                 });
             });
             ResetStatusBarText();

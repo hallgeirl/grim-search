@@ -49,6 +49,14 @@ namespace GDItemSearch.ViewModels
             set { _itemQualities = value; RaisePropertyChangedEvent("ItemQualities"); }
         }
 
+
+        private ObservableCollection<ItemViewModel> _searchResults = new ObservableCollection<ItemViewModel>();
+        public ObservableCollection<ItemViewModel> SearchResults
+        {
+            get { return _searchResults; }
+            set { _searchResults = value; RaisePropertyChangedEvent("SearchResults"); }
+        }
+
         #region Search filters
 
         private string _searchMode = "Regular";

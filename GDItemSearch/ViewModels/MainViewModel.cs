@@ -310,6 +310,7 @@ namespace GDItemSearch.ViewModels
                 GrimDawnDirectory = gdDir;
             }
 
+            
             if (!Directory.Exists(System.IO.Path.Combine(savesDir, "main")))
             {
                 errors += "Grim Dawn saves directory was not found at " + savesDir + ". Please specify this manually.";
@@ -329,6 +330,25 @@ namespace GDItemSearch.ViewModels
             }
         }
 
+        private string[] GetAllPossibleInstallLocations(string steamPath)
+        {
+            List<string> locations = new List<string>();
+            locations.Add(Path.Combine(steamPath, "SteamApps", "common", "Grim Dawn").Replace('/', '\\'));
+
+
+            return locations.ToArray();
+        }
+
+        private string GetInstallLocation(string[] allLocations)
+        {
+            foreach (var l in allLocations)
+            {
+                if (File.Exists(System.IO.Path.Combine(l, "ArchiveTool.exe")))
+                    return l;
+            }
+
+            return null;
+        }
 
         private T GetRegistryValue<T>(string path, string valueName)
         {

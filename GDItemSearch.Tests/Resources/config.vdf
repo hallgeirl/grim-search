@@ -1,0 +1,131 @@
+"InstallConfigStore"
+{
+	"Software"
+	{
+		"Valve"
+		{
+			"Steam"
+			{
+				"SentryFile"		"D:\\Games\\Steam\\ssfn221234"
+				"Accounts"
+				{
+					"ziggwarth"
+					{
+						"SteamID"		"12345"
+					}
+				}
+				"CurrentCellID"		"67"
+				"PingTimeForCurrentCellID"		"6"
+				"MTBF"		"628536986"
+				"cip"		"12312"
+				"CM"		"155.133.242.9:27017;185.25.180.15:27019;155.133.242.8:27018;185.25.180.15:27017;185.25.180.14:27017;155.133.242.9:27019;185.25.180.14:27018;185.25.180.15:27018;155.133.242.8:27019;185.25.180.14:27019;155.133.242.8:27017;155.133.242.9:27018;162.254.196.84:27019;162.254.196.84:27017;162.254.196.68:27019;162.254.197.41:27018;162.254.196.67:27019;162.254.197.41:27019;162.254.197.42:27018;162.254.196.68:27018;162.254.196.84:27018;162.254.197.42:27017;162.254.196.83:27017;162.254.196.83:27018;162.254.196.67:27017;162.254.196.68:27017;162.254.197.41:27017;162.254.197.40:27018;162.254.197.40:27019;162.254.197.42:27019;162.254.196.83:27019;162.254.196.67:27018;162.254.197.40:27017;146.66.152.10:27018;146.66.152.11:27017;146.66.152.10:27019;146.66.152.10:27017;146.66.152.11:27018;146.66.152.11:27019;208.78.164.12:27019;208.78.164.9:27019;208.78.164.12:27018;208.78.164.11:27018;208.78.164.10:27017;208.78.164.11:27019;208.78.164.12:27017;208.78.164.9:27018;208.78.164.13:27018;208.78.164.10:27019;208.78.164.13:27017;208.78.164.10:27018;208.78.164.13:27019;208.78.164.11:27017;208.78.164.14:27017;208.78.164.9:27017;155.133.229.251:27019;155.133.229.251:27018;208.78.164.14:27019;155.133.229.250:27018;155.133.229.251:27017;155.133.229.250:27019;208.78.164.14:27018;155.133.229.250:27017;162.254.193.47:27019;162.254.193.7:27017;162.254.193.7:27019;162.254.193.6:27017;162.254.193.6:27019;162.254.193.6:27018;162.254.193.46:27018;162.254.193.46:27019;162.254.193.47:27018;162.254.193.46:27017;162.254.193.47:27017;162.254.193.7:27018;155.133.254.132:27018;162.254.195.45:27019;162.254.195.44:27019;155.133.254.133:27018;155.133.254.132:27019"
+				"CS"		"valve164.steamcontent.com;valve165.steamcontent.com;valve959.steamcontent.com;valve957.steamcontent.com;valve955.steamcontent.com;valve950.steamcontent.com;valve958.steamcontent.com;valve956.steamcontent.com;valve908.steamcontent.com;valve952.steamcontent.com;valve953.steamcontent.com;valve901.steamcontent.com;valve902.steamcontent.com;valve900.steamcontent.com;valve909.steamcontent.com;valve905.steamcontent.com;valve907.steamcontent.com;valve951.steamcontent.com;valve906.steamcontent.com;valve954.steamcontent.com;valve903.steamcontent.com;valve904.steamcontent.com;valve1601.steamcontent.com;valve413.steamcontent.com;valve407.steamcontent.com;valve431.steamcontent.com;valve414.steamcontent.com;valve408.steamcontent.com;valve400.steamcontent.com;valve501.steamcontent.com;valve500.steamcontent.com;valve412.steamcontent.com;valve1611.steamcontent.com;valve433.steamcontent.com;valve422.steamcontent.com;valve430.steamcontent.com;valve424.steamcontent.com;valve404.steamcontent.com;valve409.steamcontent.com;valve425.steamcontent.com;valve418.steamcontent.com;valve419.steamcontent.com;valve427.steamcontent.com;valve429.steamcontent.com;valve415.steamcontent.com;valve428.steamcontent.com;valve405.steamcontent.com;valve423.steamcontent.com;valve402.steamcontent.com;valve417.steamcontent.com;valve416.steamcontent.com;valve517.steamcontent.com;valve515.steamcontent.com;valve406.steamcontent.com;valve403.steamcontent.com;valve432.steamcontent.com;valve420.steamcontent.com;valve426.steamcontent.com;valve436.steamcontent.com;valve1617.steamcontent.com;valve421.steamcontent.com;valve507.steamcontent.com;valve1612.steamcontent.com;valve1604.steamcontent.com;valve1614.steamcontent.com;valve1603.steamcontent.com;valve1606.steamcontent.com;valve524.steamcontent.com;valve1613.steamcontent.com;valve1615.steamcontent.com;valve1607.steamcontent.com;valve1609.steamcontent.com;valve518.steamcontent.com;valve530.steamcontent.com;valve549.steamcontent.com;valve559.steamcontent.com;valve536.steamcontent.com;valve563.steamcontent.com;valve1619.steamcontent.com;valve560.steamcontent.com;valve520.steamcontent.com;valve565.steamcontent.com;valve554.steamcontent.com;valve1616.steamcontent.com;valve1618.steamcontent.com;valve1605.steamcontent.com;valve1608.steamcontent.com;valve1602.steamcontent.com;valve548.steamcontent.com;valve555.steamcontent.com;valve552.steamcontent.com;valve508.steamcontent.com;valve537.steamcontent.com;valve550.steamcontent.com;valve557.steamcontent.com;valve540.steamcontent.com;valve553.steamcontent.com;valve528.steamcontent.com;valve512.steamcontent.com;valve558.steamcontent.com"
+				"ConnectCache"
+				{
+					"80e7eee31"		"012345"
+				}
+				"Rate"		"30000"
+				"SurveyDate"		"2018-03-22"
+				"NCTF"		"0"
+				"LastConfigstoreUploadTime"		"1526233865"
+				"TimeCellIDSet"		"1493130504"
+				"depots"
+				{
+					"204104"
+					{
+						"DecryptionKey"		"fqwfwqfwq"
+					}
+					"204102"
+					{
+						"DecryptionKey"		"qfwqfwq"
+					}
+				}
+				"BaseInstallFolder_1"		"C:\\Steamapps"
+				"BaseInstallFolder_2"		"E:\\foo\\bar\\Steamapps"
+				"NoSavePersonalInfo"		"0"
+				"MaxServerBrowserPingsPerMin"		"0"
+				"DownloadThrottleKbps"		"0"
+				"AllowDownloadsDuringGameplay"		"0"
+				"StreamingThrottleEnabled"		"1"
+				"AutoUpdateWindowStart"		"-1"
+				"AutoUpdateWindowEnd"		"-1"
+				"RecentDownloadRate"		"5923295"
+				"CellIDServerOverride"		"67"
+				"apps"
+				{
+					"10680"
+					{
+						"AddGameExplorerEntry"		"0"
+					}
+					"8980"
+					{
+						"AddGameExplorerEntry"		"0"
+					}
+					"72850"
+					{
+						"AddGameExplorerEntry"		"0"
+					}
+				}
+				"ClientBrowserAuth"		"1"
+				"AutoUpdateWindowEnabled"		"0"
+				"PercentDefaultWebSockets"		"50"
+				"CMWS"		"CM02-STO.cm.steampowered.com:27021;CM02-STO.cm.steampowered.com:443;CM03-STO.cm.steampowered.com:27021;CM03-STO.cm.steampowered.com:443;CM01-STO.cm.steampowered.com:443;CM04-STO.cm.steampowered.com:443;CM01-STO.cm.steampowered.com:27021;CM04-STO.cm.steampowered.com:27021;CM03-LON.cm.steampowered.com:27021;CM04-LON.cm.steampowered.com:443;CM02-LON.cm.steampowered.com:27021;CM02-LON.cm.steampowered.com:443;CM03-FRA.cm.steampowered.com:443;CM03-LON.cm.steampowered.com:443;CM01-LON.cm.steampowered.com:443;CM01-LON.cm.steampowered.com:27021;CM04-LON.cm.steampowered.com:27021;CM02-FRA.cm.steampowered.com:27021;CM03-FRA.cm.steampowered.com:27021;CM01-FRA.cm.steampowered.com:443;CM02-FRA.cm.steampowered.com:443;CM01-FRA.cm.steampowered.com:27021;CM02-LUX.cm.steampowered.com:443;CM01-LUX.cm.steampowered.com:27021;CM01-LUX.cm.steampowered.com:443;CM02-LUX.cm.steampowered.com:27021;CM02-IAD.cm.steampowered.com:443;CM01-IAD.cm.steampowered.com:27021;CM04-IAD.cm.steampowered.com:443;CM01-IAD.cm.steampowered.com:443;CM03-IAD.cm.steampowered.com:443;CM02-VIE.cm.steampowered.com:27021;CM02-VIE.cm.steampowered.com:443;CM06-IAD.cm.steampowered.com:443;CM04-IAD.cm.steampowered.com:27021;CM01-VIE.cm.steampowered.com:27021;CM03-IAD.cm.steampowered.com:27021;CM05-IAD.cm.steampowered.com:443;CM-01-WAW1.cm.steampowered.com:443;CM02-IAD.cm.steampowered.com:27021;CM-02-WAW1.cm.steampowered.com:27021;CM05-IAD.cm.steampowered.com:27021;CM06-IAD.cm.steampowered.com:27021;CM-01-WAW1.cm.steampowered.com:27021;CM01-VIE.cm.steampowered.com:443;cm03-ord.cm.steampowered.com:443;cm02-ord.cm.steampowered.com:27021;cm02-ord.cm.steampowered.com:443;cm04-ord.cm.steampowered.com:443;CM-02-WAW1.cm.steampowered.com:443;cm04-ord.cm.steampowered.com:27021;cm03-ord.cm.steampowered.com:27021;cm01-ord.cm.steampowered.com:27021;cm01-ord.cm.steampowered.com:443;cm01-lax.cm.steampowered.com:443;CM-01-OKC1.cm.steampowered.com:443;cm01-lax.cm.steampowered.com:27021;cm02-lax.cm.steampowered.com:443;s3tuk-035b.cm.steampowered.com:443;cm04-lax.cm.steampowered.com:443;CM-01-OKC1.cm.steampowered.com:27021;cm03-lax.cm.steampowered.com:27021;s3tuk-035b.cm.steampowered.com:27021;s3tuk-037a.cm.steampowered.com:27021;cm04-lax.cm.steampowered.com:27021;CM-02-OKC1.cm.steampowered.com:443;s3tuk-037a.cm.steampowered.com:443;CM-02-OKC1.cm.steampowered.com:27021;cm02-lax.cm.steampowered.com:27021;cm03-lax.cm.steampowered.com:443;CM03-SGP.cm.steampowered.com:443;CM01-HKG.cm.steampowered.com:27021;CM02-HKG.cm.steampowered.com:443;CM03-SGP.cm.steampowered.com:27021;CM01-TYO.cm.steampowered.com:27021;CM01-TYO.cm.steampowered.com:443;CM02-TYO.cm.steampowered.com:443;CM02-HKG.cm.steampowered.com:27021;CM01-SGP.cm.steampowered.com:27021;CM01-SGP.cm.steampowered.com:443"
+				"CMWebSocket"
+				{
+					"CM01-LON.cm.steampowered.com:27020"
+					{
+						"LastPingTimestamp"		"1524245194"
+						"LastPingValue"		"100000"
+						"LastLoadValue"		"0"
+					}
+					"CM05-IAD.cm.steampowered.com:443"
+					{
+						"LastPingTimestamp"		"1522420906"
+						"LastPingValue"		"100000"
+						"LastLoadValue"		"0"
+					}
+				}
+				"ShaderCacheManager"
+				{
+					"HasCurrentBucket"		"1"
+					"CurrentBucketGPU"		"1291e22dc332c4a9:1291e22dc332c4a9"
+					"CurrentBucketDriver"		"61d6b4c3735e1bbf4f3e25e4d272b4fa:e9517ab4f06a8326e2b4c924b21ca531"
+				}
+				"SurveyDateVersion"		"5131670692289189960"
+				"SurveyDateType"		"3"
+			}
+		}
+	}
+	"Music"
+	{
+		"LocalLibrary"
+		{
+			"Directories"
+			{
+				"0"		"020000006124c629136dc42ca33d03c97074354046fd09bc8cf4baabc0c182014f71715a50436844ed32fe5e355719f3fd8b3e9e9815d6b87ca16034d9080ad8507f184811549dadd263b2db53b454aa"
+				"1"		"020000006124c629136dc42ca33d03c97774355254f51ebc8ccfafa2cdcb81420b244c7a44407154b15dfd4c30417ca2ee9e1092a835d6be3ed83547bc7879bb3111762f0637fcc3bc06ded3830fd8c60808543de2d3"
+			}
+		}
+		"MusicPlayerVisible"		"0"
+	}
+	"VR"
+	{
+		"BuildIDAttempted"		"740902"
+		"AttemptingInit"		"0"
+		"BuildIDCompleted"		"740902"
+	}
+	"streaming"
+	{
+		"ClientID"		"2756002418166763011"
+	}
+	"AuthorizedDevice"
+	{
+		"10339049"
+		{
+			"timeused"		"1490635220"
+			"description"		"foo-PC"
+			"tokenid"		"12345"
+		}
+	}
+	"SDL_GamepadBind"		""
+}

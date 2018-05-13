@@ -72,6 +72,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Common\ErrorOccuredEventArgs.cs" />
+    <Compile Include="Common\VdfFileReader.cs" />
     <Compile Include="Controls\MultiselectComboControl.xaml.cs">
       <DependentUpon>MultiselectComboControl.xaml</DependentUpon>
     </Compile>

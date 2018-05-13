@@ -7,11 +7,15 @@
         xmlns:c="clr-namespace:GDItemSearch.Controls"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="Grim Dawn Item Search" Height="800" Width="1335">
+        Title="Grim Dawn Item Search" Height="800" Width="1335"
+        xmlns:vm="clr-namespace:GDItemSearch.ViewModels">
+    <Window.DataContext>
+        <vm:MainViewModel /> 
+    </Window.DataContext>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
-                <TextBlock Name="StatusBarText" Text="Ready" />
+                <TextBlock Name="StatusBarText" Text="{Binding StatusBarText}" />
             </StatusBarItem>
         </StatusBar>
 
@@ -32,7 +36,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
-                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" TextChanged="Search_TextBoxChanged"/>
+                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" TextChanged="Search_TextBoxChanged"/>
                             <Label Name="FiltersLabel" Grid.Column="0" Grid.Row="1" Content="Filters" Margin="0,0,0,0" FontWeight="Bold" />
                             
                             <Grid Grid.Row="1" Grid.Column="1">
@@ -45,25 +49,26 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    
                                 </Grid.RowDefinitions>
 
                                 <Label Content="Include equipped" VerticalAlignment="Top" />
-                                <CheckBox Margin="0,6,0,0" Name="IncludeEquippedCheckBox" VerticalAlignment="Top" Grid.Column="1" Checked="Search_CheckboxChecked" Unchecked="Search_CheckboxChecked" IsChecked="True" />
+                                <CheckBox Margin="0,6,0,0" Name="IncludeEquippedCheckBox" VerticalAlignment="Top" Grid.Column="1" IsChecked="{Binding ShowEquipped}" Checked="Search_CheckboxChecked" Unchecked="Search_CheckboxChecked" />
 
                                 <Label Content="Level range" Grid.Row="1" VerticalAlignment="Top"/>
                                 <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" VerticalAlignment="Top">
-                                    <TextBox Name="MinimumLevelTextBox" Width="30" Height="20" TextChanged="Search_TextBoxChanged" />
+                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel, UpdateSourceTrigger=PropertyChanged}" Width="30" Height="20" TextChanged="Search_TextBoxChanged" />
                                     <TextBlock Text="-" />
-                                    <TextBox Name="MaximumLevelTextBox" Width="30" Height="20" TextChanged="Search_TextBoxChanged" />
+                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel, UpdateSourceTrigger=PropertyChanged}" Width="30" Height="20" TextChanged="Search_TextBoxChanged" />
                                 </StackPanel>
 
                                 <Label Content="Search mode" Grid.Row="2"></Label>
-                                <ComboBox Text="Search mode" x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes}" SelectionChanged="Search_FilterSelectionChanged" />
+                                <ComboBox Text="Search mode" x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes}" SelectedItem="{Binding SearchMode}" SelectionChanged="Search_FilterSelectionChanged" Height="25" VerticalAlignment="Top" />
 
                                 <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3">
                                     <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" SelectionChanged="Search_FilterSelectionChanged" />
-                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" ItemsSource="{Binding ItemQualities}" SelectionChanged="Search_FilterSelectionChanged" />
+                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities}" Grid.Row="1" SelectionChanged="Search_FilterSelectionChanged" />
                                 </StackPanel>
                                 
 
@@ -75,7 +80,7 @@
                             <Button Margin="10,0,0,0" Click="Button_Click">(Refresh)</Button>
                         </StackPanel>
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
-                        <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" SelectionChanged="ResultsListView_SelectionChanged" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                        <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Header="Item name" Width="200">
@@ -116,8 +121,8 @@
                         </Grid.RowDefinitions>
                         <Label Name="GDDirLabel" Grid.Column="0" Content="Grim Dawn directory" Margin="0,0,0,0" />
                         <Label Name="GDSavesDirLabel" Grid.Column="0" Grid.Row="1" Content="Saves directory" Margin="0,0,0,0" />
-                        <TextBox Name="GDDirTextBox" Grid.Column="1" Height="20"/>
-                        <TextBox Name="GDSavesTextBox" Grid.Column="1" Grid.Row="1" Height="20"/>
+                        <TextBox Name="GDDirTextBox" Text="{Binding GrimDawnDirectory}" Grid.Column="1" Height="20"/>
+                        <TextBox Name="GDSavesTextBox" Text="{Binding GrimDawnSavesDirectory}" Grid.Column="1" Grid.Row="1" Height="20"/>
                     </Grid>
                     <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save causes all characters and items to be reloaded. This WILL take some time!" VerticalAlignment="Top"/>
                     <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="250" HorizontalAlignment="Left" Margin="0,5,0,0" Click="DetectGDSettings_Click"  />

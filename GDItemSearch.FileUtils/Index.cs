@@ -19,6 +19,8 @@ namespace GDItemSearch.FileUtils
 
         public List<IndexItem> Find(string search, IndexFilter filter)
         {
+            search = search ?? "";
+
             var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
 
             if (filter.PageSize != null)
@@ -29,6 +31,8 @@ namespace GDItemSearch.FileUtils
 
         public List<IndexItem> FindDuplicates(string search, IndexFilter filter)
         {
+            search = search ?? "";
+
             var characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
             List<IndexItem> results = new List<IndexItem>();
 

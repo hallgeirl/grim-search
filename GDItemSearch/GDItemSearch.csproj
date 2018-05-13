@@ -76,7 +76,10 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\ItemViewModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\MultiselectComboControlViewModel.cs" />
     <Compile Include="ViewModels\MultiselectComboItem.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Page Include="Controls\MultiselectComboControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -34,13 +34,12 @@ namespace GDItemSearch
         private Index _index = new Index();
         const string settingsFile = "GDItemSearchSettings.json";
         bool _initialized = false;
-
-        public ObservableCollection<MultiselectComboItem> ItemTypes = new ObservableCollection<MultiselectComboItem>();
-        public ObservableCollection<string> SearchModes = new ObservableCollection<string>() { "Regular", "Duplicate search" };
+        MainViewModel _viewModel = new MainViewModel();
 
         public MainWindow()
         {
             InitializeComponent();
+            _viewModel = this.DataContext as MainViewModel;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -48,10 +47,6 @@ namespace GDItemSearch
             await LoadSettings();
 
             ResultsListView.PreviewMouseWheel += ResultsListView_PreviewMouseWheel;
-
-            ItemTypesSelector.ItemsSource = ItemTypes;
-            SearchModeSelector.ItemsSource = SearchModes;
-            SearchModeSelector.SelectedItem = "Regular";
         }
 
         private void ResultsListView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -77,8 +72,8 @@ namespace GDItemSearch
                     var settings = JsonConvert.DeserializeObject<StoredSettings>(File.ReadAllText(settingsFile));
                     Settings.GrimDawnDirectory = settings.GrimDawnDirectory;
                     Settings.SavesDirectory = settings.SavesDirectory;
-                    GDDirTextBox.Text = Settings.GrimDawnDirectory;
-                    GDSavesTextBox.Text = Settings.SavesDirectory;
+                    _viewModel.GrimDawnDirectory = Settings.GrimDawnDirectory;
+                    _viewModel.GrimDawnSavesDirectory = Settings.SavesDirectory;
 
                     await BuildIndex();
 
@@ -132,7 +127,7 @@ namespace GDItemSearch
             }
             else
             {
-                GDDirTextBox.Text = gdDir;
+                _viewModel.GrimDawnDirectory = gdDir;
             }
 
             if (!Directory.Exists(System.IO.Path.Combine(savesDir, "main")))
@@ -141,7 +136,7 @@ namespace GDItemSearch
             }
             else
             {
-                GDSavesTextBox.Text = savesDir;
+                _viewModel.GrimDawnSavesDirectory = savesDir;
             }
 
             if (!string.IsNullOrEmpty(errors))
@@ -171,10 +166,10 @@ namespace GDItemSearch
 
         private async Task SaveSettings()
         {
-            Settings.GrimDawnDirectory = GDDirTextBox.Text;
-            Settings.SavesDirectory = GDSavesTextBox.Text;
+            Settings.GrimDawnDirectory = _viewModel.GrimDawnDirectory;
+            Settings.SavesDirectory = _viewModel.GrimDawnSavesDirectory;
 
-            var storedSettings = new StoredSettings() { GrimDawnDirectory = GDDirTextBox.Text, SavesDirectory = GDSavesTextBox.Text };
+            var storedSettings = new StoredSettings() { GrimDawnDirectory = _viewModel.GrimDawnDirectory, SavesDirectory = _viewModel.GrimDawnSavesDirectory };
             try
             {
                 SetStatusBarText("Saving settings...");
@@ -206,23 +201,24 @@ namespace GDItemSearch
 
             if (!skipItemTypesReload)
             {
-                var rarities = new List<MultiselectComboItem>();
-                rarities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x != "Rare" && x != "Magical"), Value = x, DisplayText = x }));
-                RaritySelector.ItemsSource = rarities;
+                var itemQualities = new ObservableCollection<MultiselectComboItem>();
+                itemQualities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x != "Rare" && x != "Magical"), Value = x, DisplayText = x }));
+                _viewModel.ItemQualities = itemQualities;
 
-                ItemTypes.Clear();
-                ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+                _viewModel.ItemTypes.Clear();
+
+                _viewModel.ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
             }
         }
 
         private void SetStatusBarText(string s)
         {
-            StatusBarText.Text = s;
+            _viewModel.StatusBarText = s;
         }
 
         private void ResetStatusBarText()
         {
-            StatusBarText.Text = "Ready";
+            _viewModel.StatusBarText = "Ready";
         }
 
         private void DisplayError(string errorMessage, Exception ex)
@@ -263,8 +259,8 @@ namespace GDItemSearch
                 return;
 
             var filter = CreateIndexFilter();
-            var searchText = SearchTextBox.Text;
-            string searchMode = SearchModeSelector.SelectedValue as string;
+            var searchText = _viewModel.SearchString;
+            string searchMode = _viewModel.SearchMode;
             SetStatusBarText("Searching for " + searchText);
 
             await Task.Run(() =>
@@ -286,20 +282,16 @@ namespace GDItemSearch
         private IndexFilter CreateIndexFilter()
         {
             IndexFilter filter = new IndexFilter();
-            if (!string.IsNullOrEmpty(MinimumLevelTextBox.Text))
-                filter.MinLevel = int.Parse(MinimumLevelTextBox.Text);
+            filter.MinLevel = _viewModel.MinimumLevel;
+            filter.MaxLevel = _viewModel.MaximumLevel;
 
-            if (!string.IsNullOrEmpty(MaximumLevelTextBox.Text))
-                filter.MaxLevel = int.Parse(MaximumLevelTextBox.Text);
+            filter.IsEquipped = _viewModel.ShowEquipped;
 
-            if (!IncludeEquippedCheckBox.IsChecked.HasValue || !IncludeEquippedCheckBox.IsChecked.Value)
-                filter.IsEquipped = false;
-
-            var rarityItems = RaritySelector.ItemsSource as IEnumerable<MultiselectComboItem>;
+            var rarityItems = _viewModel.ItemQualities;
             if (rarityItems != null)
                 filter.ItemQualities = rarityItems.Where(x => x.Selected).Select(x => x.Value).ToArray();
 
-            var itemTypes = ItemTypesSelector.ItemsSource as IEnumerable<MultiselectComboItem>;
+            var itemTypes = _viewModel.ItemTypes as IEnumerable<MultiselectComboItem>;
             if (itemTypes != null)
                 filter.ItemTypes = itemTypes.Where(x => x.Selected).Select(x => x.Value).ToArray();
 
@@ -307,15 +299,10 @@ namespace GDItemSearch
             return filter;
         }
 
-        private void ResultsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
         private void ResultsListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var selected = ResultsListView.SelectedItem as ItemViewModel;
-
+            
             if (selected == null)
                 return;
 

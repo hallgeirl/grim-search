@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,12 +23,15 @@ namespace GDItemSearch.Controls
     /// </summary>
     public partial class MultiselectComboControl : UserControl
     {
+        //MultiselectComboControlViewModel _viewModel;
+
         private bool _fireCheckboxEvents = true;
 
         public MultiselectComboControl()
         {
             InitializeComponent();
-            LayoutRoot.DataContext = this;
+
+            var vm = LayoutRoot.DataContext;
         }
 
         private void DeselectAllItemTypes_Click(object sender, RoutedEventArgs e)
@@ -71,13 +75,13 @@ namespace GDItemSearch.Controls
 
             SelectionChanged?.Invoke(this, new EventArgs());
         }
-
-        public IEnumerable ItemsSource
+        
+        public ObservableCollection<MultiselectComboItem> ItemsSource
         {
             get
             {
                 
-                return (IEnumerable)GetValue(ItemsSourceProperty);
+                return (ObservableCollection<MultiselectComboItem>)GetValue(ItemsSourceProperty);
 
             }
             set
@@ -86,7 +90,7 @@ namespace GDItemSearch.Controls
                 SelectorListView.ItemsSource = value;
             }
         }
-
+        
         public string Header
         {
             get
@@ -101,7 +105,14 @@ namespace GDItemSearch.Controls
 
         public event EventHandler SelectionChanged;
 
-        public static DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(IEnumerable), typeof(MultiselectComboControl));
+        public static DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(ObservableCollection<MultiselectComboItem>), typeof(MultiselectComboControl),
+            new FrameworkPropertyMetadata
+            {
+                DefaultValue = new ObservableCollection<MultiselectComboItem>(),
+                DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged
+            });
+        
+
 
         public static DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(string), typeof(MultiselectComboControl));
 

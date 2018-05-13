@@ -57,6 +57,7 @@
     <Compile Include="CharacterFiles\GDWString.cs" />
     <Compile Include="CharacterFiles\Header.cs" />
     <Compile Include="CharacterFiles\HotSlot.cs" />
+    <Compile Include="CharacterFiles\ICharacterFile.cs" />
     <Compile Include="CharacterFiles\Inventory.cs" />
     <Compile Include="CharacterFiles\InventoryEquipment.cs" />
     <Compile Include="CharacterFiles\InventoryItem.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="CharacterFiles\StashItem.cs" />
     <Compile Include="CharacterFiles\StashPage.cs" />
     <Compile Include="CharacterFiles\TeleportList.cs" />
+    <Compile Include="CharacterFiles\TransferStashFile.cs" />
     <Compile Include="CharacterFiles\TriggerTokens.cs" />
     <Compile Include="CharacterFiles\TutorialPages.cs" />
     <Compile Include="CharacterFiles\Uid.cs" />

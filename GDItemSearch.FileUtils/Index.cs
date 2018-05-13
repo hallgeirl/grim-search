@@ -25,6 +25,7 @@ namespace GDItemSearch.FileUtils
         ItemCache _itemCache = ItemCache.Instance;
         StringsCache _stringsCache = StringsCache.Instance;
         List<CharacterFile> _characters = new List<CharacterFile>();
+        TransferStashFile _transferStash = new TransferStashFile();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
         public List<IndexItem> Find(string search, IndexFilter filter)
@@ -69,9 +70,11 @@ namespace GDItemSearch.FileUtils
         public IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory)
         {
             LoadAllCharacters(grimDawnSavesDirectory);
+
             _itemCache.LoadAllItems(grimDawnDirectory);
             _stringsCache.LoadAllStrings(grimDawnDirectory);
             var summary = BuildIndex();
+
 
             return summary;
         }
@@ -104,8 +107,21 @@ namespace GDItemSearch.FileUtils
                 {
                     Trace.TraceError(ex.ToString());
                 }
-                
             }
+
+            LoadTransferStashAsCharacter(grimDawnSavesDirectory);
+        }
+
+        private void LoadTransferStashAsCharacter(string grimDawnSavesDirectory)
+        {
+            var transferStashFile = Path.Combine(grimDawnSavesDirectory, "transfer.gst");
+
+            using (var s = File.OpenRead(transferStashFile))
+            {
+                _transferStash.Read(s);
+            }
+
+            _characters.Add(_transferStash.ToCharacterFile());
         }
 
         private IndexSummary BuildIndex()
@@ -148,7 +164,6 @@ namespace GDItemSearch.FileUtils
                     item.Bag = "Equipped";
                     item.IsEquipped = true;
                 }
-                    
 
                 AddIndexItem(item, summary);
             }
@@ -210,7 +225,7 @@ namespace GDItemSearch.FileUtils
 
             var indexItem = new IndexItem();
             indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);
-            indexItem.Owner = character.Header.name;
+            indexItem.Owner = character.Header.Name;
             if (itemDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
                 indexItem.LevelRequirement = (int)itemDef.NumericalParametersRaw["levelRequirement"];
 
@@ -250,7 +265,7 @@ namespace GDItemSearch.FileUtils
 
             searchableStrings.Add(ItemHelper.GetFullItemName(item, itemDef).ToLower());
             searchableStrings.AddRange(itemStats);
-            searchableStrings.Add(character.Header.name);
+            searchableStrings.Add(character.Header.Name);
 
             return string.Join(" ", searchableStrings).ToLower();
         }

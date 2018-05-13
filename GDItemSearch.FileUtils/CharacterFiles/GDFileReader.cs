@@ -67,16 +67,17 @@ namespace GDItemSearch.FileUtils.CharacterFiles
             }
         }
 
-        public UInt32 ReadInt()
+        public UInt32 ReadInt(bool updateKey = true)
         {
-
             UInt32 val = file.ReadUInt32();
             UInt32 ret = val ^ key;
 
-            UpdateKey(BitConverter.GetBytes(val), 4);
+            if (updateKey)
+                UpdateKey(BitConverter.GetBytes(val), 4);
 
             return ret;
         }
+
 
         public UInt16 ReadShort()
         {

@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="FileUtils\IndexTests.cs" />
     <Compile Include="FileUtils\ItemsCacheTests.cs" />
+    <Compile Include="FileUtils\TransferStashFileTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

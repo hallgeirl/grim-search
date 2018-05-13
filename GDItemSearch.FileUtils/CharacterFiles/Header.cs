@@ -7,11 +7,11 @@ namespace GDItemSearch.FileUtils.CharacterFiles
 {
     public class Header
     {
-        public string name;
-        public string tag;
-        public UInt32 level;
-        public byte sex;
-        public byte hardcore;
+        public string Name;
+        public string Tag;
+        public UInt32 Level;
+        public byte Sex;
+        public byte Hardcore;
 
         public void Read(GDFileReader file)
         {
@@ -19,11 +19,11 @@ namespace GDItemSearch.FileUtils.CharacterFiles
             if (headerVersion != 1 && headerVersion != 2) // Header version. Must be 2.
                 throw new Exception("Invalid header version.");
 
-            name = GDWString.Read(file);
-            sex = file.ReadByte();
-            tag = GDString.Read(file);
-            level = file.ReadInt();
-            hardcore = file.ReadByte();
+            Name = GDWString.Read(file);
+            Sex = file.ReadByte();
+            Tag = GDString.Read(file);
+            Level = file.ReadInt();
+            Hardcore = file.ReadByte();
             if (headerVersion == 2)
                 file.ReadByte(); //expansion status
         }

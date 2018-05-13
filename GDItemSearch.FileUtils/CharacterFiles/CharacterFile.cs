@@ -5,13 +5,13 @@ using System.Text;
 
 namespace GDItemSearch.FileUtils.CharacterFiles
 {
-    public class CharacterFile
+    public class CharacterFile : ICharacterFile
     {
-        public Header Header = new Header();
+        public Header Header { get; set; }
         public Uid Id = new Uid();
         public CharacterInfo Info = new CharacterInfo();
         public CharacterBio Bio = new CharacterBio();
-        public Inventory Inventory = new Inventory();
+        public Inventory Inventory { get; set; }
         public CharacterStash Stash = new CharacterStash();
         private RespawnList respawns = new RespawnList();
         private TeleportList teleports = new TeleportList();
@@ -24,6 +24,12 @@ namespace GDItemSearch.FileUtils.CharacterFiles
         private TutorialPages tutorials = new TutorialPages();
         private PlayStats stats = new PlayStats();
         private TriggerTokens tokens = new TriggerTokens();
+
+        public CharacterFile()
+        {
+            Header = new Header();
+            Inventory = new Inventory();
+        }
 
         public void Read(Stream f)
         {

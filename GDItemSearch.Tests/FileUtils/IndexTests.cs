@@ -33,6 +33,18 @@ namespace GDItemSearch.Tests.FileUtils
         }
 
         [TestMethod]
+        public void TestBuildIndexRepeated()
+        {
+            var index = new Index();
+            var summary = index.Build(null, "Resources\\Saves");
+            var entries = summary.Entries;
+            summary = index.Build(null, "Resources\\Saves");
+
+            Assert.AreEqual(entries, summary.Entries);
+        }
+
+
+        [TestMethod]
         public void TestFindOnName()
         {
             var index = new Index();

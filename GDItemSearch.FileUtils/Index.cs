@@ -25,7 +25,6 @@ namespace GDItemSearch.FileUtils
         ItemCache _itemCache = ItemCache.Instance;
         StringsCache _stringsCache = StringsCache.Instance;
         List<CharacterFile> _characters = new List<CharacterFile>();
-        TransferStashFile _transferStash = new TransferStashFile();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
         public List<IndexItem> Find(string search, IndexFilter filter)
@@ -115,13 +114,13 @@ namespace GDItemSearch.FileUtils
         private void LoadTransferStashAsCharacter(string grimDawnSavesDirectory)
         {
             var transferStashFile = Path.Combine(grimDawnSavesDirectory, "transfer.gst");
-
+            var transferStash = new TransferStashFile();
             using (var s = File.OpenRead(transferStashFile))
             {
-                _transferStash.Read(s);
+                transferStash.Read(s);
             }
 
-            _characters.Add(_transferStash.ToCharacterFile());
+            _characters.Add(transferStash.ToCharacterFile());
         }
 
         private IndexSummary BuildIndex()

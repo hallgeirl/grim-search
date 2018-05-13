@@ -12,6 +12,16 @@ namespace GDItemSearch.FileUtils
 {
     public class Index
     {
+        public Index()
+        {
+        }
+
+        public Index(ItemCache itemCache, StringsCache stringsCache)
+        {
+            _itemCache = itemCache;
+            _stringsCache = stringsCache;
+        }
+
         ItemCache _itemCache = ItemCache.Instance;
         StringsCache _stringsCache = StringsCache.Instance;
         List<CharacterFile> _characters = new List<CharacterFile>();
@@ -56,21 +66,21 @@ namespace GDItemSearch.FileUtils
             _stringsCache.ClearCache();
         }
 
-        public IndexSummary Build()
+        public IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory)
         {
-            LoadAllCharacters();
-            _itemCache.LoadAllItems();
-            _stringsCache.LoadAllStrings();
+            LoadAllCharacters(grimDawnSavesDirectory);
+            _itemCache.LoadAllItems(grimDawnDirectory);
+            _stringsCache.LoadAllStrings(grimDawnDirectory);
             var summary = BuildIndex();
 
             return summary;
         }
 
-        private void LoadAllCharacters()
+        private void LoadAllCharacters(string grimDawnSavesDirectory)
         {
             _characters.Clear();
 
-            var charactersDirectory = Path.Combine(Settings.SavesDirectory, "main");
+            var charactersDirectory = Path.Combine(grimDawnSavesDirectory, "main");
             if (!Directory.Exists(charactersDirectory))
                 throw new InvalidOperationException("Saves directory not found: " + charactersDirectory);
 

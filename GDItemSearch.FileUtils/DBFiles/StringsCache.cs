@@ -11,11 +11,12 @@ namespace GDItemSearch.FileUtils.DBFiles
     public class StringsCache
     {
         Dictionary<string, string> AllStrings = new Dictionary<string, string>();
-        string cacheFilename = "TagsCache.json";
+        public string CacheFilename { get; set; }
         bool initialized = false;
 
         private StringsCache()
         {
+            CacheFilename = "TagsCache.json"; 
         }
 
         public string GetString(string tagName)
@@ -29,14 +30,14 @@ namespace GDItemSearch.FileUtils.DBFiles
             return null;
         }
 
-        public void LoadAllStrings()
+        public void LoadAllStrings(string grimDawnDirectory)
         {
-            if (File.Exists(cacheFilename))
-                AllStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(cacheFilename));
+            if (File.Exists(CacheFilename))
+                AllStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(CacheFilename));
             else
             {
-                ReadTagsFromFiles();
-                File.WriteAllText(cacheFilename, JsonConvert.SerializeObject(AllStrings));
+                ReadTagsFromFiles(grimDawnDirectory);
+                File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(AllStrings));
             }
 
             initialized = true;
@@ -44,9 +45,9 @@ namespace GDItemSearch.FileUtils.DBFiles
 
         public void ClearCache()
         {
-            if (File.Exists(cacheFilename))
+            if (File.Exists(CacheFilename))
             {
-                File.Delete(cacheFilename);
+                File.Delete(CacheFilename);
             }
         }
 
@@ -70,7 +71,7 @@ namespace GDItemSearch.FileUtils.DBFiles
             }
         }
 
-        private void ReadTagsFromFiles()
+        private void ReadTagsFromFiles(string grimDawnDirectory)
         {
             string[] dbFiles = {
                 "resources\\Text_EN.arc",
@@ -79,8 +80,8 @@ namespace GDItemSearch.FileUtils.DBFiles
 
             foreach (var file in dbFiles)
             {
-                var fullFilePath = Path.Combine(Settings.GrimDawnDirectory, file);
-                var path = ArzExtractor.Extract(fullFilePath);
+                var fullFilePath = Path.Combine(grimDawnDirectory, file);
+                var path = ArzExtractor.Extract(fullFilePath, grimDawnDirectory);
                 var tagsDir = Path.Combine(path, "text_en");
                 foreach (var f in Directory.EnumerateFiles(tagsDir, "*.txt", SearchOption.AllDirectories))
                 {

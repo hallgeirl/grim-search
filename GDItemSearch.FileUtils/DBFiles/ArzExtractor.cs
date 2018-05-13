@@ -8,12 +8,12 @@ namespace GDItemSearch.FileUtils.DBFiles
 {
     public static class ArzExtractor
     {
-        public static string Extract(string arzPath)
+        public static string Extract(string arzPath, string grimDawnDirectory)
         {
-            var archiveTool = Path.Combine(Settings.GrimDawnDirectory, "ArchiveTool.exe");
+            var archiveTool = Path.Combine(grimDawnDirectory, "ArchiveTool.exe");
             if (!File.Exists(archiveTool))
             {
-                throw new InvalidOperationException("ArchiveTool.exe not found in directory: " + Settings.GrimDawnDirectory + ". Check that you have configured the correct Grim Dawn directory.");
+                throw new InvalidOperationException("ArchiveTool.exe not found in directory: " + grimDawnDirectory + ". Check that you have configured the correct Grim Dawn directory.");
             }
 
             var tempDir = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath");

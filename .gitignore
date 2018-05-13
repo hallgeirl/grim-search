@@ -13,3 +13,5 @@
 /GDItemSearch.FileUtils/bin
 /packages
 /.vs/config
+/GDItemSearch.Tests/bin
+/GDItemSearch.Tests/obj

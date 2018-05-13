@@ -20,7 +20,7 @@ namespace GDItemSearchTest
   //              file.Read(s);
 
                 Index index = new Index();
-                index.Build();
+                index.Build("");
 
                 var res = index.Find("ultos", new IndexFilter());
                 var res2 = index.Find("ultos", new IndexFilter() { MaxLevel = 80 });

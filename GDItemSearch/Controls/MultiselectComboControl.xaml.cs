@@ -90,7 +90,18 @@ namespace GDItemSearch.Controls
                 SelectorListView.ItemsSource = value;
             }
         }
-        
+
+        public event EventHandler SelectionChanged;
+
+        public static DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(ObservableCollection<MultiselectComboItem>), typeof(MultiselectComboControl),
+            new FrameworkPropertyMetadata
+            {
+                DefaultValue = new ObservableCollection<MultiselectComboItem>(),
+                DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged
+            });
+
+
+
         public string Header
         {
             get
@@ -102,24 +113,34 @@ namespace GDItemSearch.Controls
                 SetValue(HeaderProperty, value);
             }
         }
-
-        public event EventHandler SelectionChanged;
-
-        public static DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(ObservableCollection<MultiselectComboItem>), typeof(MultiselectComboControl),
-            new FrameworkPropertyMetadata
-            {
-                DefaultValue = new ObservableCollection<MultiselectComboItem>(),
-                DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged
-            });
-        
-
-
         public static DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(string), typeof(MultiselectComboControl));
+
+
+        public ICommand Command
+        {
+            get
+            {
+                return (ICommand)GetValue(CommandProperty);
+            }
+            set
+            {
+                SetValue(CommandProperty, value);
+            }
+        }
+        public static DependencyProperty CommandProperty = DependencyProperty.Register("Command", typeof(ICommand), typeof(MultiselectComboControl));
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (_fireCheckboxEvents)
+            {
                 SelectionChanged?.Invoke(this, new EventArgs());
+                if (Command != null)
+                    Command.Execute(null);
+            }
+                
+
+            
+
         }
     }
 }

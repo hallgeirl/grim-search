@@ -11,8 +11,6 @@ namespace GDItemSearch
     {
         public StoredSettings()
         {
-            GrimDawnDirectory = Settings.GrimDawnDirectory;
-            SavesDirectory = Settings.SavesDirectory;
         }
 
         public string GrimDawnDirectory { get; set; }

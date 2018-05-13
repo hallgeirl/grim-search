@@ -12,10 +12,11 @@ namespace GDItemSearch.FileUtils.DBFiles
     {
         Dictionary<string, ItemRaw> AllItems = new Dictionary<string, ItemRaw>();
 
-        string cacheFilename = "ItemsCache.json";
+        public string CacheFilename { get; set; }
 
         private ItemCache()
         {
+            CacheFilename = "ItemsCache.json";
         }
 
         public ItemRaw GetItem(string path)
@@ -26,14 +27,14 @@ namespace GDItemSearch.FileUtils.DBFiles
             return null;
         }
 
-        public void LoadAllItems()
+        public void LoadAllItems(string grimDawnDirectory)
         {
-            if (File.Exists(cacheFilename))
-                AllItems = JsonConvert.DeserializeObject<Dictionary<string, ItemRaw>>(File.ReadAllText(cacheFilename));
+            if (File.Exists(CacheFilename))
+                AllItems = JsonConvert.DeserializeObject<Dictionary<string, ItemRaw>>(File.ReadAllText(CacheFilename));
             else
             {
-                ReadItemsFromFiles();
-                File.WriteAllText(cacheFilename, JsonConvert.SerializeObject(AllItems));
+                ReadItemsFromFiles(grimDawnDirectory);
+                File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(AllItems));
             }
 
             
@@ -41,9 +42,9 @@ namespace GDItemSearch.FileUtils.DBFiles
 
         public void ClearCache()
         {
-            if (File.Exists(cacheFilename))
+            if (File.Exists(CacheFilename))
             {
-                File.Delete(cacheFilename);
+                File.Delete(CacheFilename);
             }
         }
 
@@ -68,7 +69,7 @@ namespace GDItemSearch.FileUtils.DBFiles
         }
 
 
-        private void ReadItemsFromFiles()
+        private void ReadItemsFromFiles(string grimDawnDirectory)
         {
             string[] dbFiles = {
                 "database\\database.arz",
@@ -77,8 +78,8 @@ namespace GDItemSearch.FileUtils.DBFiles
 
             foreach (var file in dbFiles)
             {
-                var fullFilePath = Path.Combine(Settings.GrimDawnDirectory, file);
-                var path = ArzExtractor.Extract(fullFilePath);
+                var fullFilePath = Path.Combine(grimDawnDirectory, file);
+                var path = ArzExtractor.Extract(fullFilePath, grimDawnDirectory);
                 PopulateAllItems(path);
 
                 Directory.Delete(path, true);

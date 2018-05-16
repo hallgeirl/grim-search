@@ -298,7 +298,7 @@ namespace GDItemSearch.ViewModels
 
             string errors = "";
 
-            string gdDir = System.IO.Path.Combine(steamPath, "SteamApps", "common", "Grim Dawn").Replace('/', '\\');
+            string gdDir = GetInstallLocation(steamPath);
             string savesDir = System.IO.Path.Combine(steamPath, "userdata", activeUser.ToString(), "219990", "remote", "save").Replace('/', '\\');
 
             if (!File.Exists(System.IO.Path.Combine(gdDir, "ArchiveTool.exe")))
@@ -334,13 +334,42 @@ namespace GDItemSearch.ViewModels
         {
             List<string> locations = new List<string>();
             locations.Add(Path.Combine(steamPath, "SteamApps", "common", "Grim Dawn").Replace('/', '\\'));
-
+            locations.AddRange(GetInstallLocationsFromSteamConfig(steamPath));
+            
 
             return locations.ToArray();
         }
 
-        private string GetInstallLocation(string[] allLocations)
+        private string[] GetInstallLocationsFromSteamConfig(string steamPath)
         {
+            var configPath = Path.Combine(steamPath, "config", "config.vdf");
+            if (!File.Exists(configPath))
+                return new string[0];
+            var configContent = File.ReadAllText(configPath);
+
+            var configJson = VdfFileReader.ToJson(configContent);
+
+            var deserialized = JsonConvert.DeserializeObject<SteamConfig>(configJson);
+
+            var steamConfigInstallKeys = deserialized.Software.Valve.Steam.Keys.Where(x => x.StartsWith("BaseInstallFolder_"));
+
+            List<string> results = new List<string>();
+
+            foreach (var k in steamConfigInstallKeys)
+            {
+                var val = deserialized.Software.Valve.Steam[k] as string;
+                if (string.IsNullOrEmpty(val))
+                    continue;
+                var fullGDPath = Path.Combine(val, "SteamApps", "common", "Grim Dawn").Replace('/', '\\');
+                results.Add(fullGDPath);
+            }
+                
+            return results.ToArray();
+        }
+
+        private string GetInstallLocation(string steamPath)
+        {
+            var allLocations = GetAllPossibleInstallLocations(steamPath);
             foreach (var l in allLocations)
             {
                 if (File.Exists(System.IO.Path.Combine(l, "ArchiveTool.exe")))

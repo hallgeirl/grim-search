@@ -1,16 +1,17 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GDItemSearch.FileUtils.DBFiles
+namespace GDItemSearch.Utils.DBFiles
 {
     public class ItemCache
     {
-        Dictionary<string, ItemRaw> AllItems = new Dictionary<string, ItemRaw>();
+        ItemCacheContainer _cache = new ItemCacheContainer();
 
         public string CacheFilename { get; set; }
 
@@ -21,8 +22,8 @@ namespace GDItemSearch.FileUtils.DBFiles
 
         public ItemRaw GetItem(string path)
         {
-            if (AllItems.ContainsKey(path))
-                return AllItems[path];
+            if (_cache.Items.ContainsKey(path))
+                return _cache.Items[path];
 
             return null;
         }
@@ -30,11 +31,19 @@ namespace GDItemSearch.FileUtils.DBFiles
         public void LoadAllItems(string grimDawnDirectory)
         {
             if (File.Exists(CacheFilename))
-                AllItems = JsonConvert.DeserializeObject<Dictionary<string, ItemRaw>>(File.ReadAllText(CacheFilename));
-            else
             {
+                LogHelper.GetLog().Debug("Found cache version: " + _cache.Version);
+                _cache = JsonConvert.DeserializeObject<ItemCacheContainer>(File.ReadAllText(CacheFilename));
+                LogHelper.GetLog().Debug("Items loaded from cache");
+            }
+
+            if (!File.Exists(CacheFilename) || _cache == null)
+            {
+                _cache = new ItemCacheContainer();
+                LogHelper.GetLog().Debug("Item cache not found - reading from " + grimDawnDirectory);
                 ReadItemsFromFiles(grimDawnDirectory);
-                File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(AllItems));
+                _cache.Version = GetGrimDawnVersion(grimDawnDirectory);
+                File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(_cache));
             }
 
             
@@ -79,6 +88,7 @@ namespace GDItemSearch.FileUtils.DBFiles
             foreach (var file in dbFiles)
             {
                 var fullFilePath = Path.Combine(grimDawnDirectory, file);
+                LogHelper.GetLog().Debug("Processing: " + fullFilePath);
                 var path = ArzExtractor.Extract(fullFilePath, grimDawnDirectory);
                 PopulateAllItems(path);
 
@@ -95,8 +105,17 @@ namespace GDItemSearch.FileUtils.DBFiles
                 var item = new ItemRaw();
                 item.Read(f);
 
-                AllItems[relativePath] = item;
+                _cache.Items[relativePath] = item;
             }
+        }
+
+        private string GetGrimDawnVersion(string grimDawnDirectory)
+        {
+            var gdExe = Path.Combine(grimDawnDirectory, "Grim Dawn.exe");
+
+            var fileInfo = File.GetLastWriteTimeUtc(gdExe);
+
+            return fileInfo.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
     }
 }

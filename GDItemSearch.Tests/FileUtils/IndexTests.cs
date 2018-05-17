@@ -1,5 +1,5 @@
-﻿using GDItemSearch.FileUtils;
-using GDItemSearch.FileUtils.DBFiles;
+﻿using GDItemSearch.Utils;
+using GDItemSearch.Utils.DBFiles;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

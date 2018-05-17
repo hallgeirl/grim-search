@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GDItemSearch.FileUtils.DBFiles
+namespace GDItemSearch.Utils.DBFiles
 {
     public static class TagsReader
     {

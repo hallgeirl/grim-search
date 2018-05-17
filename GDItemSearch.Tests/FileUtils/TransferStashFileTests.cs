@@ -1,4 +1,4 @@
-﻿using GDItemSearch.FileUtils.CharacterFiles;
+﻿using GDItemSearch.Utils.CharacterFiles;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

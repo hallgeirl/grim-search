@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GDItemSearch.FileUtils.CharacterFiles
+namespace GDItemSearch.Utils.CharacterFiles
 {
     public interface ICharacterFile
     {

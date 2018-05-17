@@ -1,4 +1,4 @@
-﻿using GDItemSearch.FileUtils.CharacterFiles;
+﻿using GDItemSearch.Utils.CharacterFiles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace GDItemSearch.FileUtils.DBFiles
+namespace GDItemSearch.Utils.DBFiles
 {
     public static class ItemHelper
     {

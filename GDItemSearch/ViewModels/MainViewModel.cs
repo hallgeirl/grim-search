@@ -1,6 +1,6 @@
 ﻿using GDItemSearch.Common;
-using GDItemSearch.FileUtils;
-using GDItemSearch.FileUtils.DBFiles;
+using GDItemSearch.Utils;
+using GDItemSearch.Utils.DBFiles;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Prism.Commands;
@@ -31,6 +31,11 @@ namespace GDItemSearch.ViewModels
             SaveSettingsCommand = new DelegateCommand(() =>
             {
                 SaveSettings();
+            });
+
+            ClearCacheCommand = new DelegateCommand(() =>
+            {
+                ClearCache();
             });
 
             RefreshCommand = new DelegateCommand(() =>
@@ -208,6 +213,7 @@ namespace GDItemSearch.ViewModels
         #region commands
 
         public ICommand SaveSettingsCommand { get; set; }
+        public ICommand ClearCacheCommand { get; set; }
         public ICommand SearchCommand { get; set; }
         public ICommand RefreshCommand { get; set; }
         public ICommand DetectGDSettingsCommand { get; set; }
@@ -225,9 +231,6 @@ namespace GDItemSearch.ViewModels
                 StatusBarText = "Saving settings...";
                 EnableInput = false;
                 File.WriteAllText(settingsFile, JsonConvert.SerializeObject(storedSettings));
-
-                StatusBarText = "Clearing cache...";
-                _index.ClearCache();
 
                 BuildIndex();
 
@@ -278,6 +281,14 @@ namespace GDItemSearch.ViewModels
 
                 SettingsMissing?.Invoke(this, new EventArgs());
             }
+        }
+
+
+        private void ClearCache()
+        {
+            StatusBarText = "Clearing cache...";
+            _index.ClearCache();
+            ResetStatusBarText();
         }
 
         private void ResetStatusBarText()

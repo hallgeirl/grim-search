@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using GDItemSearch.FileUtils.DBFiles;
+using GDItemSearch.Utils.DBFiles;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GDItemSearch.Tests.FileUtils

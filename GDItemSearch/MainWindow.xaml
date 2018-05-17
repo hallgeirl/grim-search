@@ -123,9 +123,12 @@
                         <TextBox Name="GDDirTextBox" Text="{Binding GrimDawnDirectory}" Grid.Column="1" Height="20"/>
                         <TextBox Name="GDSavesTextBox" Text="{Binding GrimDawnSavesDirectory}" Grid.Column="1" Grid.Row="1" Height="20"/>
                     </Grid>
-                    <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save causes all characters and items to be reloaded. This WILL take some time!" VerticalAlignment="Top"/>
-                    <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="250" HorizontalAlignment="Left" Margin="0,5,0,0" Command="{Binding DetectGDSettingsCommand}" />
-                    <Button Content="Save" Name="SaveSettingsButton" Width="50" HorizontalAlignment="Left" Margin="0,5,0,0" Command="{Binding SaveSettingsCommand}" />
+                    <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save will load all items from the Grim Dawn data files, if not previously loaded. This WILL take some time!" VerticalAlignment="Top"/>
+                    <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="250" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Save" Name="SaveSettingsButton" Width="50" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding SaveSettingsCommand}" />
+                        <Button Content="Clear items cache" Name="RemoveItemCacheButton" Width="100" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding ClearCacheCommand}" />
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="About">

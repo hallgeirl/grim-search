@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace GDItemSearch.FileUtils.CharacterFiles
+namespace GDItemSearch.Utils.CharacterFiles
 {
     public class Item : Readable
     {

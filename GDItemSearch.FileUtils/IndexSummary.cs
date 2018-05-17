@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GDItemSearch.FileUtils
+namespace GDItemSearch.Utils
 {
     public class IndexSummary
     {

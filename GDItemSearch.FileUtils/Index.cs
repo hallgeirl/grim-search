@@ -1,5 +1,5 @@
-﻿using GDItemSearch.FileUtils.CharacterFiles;
-using GDItemSearch.FileUtils.DBFiles;
+﻿using GDItemSearch.Utils.CharacterFiles;
+using GDItemSearch.Utils.DBFiles;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GDItemSearch.FileUtils
+namespace GDItemSearch.Utils
 {
     public class Index
     {

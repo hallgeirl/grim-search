@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace GDItemSearch.FileUtils.CharacterFiles
+namespace GDItemSearch.Utils.CharacterFiles
 {
     static public class GDString
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace GDItemSearch.FileUtils.CharacterFiles
+namespace GDItemSearch.Utils.CharacterFiles
 {
     public static class GDArray<T> where T:Readable, new()
     {

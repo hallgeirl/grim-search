@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GDItemSearch.FileUtils.CharacterFiles
+namespace GDItemSearch.Utils.CharacterFiles
 {
     public class StashPage : Readable
     {

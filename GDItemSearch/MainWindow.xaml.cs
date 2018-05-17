@@ -1,7 +1,8 @@
 ﻿using GDItemSearch.Common;
-using GDItemSearch.FileUtils;
-using GDItemSearch.FileUtils.DBFiles;
+using GDItemSearch.Utils;
+using GDItemSearch.Utils.DBFiles;
 using GDItemSearch.ViewModels;
+using log4net;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
@@ -40,6 +41,8 @@ namespace GDItemSearch
             _viewModel = this.DataContext as MainViewModel;
             _viewModel.SettingsMissing += _viewModel_SettingsMissing;
             _viewModel.ErrorOccured += _viewModel_ErrorOccured;
+
+            LogHelper.GetLog().Debug("Main window initialized.");
         }
 
         private void _viewModel_ErrorOccured(object sender, ErrorOccuredEventArgs e)

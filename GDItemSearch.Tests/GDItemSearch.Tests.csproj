@@ -97,9 +97,9 @@
     <Folder Include="ViewModels\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GDItemSearch.FileUtils\GDItemSearch.FileUtils.csproj">
+    <ProjectReference Include="..\GDItemSearch.FileUtils\GDItemSearch.Utils.csproj">
       <Project>{cb1650f8-df00-42ce-8488-d421c347aca3}</Project>
-      <Name>GDItemSearch.FileUtils</Name>
+      <Name>GDItemSearch.Utils</Name>
     </ProjectReference>
     <ProjectReference Include="..\GDItemSearch\GDItemSearch.csproj">
       <Project>{8d53cd2d-5b88-42ba-b3c0-f8a7312d0392}</Project>

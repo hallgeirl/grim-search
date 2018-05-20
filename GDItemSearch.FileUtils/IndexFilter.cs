@@ -11,7 +11,7 @@ namespace GDItemSearch.Utils
         public int? MinLevel { get; set; }
         public int? MaxLevel { get; set; }
 
-        public bool? IsEquipped { get; set; }
+        public bool? IncludeEquipped { get; set; }
 
         public int? PageSize { get; set; }
 

@@ -446,7 +446,7 @@ namespace GDItemSearch.ViewModels
             filter.MinLevel = MinimumLevel;
             filter.MaxLevel = MaximumLevel;
 
-            filter.IsEquipped = ShowEquipped;
+            filter.IncludeEquipped = ShowEquipped;
 
             var rarityItems = ItemQualities;
             if (rarityItems != null)

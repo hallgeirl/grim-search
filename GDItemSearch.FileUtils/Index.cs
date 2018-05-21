@@ -246,7 +246,7 @@ namespace GDItemSearch.Utils
             if (filter.MinLevel != null && item.LevelRequirement < filter.MinLevel)
                 return false;
 
-            if (filter.IncludeEquipped != null && (!filter.IncludeEquipped.Value && !item.IsEquipped))
+            if (filter.IncludeEquipped != null && (!filter.IncludeEquipped.Value && item.IsEquipped))
                 return false;
 
             if (filter.ItemQualities != null && !filter.ItemQualities.Contains(item.Rarity))

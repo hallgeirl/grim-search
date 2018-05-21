@@ -15,4 +15,4 @@ From the dropdown, choose "Duplicate search" instead of "Regular search" and typ
 ![Regular search](https://github.com/hallgeirl/gd-item-search/blob/master/assets/GDItemSearchDuplicateSearch.png)
 
 ## Contributing
-If you want to contribute, please fork my repository. I accept pull requests.
+If you want to contribute, please fork my repository and submit a pull request. 

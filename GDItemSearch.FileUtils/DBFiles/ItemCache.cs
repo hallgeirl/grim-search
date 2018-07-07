@@ -98,14 +98,21 @@ namespace GDItemSearch.Utils.DBFiles
 
         private void PopulateAllItems(string path)
         {
-            var itemsDir = Path.Combine(path, "records", "items");
-            foreach (var f in Directory.EnumerateFiles(itemsDir, "*.dbr", SearchOption.AllDirectories))
-            {
-                var relativePath = f.Replace(path, "").Trim('\\').Trim('/').Replace('\\', '/');
-                var item = new ItemRaw();
-                item.Read(f);
+            var itemsDirs = new string[] {
+                Path.Combine(path, "records", "items"),
+                Path.Combine(path, "records", "storyelements")
+            };
 
-                _cache.Items[relativePath] = item;
+            foreach (var itemsDir in itemsDirs)
+            {
+                foreach (var f in Directory.EnumerateFiles(itemsDir, "*.dbr", SearchOption.AllDirectories))
+                {
+                    var relativePath = f.Replace(path, "").Trim('\\').Trim('/').Replace('\\', '/');
+                    var item = new ItemRaw();
+                    item.Read(f);
+
+                    _cache.Items[relativePath] = item;
+                }
             }
         }
 

@@ -79,7 +79,7 @@
                             <Button Margin="10,0,0,0" Command="{Binding RefreshCommand}">(Refresh)</Button>
                         </StackPanel>
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
-                        <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
+                        <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" KeyUp="ResultsListView_KeyUp" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Header="Item name" Width="200">

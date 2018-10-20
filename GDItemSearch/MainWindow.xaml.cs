@@ -98,8 +98,32 @@ namespace GDItemSearch
             if (selected == null)
                 return;
 
-            var searchNameInURL = HttpUtility.UrlEncode(selected.Name);
-            Process.Start("https://www.grimtools.com/db/search?query=" + searchNameInURL + "&in_description=0&exact_match=1");
+            var url = GetGDToolsURLForItem(selected);
+            Process.Start(url);
+        }
+
+        private string GetGDToolsURLForItem(ItemViewModel item)
+        {
+            var searchNameInURL = HttpUtility.UrlEncode(item.Name);
+            return "https://www.grimtools.com/db/search?query=" + searchNameInURL + "&in_description=0&exact_match=1";
+        }
+
+        private void ResultsListView_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) && e.Key == Key.C )
+                CopySelectedValuesToClipboard();
+        }
+
+        private void CopySelectedValuesToClipboard()
+        {
+            var builder = new StringBuilder();
+            foreach (ItemViewModel item in ResultsListView.SelectedItems)
+            {
+                var url = GetGDToolsURLForItem(item);
+                builder.AppendLine(item.Name);
+            }
+
+            Clipboard.SetText(builder.ToString());
         }
     }
 }

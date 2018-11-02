@@ -109,6 +109,7 @@ namespace GDItemSearch.Utils
             }
 
             LoadTransferStashAsCharacter(grimDawnSavesDirectory);
+            LoadBlueprintsAsCharacter(grimDawnSavesDirectory);
         }
 
         private void LoadTransferStashAsCharacter(string grimDawnSavesDirectory)
@@ -121,6 +122,18 @@ namespace GDItemSearch.Utils
             }
 
             _characters.Add(transferStash.ToCharacterFile());
+        }
+
+        private void LoadBlueprintsAsCharacter(string grimDawnSavesDirectory)
+        {
+            var recipesFilePath = Path.Combine(grimDawnSavesDirectory, "formulas.gst");
+            var recipes = new BlueprintFile();
+            using (var s = File.OpenRead(recipesFilePath))
+            {
+                recipes.Read(s);
+            }
+
+            _characters.Add(recipes.ToCharacterFile());
         }
 
         private IndexSummary BuildIndex()

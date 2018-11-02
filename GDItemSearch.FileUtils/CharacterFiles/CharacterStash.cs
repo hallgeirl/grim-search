@@ -8,7 +8,7 @@ namespace GDItemSearch.Utils.CharacterFiles
     public class CharacterStash
     {
         // new version
-        public List<StashPage> stashPages;
+        public List<StashPage> stashPages = new List<StashPage>();
         public UInt32 numStashPages;
 
         public void Read(GDFileReader file)

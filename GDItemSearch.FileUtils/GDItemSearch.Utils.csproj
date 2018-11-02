@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CharacterFiles\Block.cs" />
+    <Compile Include="CharacterFiles\BlueprintFile.cs" />
     <Compile Include="CharacterFiles\CharacterBio.cs" />
     <Compile Include="CharacterFiles\CharacterFile.cs" />
     <Compile Include="CharacterFiles\CharacterInfo.cs" />

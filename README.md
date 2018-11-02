@@ -19,5 +19,8 @@ From the dropdown, choose "Duplicate search" instead of "Regular search" and typ
 ## Contributing
 If you want to contribute, please fork my repository and submit a pull request. 
 
+## Acknowledgements
+Thanks to marius00 @ github (https://github.com/marius00) for providing sample code for how to read blueprints.
+
 ## Community
 There's not that big of a community yet, but there IS a thread on the Grim Dawn forums. 

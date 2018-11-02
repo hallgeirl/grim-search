@@ -90,9 +90,14 @@ namespace GDItemSearch.Utils
 
             foreach (var d in directories)
             {
+                //Skip backup characters
+                if (Path.GetFileName(d).StartsWith("__"))
+                    continue;
+
                 var characterFile = Path.Combine(d, "player.gdc");
                 if (!File.Exists(characterFile))
                     continue;
+
                 var character = new CharacterFile();
                 try
                 {

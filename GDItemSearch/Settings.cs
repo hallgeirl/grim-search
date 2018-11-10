@@ -15,5 +15,6 @@ namespace GDItemSearch
 
         public string GrimDawnDirectory { get; set; }
         public string SavesDirectory { get; set; }
+        public bool AutoRefresh { get; set; }
     }
 }

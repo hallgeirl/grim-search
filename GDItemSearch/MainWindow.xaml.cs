@@ -41,7 +41,7 @@ namespace GDItemSearch
             _viewModel = this.DataContext as MainViewModel;
             _viewModel.SettingsMissing += _viewModel_SettingsMissing;
             _viewModel.ErrorOccured += _viewModel_ErrorOccured;
-
+            _viewModel.Dispatcher = Dispatcher;
             LogHelper.GetLog().Debug("Main window initialized.");
         }
 
@@ -53,7 +53,6 @@ namespace GDItemSearch
         private void _viewModel_SettingsMissing(object sender, EventArgs e)
         {
             SettingsTab.IsSelected = true;
-            
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

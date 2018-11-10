@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace GDItemSearch.ViewModels
 {
@@ -80,6 +81,14 @@ namespace GDItemSearch.ViewModels
             }
         }
 
+        public Dispatcher Dispatcher;
+
+        private bool _autoRefresh = true;
+        public bool AutoRefresh
+        {
+            get { return _autoRefresh; }
+            set { _autoRefresh = value; RaisePropertyChangedEvent("AutoRefresh"); SaveSettings(true); }
+        }
 
         private bool _enableInput = true;
         public bool EnableInput
@@ -201,11 +210,42 @@ namespace GDItemSearch.ViewModels
         }
 
 
+        private FileSystemWatcher _savesWatcher = null;
         private string _grimDawnSavesDirectory;
         public string GrimDawnSavesDirectory
         {
             get { return _grimDawnSavesDirectory; }
-            set { _grimDawnSavesDirectory = value; RaisePropertyChangedEvent("GrimDawnSavesDirectory"); }
+            set
+            {
+                _grimDawnSavesDirectory = value;
+                RaisePropertyChangedEvent("GrimDawnSavesDirectory");
+                WatchDirectory(value);
+            }
+        }
+
+        private void WatchDirectory(string value)
+        {
+            if (_savesWatcher != null)
+                _savesWatcher.Dispose();
+
+            if (!Directory.Exists(value))
+                return;
+
+            _savesWatcher = new FileSystemWatcher(value);
+            _savesWatcher.IncludeSubdirectories = true;
+            _savesWatcher.EnableRaisingEvents = true;
+            _savesWatcher.Changed += _savesWatcher_Changed;
+        }
+
+        private void _savesWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (Dispatcher == null || !AutoRefresh)
+                return;
+
+            Dispatcher.Invoke(() =>
+            {
+                Refresh();
+            });
         }
 
         #endregion
@@ -218,21 +258,22 @@ namespace GDItemSearch.ViewModels
         public ICommand RefreshCommand { get; set; }
         public ICommand DetectGDSettingsCommand { get; set; }
 
-        
+
 
         #endregion
 
         #region Settings
-        private void SaveSettings()
+        private void SaveSettings(bool skipIndexBuild = false)
         {
-            var storedSettings = new StoredSettings() { GrimDawnDirectory = GrimDawnDirectory, SavesDirectory = GrimDawnSavesDirectory };
+            var storedSettings = new StoredSettings() { GrimDawnDirectory = GrimDawnDirectory, SavesDirectory = GrimDawnSavesDirectory, AutoRefresh = AutoRefresh };
             try
             {
                 StatusBarText = "Saving settings...";
                 EnableInput = false;
                 File.WriteAllText(settingsFile, JsonConvert.SerializeObject(storedSettings));
 
-                BuildIndex();
+                if (!skipIndexBuild)
+                    BuildIndex();
 
                 _initialized = true;
             }
@@ -257,6 +298,7 @@ namespace GDItemSearch.ViewModels
                     var settings = JsonConvert.DeserializeObject<StoredSettings>(File.ReadAllText(settingsFile));
                     GrimDawnDirectory = settings.GrimDawnDirectory;
                     GrimDawnSavesDirectory = settings.SavesDirectory;
+                    AutoRefresh = settings.AutoRefresh;
 
                     BuildIndex();
 
@@ -357,7 +399,7 @@ namespace GDItemSearch.ViewModels
             if (!File.Exists(configPath))
                 return new string[0];
             var configContent = File.ReadAllText(configPath);
-
+            
             var configJson = VdfFileReader.ToJson(configContent);
 
             var deserialized = JsonConvert.DeserializeObject<SteamConfig>(configJson);
@@ -462,6 +504,7 @@ namespace GDItemSearch.ViewModels
 
         private void Refresh()
         {
+            StatusBarText = "Refreshing...";
             BuildIndex(true);
             Search();
             ResetStatusBarText();

@@ -77,6 +77,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Results (max. 50 displayed at once)" FontWeight="Bold" />
                             <Button Margin="10,0,0,0" Command="{Binding RefreshCommand}">(Refresh)</Button>
+                            <CheckBox Margin="10,5,0,0" IsChecked="{Binding AutoRefresh, Mode=TwoWay}">Auto refresh</CheckBox>
                         </StackPanel>
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
                         <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" KeyUp="ResultsListView_KeyUp" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">

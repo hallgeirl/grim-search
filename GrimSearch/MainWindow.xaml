@@ -35,6 +35,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
                             <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" />
@@ -72,13 +73,19 @@
                                     <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities}" Grid.Row="1" Command="{Binding SearchCommand}" />
                                 </StackPanel>
                             </Grid>
+                            <Label Content="Results (max. 50 at once)" FontWeight="Bold" Grid.Row="2" />
+                            <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
+                                <Button Margin="0,0,0,0" Command="{Binding RefreshCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="Assets/arrow_refresh.png"></Image>
+                                        <TextBlock Text="Refresh" />
+                                    </StackPanel>
+                                </Button>
+                                <CheckBox Margin="10,5,0,0" IsChecked="{Binding AutoRefresh, Mode=TwoWay}">Auto refresh</CheckBox>
+                            </StackPanel>
                         </Grid>
 
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Results (max. 50 displayed at once)" FontWeight="Bold" />
-                            <Button Margin="10,0,0,0" Command="{Binding RefreshCommand}">(Refresh)</Button>
-                            <CheckBox Margin="10,5,0,0" IsChecked="{Binding AutoRefresh, Mode=TwoWay}">Auto refresh</CheckBox>
-                        </StackPanel>
+                        
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
                         <ListView Height="Auto" MinHeight="300"  Margin="5,0,0,0"  Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" KeyUp="ResultsListView_KeyUp" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
                             <ListView.View>
@@ -131,8 +138,8 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="About">
-
                 <StackPanel Margin="24,19,24,19">
+                    <TextBlock FontWeight="Bold">Disclaimer &amp; License</TextBlock>
                     <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see: <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink>. For simplicity, the license is provided below as well.</TextBlock>
 
                     <StackPanel Margin="16,10,16,0">
@@ -143,6 +150,8 @@
 
                         <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</TextBlock>
                     </StackPanel>
+                    <TextBlock Margin="0,10,0,0" FontWeight="Bold">Attributions</TextBlock>
+                    <TextBlock>Icons within this application (except the application's icon) is from the Silk Icons pack from http://www.famfamfam.com/. The icons are licensed under the Creative Commons 3.0 license found <Hyperlink NavigateUri="https://creativecommons.org/licenses/by/3.0/">here</Hyperlink>. </TextBlock>
                 </StackPanel>
             </TabItem>
         </TabControl>

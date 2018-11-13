@@ -141,6 +141,7 @@ namespace GrimSearch.ViewModels
                 _searchMode = value;
                 RaisePropertyChangedEvent("SearchMode");
                 Search();
+                SaveSettingsDelayed();
             }
         }
 
@@ -194,9 +195,42 @@ namespace GrimSearch.ViewModels
                 _searchString = value;
                 RaisePropertyChangedEvent("SearchString");
                 Search();
+                SaveSettingsDelayed();
             }
         }
-        
+
+        bool _shouldSave = false;
+        object _lock = new object();
+        //Saves settings after a 5 second delay. Useful to "batch" changes (e.g. when typing in the search text box)
+        private async void SaveSettingsDelayed()
+        {
+            _shouldSave = true;
+            await Task.Delay(5000);
+
+            if (_shouldSave)
+            {
+                lock (_lock)
+                {
+                    if (_shouldSave)
+                    {
+                        try
+                        { 
+                            Dispatcher.Invoke(() =>
+                            {
+                                SaveSettings(true);
+                            });
+                            _shouldSave = false;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.GetLog().Error("Error saving settings: " + ex.ToString(), ex);
+                        }
+                    }
+                }
+            }
+            
+        }
+
         #endregion
 
         #region Settings
@@ -265,7 +299,14 @@ namespace GrimSearch.ViewModels
         #region Settings
         private void SaveSettings(bool skipIndexBuild = false)
         {
-            var storedSettings = new StoredSettings() { GrimDawnDirectory = GrimDawnDirectory, SavesDirectory = GrimDawnSavesDirectory, AutoRefresh = AutoRefresh };
+            var storedSettings = new StoredSettings()
+            {
+                GrimDawnDirectory = GrimDawnDirectory,
+                SavesDirectory = GrimDawnSavesDirectory,
+                AutoRefresh = AutoRefresh,
+                LastSearchMode = SearchMode,
+                LastSearchText = SearchString
+            };
             try
             {
                 StatusBarText = "Saving settings...";
@@ -298,7 +339,9 @@ namespace GrimSearch.ViewModels
                     var settings = JsonConvert.DeserializeObject<StoredSettings>(File.ReadAllText(settingsFile));
                     GrimDawnDirectory = settings.GrimDawnDirectory;
                     GrimDawnSavesDirectory = settings.SavesDirectory;
-                    AutoRefresh = settings.AutoRefresh;
+                    _autoRefresh = settings.AutoRefresh;
+                    _searchMode = settings.LastSearchMode;
+                    _searchString = settings.LastSearchText;
 
                     BuildIndex();
 

@@ -87,6 +87,7 @@
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\MultiselectComboControlViewModel.cs" />
     <Compile Include="ViewModels\MultiselectComboItem.cs" />
+    <Compile Include="ViewModels\NotifyTaskCompletion.cs" />
     <Compile Include="ViewModels\SteamConfig.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Page Include="Controls\MultiselectComboControl.xaml">

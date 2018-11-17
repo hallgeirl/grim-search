@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -20,18 +21,21 @@ namespace GrimSearch.ViewModels
 {
     class MainViewModel : ViewModelBase
     {
+        public MainViewModel(Dispatcher dispatcher) : this()
+        {
+            Dispatcher = dispatcher;
+        }
+
         public MainViewModel()
         {
-            LoadSettings();
-
-            SearchCommand = new DelegateCommand(() => 
+            SearchCommand = new DelegateCommand(async () => 
             {
-                Search();
+                await SearchAsync();
             });
 
-            SaveSettingsCommand = new DelegateCommand(() =>
+            SaveSettingsCommand = new DelegateCommand(async () =>
             {
-                SaveSettings();
+                await SaveSettingsAsync();
             });
 
             ClearCacheCommand = new DelegateCommand(() =>
@@ -43,10 +47,15 @@ namespace GrimSearch.ViewModels
             {
                 Refresh();
             });
-            DetectGDSettingsCommand = new DelegateCommand(() =>
+            DetectGDSettingsCommand = new DelegateCommand(async () =>
             {
-                TryDetectGDSettings();
+                await TryDetectGDSettings();
             });
+        }
+
+        public async Task Initialize()
+        {
+            await LoadSettingsAsync();
         }
 
         bool _initialized = false;
@@ -87,7 +96,7 @@ namespace GrimSearch.ViewModels
         public bool AutoRefresh
         {
             get { return _autoRefresh; }
-            set { _autoRefresh = value; RaisePropertyChangedEvent("AutoRefresh"); SaveSettings(true); }
+            set { _autoRefresh = value; RaisePropertyChangedEvent("AutoRefresh"); }
         }
 
         private bool _enableInput = true;
@@ -140,8 +149,6 @@ namespace GrimSearch.ViewModels
             {
                 _searchMode = value;
                 RaisePropertyChangedEvent("SearchMode");
-                Search();
-                SaveSettingsDelayed();
             }
         }
 
@@ -153,7 +160,6 @@ namespace GrimSearch.ViewModels
             {
                 _minimumLevel = value;
                 RaisePropertyChangedEvent("MinimumLevel");
-                Search();
             }
         }
 
@@ -166,7 +172,6 @@ namespace GrimSearch.ViewModels
             {
                 _maximumLevel = value;
                 RaisePropertyChangedEvent("MaximumLevel");
-                Search();
             }
         }
 
@@ -179,7 +184,6 @@ namespace GrimSearch.ViewModels
             {
                 _showEquipped = value;
                 RaisePropertyChangedEvent("ShowEquipped");
-                Search();
             }
         }
 
@@ -194,41 +198,7 @@ namespace GrimSearch.ViewModels
             {
                 _searchString = value;
                 RaisePropertyChangedEvent("SearchString");
-                Search();
-                SaveSettingsDelayed();
             }
-        }
-
-        bool _shouldSave = false;
-        object _lock = new object();
-        //Saves settings after a 5 second delay. Useful to "batch" changes (e.g. when typing in the search text box)
-        private async void SaveSettingsDelayed()
-        {
-            _shouldSave = true;
-            await Task.Delay(5000);
-
-            if (_shouldSave)
-            {
-                lock (_lock)
-                {
-                    if (_shouldSave)
-                    {
-                        try
-                        { 
-                            Dispatcher.Invoke(() =>
-                            {
-                                SaveSettings(true);
-                            });
-                            _shouldSave = false;
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.GetLog().Error("Error saving settings: " + ex.ToString(), ex);
-                        }
-                    }
-                }
-            }
-            
         }
 
         #endregion
@@ -289,6 +259,7 @@ namespace GrimSearch.ViewModels
         public ICommand SaveSettingsCommand { get; set; }
         public ICommand ClearCacheCommand { get; set; }
         public ICommand SearchCommand { get; set; }
+        public ICommand SearchAndSaveCommand { get; set; }
         public ICommand RefreshCommand { get; set; }
         public ICommand DetectGDSettingsCommand { get; set; }
 
@@ -297,7 +268,7 @@ namespace GrimSearch.ViewModels
         #endregion
 
         #region Settings
-        private void SaveSettings(bool skipIndexBuild = false)
+        public async Task SaveSettingsAsync(bool skipIndexBuild = false)
         {
             var storedSettings = new StoredSettings()
             {
@@ -314,7 +285,7 @@ namespace GrimSearch.ViewModels
                 File.WriteAllText(settingsFile, JsonConvert.SerializeObject(storedSettings));
 
                 if (!skipIndexBuild)
-                    BuildIndex();
+                    await BuildIndexAsync();
 
                 _initialized = true;
             }
@@ -329,7 +300,7 @@ namespace GrimSearch.ViewModels
             }
         }
 
-        private void LoadSettings()
+        private async Task LoadSettingsAsync()
         {
             if (File.Exists(settingsFile))
             {
@@ -339,15 +310,15 @@ namespace GrimSearch.ViewModels
                     var settings = JsonConvert.DeserializeObject<StoredSettings>(File.ReadAllText(settingsFile));
                     GrimDawnDirectory = settings.GrimDawnDirectory;
                     GrimDawnSavesDirectory = settings.SavesDirectory;
-                    _autoRefresh = settings.AutoRefresh;
-                    _searchMode = settings.LastSearchMode;
-                    _searchString = settings.LastSearchText;
+                    AutoRefresh = settings.AutoRefresh;
+                    SearchMode = settings.LastSearchMode;
+                    SearchString = settings.LastSearchText;
 
-                    BuildIndex();
+                    await BuildIndexAsync();
 
                     _initialized = true;
 
-                    Search();
+                    await SearchAsync();
                 }
                 catch (Exception ex)
                 {
@@ -371,17 +342,27 @@ namespace GrimSearch.ViewModels
 
         private void ClearCache()
         {
-            StatusBarText = "Clearing cache...";
+            SetStatusbarText("Clearing cache...");
             _index.ClearCache();
             ResetStatusBarText();
         }
 
         private void ResetStatusBarText()
         {
-            StatusBarText = "Ready";
+            SetStatusbarText("Ready");
         }
 
-        private void TryDetectGDSettings()
+        private void SetStatusbarText(string text)
+        {
+            if (Dispatcher == null)
+                return;
+            Dispatcher.Invoke(() =>
+            {
+                StatusBarText = text;
+            });
+        }
+
+        private async Task TryDetectGDSettings()
         {
             string steamPath = GetRegistryValue<string>("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath");
             int activeUser = GetRegistryValue<int>("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\ActiveProcess", "ActiveUser");
@@ -420,9 +401,12 @@ namespace GrimSearch.ViewModels
                 throw new InvalidOperationException(errors);
             else
             {
-                var answer = MessageBox.Show("The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (answer == MessageBoxResult.Yes)
-                    SaveSettings();
+                await Dispatcher.Invoke(async () =>
+                {
+                    var answer = MessageBox.Show("The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (answer == MessageBoxResult.Yes)
+                        await SaveSettingsAsync();
+                });
             }
         }
 
@@ -489,38 +473,50 @@ namespace GrimSearch.ViewModels
 
         #region Search and index
 
-        private void BuildIndex(bool skipItemTypesReload = false)
+        private async Task BuildIndexAsync(bool skipItemTypesReload = false)
         {
-            StatusBarText = "Loading characters and items...";
-            var result = _index.Build(GrimDawnDirectory, GrimDawnSavesDirectory);
+            SetStatusbarText("Loading characters and items...");
+            IndexSummary result;
+
+            var newIndex = new Index();
+            result = await newIndex.BuildAsync(GrimDawnDirectory, GrimDawnSavesDirectory, (msg) => SetStatusbarText(msg)).ConfigureAwait(false);
+            _index = newIndex;
 
             if (!skipItemTypesReload)
             {
-                var itemQualities = new ObservableCollection<MultiselectComboItem>();
-                itemQualities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x != "Rare" && x != "Magical"), Value = x, DisplayText = x }));
-                ItemQualities = itemQualities;
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    var itemQualities = new ObservableCollection<MultiselectComboItem>();
+                    itemQualities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x != "Rare" && x != "Magical"), Value = x, DisplayText = x }));
+                    ItemQualities = itemQualities;
 
-                ItemTypes.Clear();
-                ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+                    ItemTypes.Clear();
+                    ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+                }));
             }
         }
 
-        private void Search()
+
+        private async Task SearchAsync()
         {
             if (!_initialized)
                 return;
 
             var filter = CreateIndexFilter();
-            StatusBarText = "Searching for " + SearchString;
+            SetStatusbarText("Searching for " + SearchString);
 
             List<IndexItem> items;
-            if (SearchMode == "Duplicate search")
-                items = _index.FindDuplicates(SearchString, filter);
-            else
-                items = _index.Find(SearchString, filter);
 
-            SearchResults.Clear();
-            SearchResults.AddRange(items.Select(x => ItemViewModel.FromModel(x)));
+            if (SearchMode == "Duplicate search")
+                items = await _index.FindDuplicatesAsync(SearchString, filter).ConfigureAwait(false);
+            else
+                items = await _index.FindAsync(SearchString, filter).ConfigureAwait(false);
+            
+            Dispatcher.Invoke(() =>
+            {
+                SearchResults.Clear();
+                SearchResults.AddRange(items.Select(x => ItemViewModel.FromModel(x)));
+            });
 
             ResetStatusBarText();
         }
@@ -545,11 +541,11 @@ namespace GrimSearch.ViewModels
             return filter;
         }
 
-        private void Refresh()
+        private async void Refresh()
         {
-            StatusBarText = "Refreshing...";
-            BuildIndex(true);
-            Search();
+            SetStatusbarText("Refreshing...");
+            await BuildIndexAsync(true).ConfigureAwait(false);
+            await SearchAsync().ConfigureAwait(false);
             ResetStatusBarText();
         }
         #endregion

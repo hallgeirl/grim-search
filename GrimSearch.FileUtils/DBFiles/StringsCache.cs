@@ -71,6 +71,15 @@ namespace GrimSearch.Utils.DBFiles
             }
         }
 
+        private string GetTagFileCopy(string tagFilePath)
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var targetFile = Path.Combine(tempDir, Path.GetFileName(tagFilePath));
+            Directory.CreateDirectory(tempDir);
+            File.Copy(tagFilePath, targetFile);
+
+            return targetFile;
+        }
         private void ReadTagsFromFiles(string grimDawnDirectory)
         {
             string[] dbFiles = {
@@ -81,18 +90,33 @@ namespace GrimSearch.Utils.DBFiles
             foreach (var file in dbFiles)
             {
                 var fullFilePath = Path.Combine(grimDawnDirectory, file);
-                var path = ArzExtractor.Extract(fullFilePath, grimDawnDirectory);
-                var tagsDir = Path.Combine(path, "text_en");
-                foreach (var f in Directory.EnumerateFiles(tagsDir, "*.txt", SearchOption.AllDirectories))
+                var tempArcFile = GetTagFileCopy(fullFilePath);
+                string extractedPath = null;
+
+                try
                 {
-                    var tags = TagsReader.ReadAllTags(f);
-                    foreach (var t in tags)
+                    extractedPath = ArzExtractor.Extract(tempArcFile, grimDawnDirectory);
+                    var tagsDir = Path.Combine(extractedPath, "text_en");
+                    foreach (var f in Directory.EnumerateFiles(tagsDir, "*.txt", SearchOption.AllDirectories))
                     {
-                        AllStrings[t.Key] = t.Value;
+                        var tags = TagsReader.ReadAllTags(f);
+                        foreach (var t in tags)
+                        {
+                            AllStrings[t.Key] = t.Value;
+                        }
                     }
                 }
+                finally
+                {
+                    if (extractedPath != null && Directory.Exists(extractedPath))
+                        Directory.Delete(extractedPath, true);   
 
-                Directory.Delete(path, true);
+                    var tempArcDir = Path.GetDirectoryName(tempArcFile);
+                    if (Directory.Exists(tempArcDir))
+                        Directory.Delete(tempArcDir, true);
+                }
+
+                
             }
         }
 

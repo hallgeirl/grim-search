@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GrimSearch"
         xmlns:c="clr-namespace:GrimSearch.Controls"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
         Title="Grim Search" Height="800" Width="1335"
         xmlns:vm="clr-namespace:GrimSearch.ViewModels"
-        IsEnabled="{Binding EnableInput}">
+        IsEnabled="{Binding EnableInput}"
+        Closing="Window_Closing">
     <Window.DataContext>
         <vm:MainViewModel /> 
     </Window.DataContext>
@@ -20,7 +22,7 @@
             </StatusBarItem>
         </StatusBar>
 
-        <TabControl Name="MainTabControl">
+        <TabControl Name="MainTabControl" SelectedItem="">
             <TabItem Header="Search" Name="SearchTab">
                 <ScrollViewer>
                     <StackPanel Margin="24,19,24,19">
@@ -38,7 +40,13 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
-                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="TextChanged">
+                                        <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
                             <Label Name="FiltersLabel" Grid.Column="0" Grid.Row="1" Content="Filters" Margin="0,0,0,0" FontWeight="Bold" />
                             
                             <Grid Grid.Row="1" Grid.Column="1">
@@ -56,21 +64,60 @@
                                 </Grid.RowDefinitions>
 
                                 <Label Content="Include equipped" VerticalAlignment="Top" />
-                                <CheckBox Margin="0,6,0,0" Name="IncludeEquippedCheckBox" VerticalAlignment="Top" Grid.Column="1" IsChecked="{Binding ShowEquipped}" />
+                                <CheckBox Margin="0,6,0,0" Name="IncludeEquippedCheckBox" VerticalAlignment="Top" Grid.Column="1" IsChecked="{Binding ShowEquipped}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Checked">
+                                            <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                        </i:EventTrigger>
+                                        <i:EventTrigger EventName="Unchecked">
+                                            <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </CheckBox>
 
                                 <Label Content="Level range" Grid.Row="1" VerticalAlignment="Top"/>
                                 <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" VerticalAlignment="Top">
-                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel, UpdateSourceTrigger=PropertyChanged}" Width="30" Height="20" />
+                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel, UpdateSourceTrigger=PropertyChanged}" Width="30" Height="20">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="TextChanged">
+                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
                                     <TextBlock Text="-" />
-                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel, UpdateSourceTrigger=PropertyChanged}" Width="30" Height="20" />
+                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel, UpdateSourceTrigger=PropertyChanged}" Width="30" Height="20">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="TextChanged">
+                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
                                 </StackPanel>
 
                                 <Label Content="Search mode" Grid.Row="2"></Label>
-                                <ComboBox Text="Search mode" x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes}" SelectedItem="{Binding SearchMode}" Height="25" VerticalAlignment="Top" />
+                                <ComboBox Text="Search mode" x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes, Mode=TwoWay}" SelectedItem="{Binding SearchMode}" Height="25" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="1,0,129,0">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
 
                                 <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3">
-                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" Command="{Binding SearchCommand}" />
-                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities}" Grid.Row="1" Command="{Binding SearchCommand}" />
+                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" Command="{Binding SearchCommand}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="SelectionChanged">
+                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </c:MultiselectComboControl>
+                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities}" Grid.Row="1" Command="{Binding SearchCommand}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="SelectionChanged">
+                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </c:MultiselectComboControl>
                                 </StackPanel>
                             </Grid>
                             <Label Content="Results (max. 50 at once)" FontWeight="Bold" Grid.Row="2" />

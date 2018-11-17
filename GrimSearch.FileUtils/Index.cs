@@ -27,7 +27,12 @@ namespace GrimSearch.Utils
         List<CharacterFile> _characters = new List<CharacterFile>();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
-        public List<IndexItem> Find(string search, IndexFilter filter)
+        public async Task<List<IndexItem>> FindAsync(string search, IndexFilter filter)
+        {
+            return await Task.Run(() => Find(search, filter)).ConfigureAwait(false);
+        }
+
+        private List<IndexItem> Find(string search, IndexFilter filter)
         {
             search = search ?? "";
 
@@ -39,7 +44,12 @@ namespace GrimSearch.Utils
             return result.ToList();
         }
 
-        public List<IndexItem> FindDuplicates(string search, IndexFilter filter)
+        public async Task<List<IndexItem>> FindDuplicatesAsync(string search, IndexFilter filter)
+        {
+            return await Task.Run(() => FindDuplicates(search, filter)).ConfigureAwait(false);
+        }
+
+        private List<IndexItem> FindDuplicates(string search, IndexFilter filter)
         {
             search = search ?? "";
 
@@ -57,7 +67,7 @@ namespace GrimSearch.Utils
                     item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
                 }
             }
-            return results.OrderBy(x=>x.Bag).ToList();
+            return results.OrderBy(x => x.Bag).ToList();
         }
 
         public void ClearCache()
@@ -66,20 +76,34 @@ namespace GrimSearch.Utils
             _stringsCache.ClearCache();
         }
 
-        public IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory)
+        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory)
         {
-            LoadAllCharacters(grimDawnSavesDirectory);
+            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, (msg) => { })).ConfigureAwait(false);
+        }
 
-            _itemCache.LoadAllItems(grimDawnDirectory);
+        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, Action<string> stateChangeCallback)
+        {
+            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, stateChangeCallback)).ConfigureAwait(false);
+        }
+
+        private IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory, Action<string> stateChangeCallback)
+        {
+            LoadAllCharacters(grimDawnSavesDirectory, stateChangeCallback);
+
+            stateChangeCallback("Loading tags/strings");
             _stringsCache.LoadAllStrings(grimDawnDirectory);
-            var summary = BuildIndex();
 
+            stateChangeCallback("Loading items");
+            _itemCache.LoadAllItems(grimDawnDirectory, stateChangeCallback);
+
+            var summary = BuildIndex(stateChangeCallback);
 
             return summary;
         }
 
-        private void LoadAllCharacters(string grimDawnSavesDirectory)
+        private void LoadAllCharacters(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
         {
+            stateChangeCallback("Clearing index");
             _characters.Clear();
 
             var charactersDirectory = Path.Combine(grimDawnSavesDirectory, "main");
@@ -98,6 +122,8 @@ namespace GrimSearch.Utils
                 if (!File.Exists(characterFile))
                     continue;
 
+                stateChangeCallback("Loading " + characterFile);
+
                 var character = new CharacterFile();
                 try
                 {
@@ -113,13 +139,14 @@ namespace GrimSearch.Utils
                 }
             }
 
-            LoadTransferStashAsCharacter(grimDawnSavesDirectory);
-            LoadBlueprintsAsCharacter(grimDawnSavesDirectory);
+            LoadTransferStashAsCharacter(grimDawnSavesDirectory, stateChangeCallback);
+            LoadBlueprintsAsCharacter(grimDawnSavesDirectory, stateChangeCallback);
         }
 
-        private void LoadTransferStashAsCharacter(string grimDawnSavesDirectory)
+        private void LoadTransferStashAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
         {
             var transferStashFile = Path.Combine(grimDawnSavesDirectory, "transfer.gst");
+            stateChangeCallback("Loading " + transferStashFile);
             var transferStash = new TransferStashFile();
             using (var s = File.OpenRead(transferStashFile))
             {
@@ -129,9 +156,10 @@ namespace GrimSearch.Utils
             _characters.Add(transferStash.ToCharacterFile());
         }
 
-        private void LoadBlueprintsAsCharacter(string grimDawnSavesDirectory)
+        private void LoadBlueprintsAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
         {
             var recipesFilePath = Path.Combine(grimDawnSavesDirectory, "formulas.gst");
+            stateChangeCallback("Loading " + recipesFilePath);
             var recipes = new BlueprintFile();
             using (var s = File.OpenRead(recipesFilePath))
             {
@@ -141,13 +169,14 @@ namespace GrimSearch.Utils
             _characters.Add(recipes.ToCharacterFile());
         }
 
-        private IndexSummary BuildIndex()
+        private IndexSummary BuildIndex(Action<string> stateChangeCallback)
         {
             _index.Clear();
             var summary = new IndexSummary();
 
             foreach (var c in _characters)
             {
+                stateChangeCallback("Indexing " + c.Header.Name);
                 BuildEquippedIndexItems(c, c.Inventory.Equipment, summary);
                 BuildEquippedIndexItems(c, c.Inventory.Weapon1, summary);
                 BuildEquippedIndexItems(c, c.Inventory.Weapon2, summary);
@@ -219,7 +248,7 @@ namespace GrimSearch.Utils
 
                 summary.Entries++;
 
-                var rarity = ItemHelper.GetItemRarity(item.Source);
+                var rarity = item.Rarity;
                 if (rarity != null)
                     summary.ItemRarities.Add(rarity);
 

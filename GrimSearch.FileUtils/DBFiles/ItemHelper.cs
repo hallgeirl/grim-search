@@ -12,10 +12,15 @@ namespace GrimSearch.Utils.DBFiles
     {
         public static string GetItemRarity(ItemRaw itemDef)
         {
-            if (itemDef.StringParametersRaw.ContainsKey("itemClassification"))
-                return itemDef.StringParametersRaw["itemClassification"];
+            string rarity = null;
 
-            return null;
+            if (itemDef.StringParametersRaw.ContainsKey("itemClassification"))
+                rarity = itemDef.StringParametersRaw["itemClassification"];
+
+            if (IsComponentBlueprint(itemDef))
+                rarity = "Component Blueprint";
+
+            return rarity;
         }
 
         public static string GetItemType(ItemRaw itemDef)
@@ -251,6 +256,16 @@ namespace GrimSearch.Utils.DBFiles
                 return StringsCache.Instance.GetString(itemDef.StringParametersRaw["itemStyleTag"]);
 
             return null;
+        }
+
+        private static bool IsComponentBlueprint(ItemRaw itemDef)
+        {
+            if (GetItemType(itemDef) != "ItemArtifactFormula")
+                return false;
+
+            var targetItem = ItemCache.Instance.GetItem(itemDef.StringParametersRaw["artifactName"]);
+
+            return targetItem.StringParametersRaw["Class"] == "ItemRelic";
         }
     }
 }

@@ -44,6 +44,7 @@ namespace GrimSearch.Utils.DBFiles
             process.Start();
 
             process.WaitForExit();
+
             LogHelper.GetLog().Debug("Execution finished.");
 
             if (process.ExitCode != 0)

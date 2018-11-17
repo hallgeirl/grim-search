@@ -55,9 +55,11 @@ namespace GrimSearch
             SettingsTab.IsSelected = true;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ResultsListView.PreviewMouseWheel += ResultsListView_PreviewMouseWheel;
+
+            await _viewModel.Initialize();
         }
 
         private void ResultsListView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -123,6 +125,11 @@ namespace GrimSearch
             }
 
             Clipboard.SetText(builder.ToString());
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _viewModel.SaveSettingsAsync(true).Wait();
         }
     }
 }

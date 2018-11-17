@@ -20,10 +20,10 @@ namespace GrimSearch.Tests.FileUtils
         }
 
         [TestMethod]
-        public void TestBuildIndex()
+        public async Task TestBuildIndex()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
             Assert.IsTrue(summary.ItemRarities.Contains("Legendary"));
             Assert.IsTrue(summary.ItemRarities.Contains("Epic"));
@@ -33,71 +33,83 @@ namespace GrimSearch.Tests.FileUtils
         }
 
         [TestMethod]
-        public void TestBuildIndexRepeated()
+        public async Task TestBuildIndexRepeated()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
             var entries = summary.Entries;
-            summary = index.Build(null, "Resources\\Saves");
+            summary = await index.BuildAsync(null, "Resources\\Saves");
 
             Assert.AreEqual(entries, summary.Entries);
         }
 
+        [TestMethod]
+        public async Task TestBuildIndexStatusCallback()
+        {
+            var messages = new List<string>();
+            Action<string> callback = (msg) => { messages.Add(msg); };
+
+            var index = new Index();
+            var summary = await index.BuildAsync(null, "Resources\\Saves", callback);
+
+            Assert.IsTrue(messages.Count >= 2);
+        }
+
 
         [TestMethod]
-        public void TestFindOnName()
+        public async Task TestFindOnName()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
-            var results = index.Find("ulTos", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
+            var results = await index.FindAsync("ulTos", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.ItemName == "Mythical Ultos' Stormseeker") > 0);
         }
 
         [TestMethod]
-        public void TestFindOnCharacterName()
+        public async Task TestFindOnCharacterName()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
-            var results = index.Find("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
+            var results = await index.FindAsync("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.Owner == "Thorine") > 0);
         }
 
 
         [TestMethod]
-        public void TestLevelRangeLimiterMinMaxLevelBaseline()
+        public async Task TestLevelRangeLimiterMinMaxLevelBaseline()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
-            var results = index.Find("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", MinLevel = 0, MaxLevel = 100, PageSize = 1000 });
+            var results = await index.FindAsync("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", MinLevel = 0, MaxLevel = 100, PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.LevelRequirement < 80) > 0);
             Assert.IsTrue(results.Count(x => x.LevelRequirement > 90) > 0);
         }
 
         [TestMethod]
-        public void TestLevelRangeLimiterMinMaxLevel()
+        public async Task TestLevelRangeLimiterMinMaxLevel()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
-            var results = index.Find("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", MinLevel = 80, MaxLevel = 90, PageSize = 1000 });
+            var results = await index.FindAsync("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", MinLevel = 80, MaxLevel = 90, PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.LevelRequirement < 80) == 0);
             Assert.IsTrue(results.Count(x => x.LevelRequirement > 90) == 0);
         }
 
         [TestMethod]
-        public void TestQualityLimiter()
+        public async Task TestQualityLimiter()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
-            
-            var results = index.Find("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", ItemQualities = new string[] { "Legendary", "Rare" }, PageSize = 1000 });
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
+
+            var results = await index.FindAsync("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", ItemQualities = new string[] { "Legendary", "Rare" }, PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.Rarity == "Legendary") > 0);
             Assert.IsTrue(results.Count(x => x.Rarity == "Epic") == 0);
@@ -105,35 +117,35 @@ namespace GrimSearch.Tests.FileUtils
         }
 
         [TestMethod]
-        public void TestQualityLimiterBaseline()
+        public async Task TestQualityLimiterBaseline()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
-            var results = index.Find("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
+            var results = await index.FindAsync("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.Rarity == "Legendary") > 0);
             Assert.IsTrue(results.Count(x => x.Rarity == "Epic") > 0);
         }
 
         [TestMethod]
-        public void TestFindDuplicates()
+        public async Task TestFindDuplicates()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
-            var results = index.FindDuplicates("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Find duplicates", PageSize = 1000 });
+            var results = await index.FindDuplicatesAsync("thorine", new IndexFilter() { IncludeEquipped = true, SearchMode = "Find duplicates", PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.ItemName == "Mythical Signet of the Runefather") > 0);
         }
 
         [TestMethod]
-        public void TestFindUnequippedWhenIsEquippedIsChecked()
+        public async Task TestFindUnequippedWhenIsEquippedIsChecked()
         {
             var index = new Index();
-            var summary = index.Build(null, "Resources\\Saves");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
 
-            var results = index.Find("ulTos", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
+            var results = await index.FindAsync("ulTos", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
 
             Assert.IsTrue(results.Count(x => x.ItemName == "Fist of Ultos") > 0);
         }

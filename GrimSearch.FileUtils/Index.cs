@@ -70,6 +70,34 @@ namespace GrimSearch.Utils
             return results.OrderBy(x => x.Bag).ToList();
         }
 
+
+        public async Task<List<IndexItem>> FindUniqueAsync(string search, IndexFilter filter)
+        {
+            return await Task.Run(() => FindUnique(search, filter)).ConfigureAwait(false);
+        }
+
+        private List<IndexItem> FindUnique(string search, IndexFilter filter)
+        {
+            search = search ?? "";
+
+            var characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+            List<IndexItem> results = new List<IndexItem>();
+
+            foreach (var item in characterItems)
+            {
+                var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
+                var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
+
+                if (dupe.Count() == 0)
+                {
+                    results.Add(item);
+                    item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
+                }
+            }
+            return results.OrderBy(x => x.Bag).ToList();
+        }
+
+
         public void ClearCache()
         {
             _itemCache.ClearCache();
@@ -254,6 +282,9 @@ namespace GrimSearch.Utils
 
                 if (itemType != null)
                     summary.ItemTypes.Add(itemType);
+
+                if (item.Owner != null)
+                    summary.Characters.Add(item.Owner);
 
                 _index.Add(item);
             }

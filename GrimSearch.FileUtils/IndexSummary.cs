@@ -12,10 +12,12 @@ namespace GrimSearch.Utils
         {
             ItemTypes = new HashSet<string>();
             ItemRarities = new HashSet<string>();
+            Characters = new HashSet<string>();
         }
 
         public int Entries { get; set; }
         public HashSet<string> ItemTypes { get; set; }
         public HashSet<string> ItemRarities { get; set; }
+        public HashSet<string> Characters { get; set; }
     }
 }

@@ -51,6 +51,11 @@ namespace GrimSearch.ViewModels
             {
                 await TryDetectGDSettings();
             });
+
+            UpdateSearchBoxVisibilityCommand = new DelegateCommand(() =>
+            {
+                UpdateSearchBoxVisibility();
+            });
         }
 
         public async Task Initialize()
@@ -106,7 +111,7 @@ namespace GrimSearch.ViewModels
             set { _enableInput = value; RaisePropertyChangedEvent("EnableInput"); }
         }
 
-        private ObservableCollection<string> _searchModes = new ObservableCollection<string> { "Regular", "Duplicate search" };
+        private ObservableCollection<string> _searchModes = new ObservableCollection<string> { "Regular", "Find duplicates", "Find new items" };
         public ObservableCollection<string> SearchModes
         {
             get { return _searchModes; }
@@ -129,6 +134,13 @@ namespace GrimSearch.ViewModels
             set { _itemQualities = value; RaisePropertyChangedEvent("ItemQualities"); }
         }
 
+        private ObservableCollection<string> _allCharacters = new ObservableCollection<string>() { "(select character)" };
+        public ObservableCollection<string> AllCharacters
+        {
+            get { return _allCharacters; }
+            set { _allCharacters = value; RaisePropertyChangedEvent("AllCharacters"); }
+        }
+
 
         private ObservableCollection<ItemViewModel> _searchResults = new ObservableCollection<ItemViewModel>();
         public ObservableCollection<ItemViewModel> SearchResults
@@ -140,6 +152,28 @@ namespace GrimSearch.ViewModels
         #endregion
 
         #region Search filters
+        private Visibility _freeTextSearchVisibility = Visibility.Visible;
+        public Visibility FreeTextSearchVisibility
+        {
+            get { return _freeTextSearchVisibility; }
+            set
+            {
+                _freeTextSearchVisibility = value;
+                RaisePropertyChangedEvent("FreeTextSearchVisibility");
+            }
+        }
+
+        private Visibility _characterBasedSearchVisibility = Visibility.Visible;
+        public Visibility CharacterBasedSearchVisibility
+        {
+            get { return _characterBasedSearchVisibility; }
+            set
+            {
+                _characterBasedSearchVisibility = value;
+                RaisePropertyChangedEvent("CharacterBasedSearchVisibility");
+            }
+        }
+
 
         private string _searchMode = "Regular";
         public string SearchMode
@@ -262,7 +296,7 @@ namespace GrimSearch.ViewModels
         public ICommand SearchAndSaveCommand { get; set; }
         public ICommand RefreshCommand { get; set; }
         public ICommand DetectGDSettingsCommand { get; set; }
-
+        public ICommand UpdateSearchBoxVisibilityCommand { get; set; }
 
 
         #endregion
@@ -492,6 +526,10 @@ namespace GrimSearch.ViewModels
 
                     ItemTypes.Clear();
                     ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+
+                    AllCharacters.Clear();
+                    AllCharacters.Add("(select character)");
+                    AllCharacters.AddRange(result.Characters);
                 }));
             }
         }
@@ -507,8 +545,10 @@ namespace GrimSearch.ViewModels
 
             List<IndexItem> items;
 
-            if (SearchMode == "Duplicate search")
+            if (SearchMode == "Find duplicates")
                 items = await _index.FindDuplicatesAsync(SearchString, filter).ConfigureAwait(false);
+            else if (SearchMode == "Find new items")
+                items = await _index.FindUniqueAsync(SearchString, filter).ConfigureAwait(false);
             else
                 items = await _index.FindAsync(SearchString, filter).ConfigureAwait(false);
             
@@ -547,6 +587,26 @@ namespace GrimSearch.ViewModels
             await BuildIndexAsync(true).ConfigureAwait(false);
             await SearchAsync().ConfigureAwait(false);
             ResetStatusBarText();
+        }
+
+        private void UpdateSearchBoxVisibility()
+        {
+            // use only search textbox for now
+            FreeTextSearchVisibility = Visibility.Visible;
+            CharacterBasedSearchVisibility = Visibility.Visible;
+
+            /*
+            if (SearchMode == "Regular")
+            {
+                FreeTextSearchVisibility = Visibility.Visible;
+                CharacterBasedSearchVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                FreeTextSearchVisibility = Visibility.Hidden;
+                CharacterBasedSearchVisibility = Visibility.Visible;
+            }*/
+
         }
         #endregion
     }

@@ -33,6 +33,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="200" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="200" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -40,13 +41,20 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
-                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding FreeTextSearchVisibility}">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="TextChanged">
                                         <i:InvokeCommandAction Command="{Binding SearchCommand}" />
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                             </TextBox>
+                            <ComboBox Name="CharacterSelectionComboBox" Grid.Column="2" Height="20" SelectedValue="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding AllCharacters}" Visibility="{Binding CharacterBasedSearchVisibility}" Text="Select character...">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="TextChanged">
+                                        <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ComboBox>
                             <Label Name="FiltersLabel" Grid.Column="0" Grid.Row="1" Content="Filters" Margin="0,0,0,0" FontWeight="Bold" />
                             
                             <Grid Grid.Row="1" Grid.Column="1">
@@ -99,6 +107,7 @@
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectionChanged">
                                             <i:InvokeCommandAction Command="{Binding SearchCommand}" />
+                                            <i:InvokeCommandAction Command="{Binding UpdateSearchBoxVisibilityCommand}" />
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </ComboBox>

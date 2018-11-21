@@ -53,7 +53,13 @@ namespace GrimSearch.Utils
         {
             search = search ?? "";
 
-            var characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+            // Try searching for partial string first -- if this gives an unique result, go with it
+            var characterItems = _index.Where(x => x.Owner.ToLower().Contains(search.ToLower()) && FilterMatch(x, filter));
+
+            // Otherwise, match the full character name
+            if (characterItems.Select(x => x.Owner.ToLower()).Distinct().Count() > 1)
+                characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+
             List<IndexItem> results = new List<IndexItem>();
 
             foreach (var item in characterItems)
@@ -80,7 +86,13 @@ namespace GrimSearch.Utils
         {
             search = search ?? "";
 
-            var characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+            // Try searching for partial string first -- if this gives an unique result, go with it
+            var characterItems = _index.Where(x => x.Owner.ToLower().Contains(search.ToLower()) && FilterMatch(x, filter));
+
+            // Otherwise, match the full character name
+            if (characterItems.Select(x=>x.Owner.ToLower()).Distinct().Count() > 1)
+                characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+
             List<IndexItem> results = new List<IndexItem>();
 
             foreach (var item in characterItems)

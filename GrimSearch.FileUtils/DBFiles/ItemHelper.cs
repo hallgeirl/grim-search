@@ -62,6 +62,17 @@ namespace GrimSearch.Utils.DBFiles
             }
         }
 
+        //Returns the item definition that is used for stats (relevant in case of blueprints, where the item itself doesn't have stats, but the crafted item does)
+        public static string GetItemStatSource(ItemRaw itemDef)
+        {
+            if (GetItemType(itemDef) == "ItemArtifactFormula" && itemDef.StringParametersRaw.ContainsKey("artifactName"))
+            {
+                return itemDef.StringParametersRaw["artifactName"];
+            }
+
+            return null;
+        }
+
         public static string GetItemTypeDisplayName(string itemType)
         {
             switch(itemType)

@@ -296,21 +296,27 @@ namespace GrimSearch.Utils
                 return null;
 
             var itemDef = _itemCache.GetItem(item.baseName);
-
             if (itemDef == null)
                 return null;
+
+            //itemStatDef is the item definition that is used for stats (relevant in case of blueprints, where the item itself doesn't have stats, but the crafted item does)
+            var itemStatDefIdentifier = ItemHelper.GetItemStatSource(itemDef);
+
+            ItemRaw itemStatDef = itemDef;
+            if (itemStatDefIdentifier != null)
+                itemStatDef = _itemCache.GetItem(itemStatDefIdentifier);
 
             var indexItem = new IndexItem();
             indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);
             indexItem.Owner = character.Header.Name;
-            if (itemDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
-                indexItem.LevelRequirement = (int)itemDef.NumericalParametersRaw["levelRequirement"];
+            if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
+                indexItem.LevelRequirement = (int)itemStatDef.NumericalParametersRaw["levelRequirement"];
 
-            indexItem.Rarity = ItemHelper.GetItemRarity(itemDef);
-            indexItem.ItemType = ItemHelper.GetItemType(itemDef);
+            indexItem.Rarity = ItemHelper.GetItemRarity(itemStatDef);
+            indexItem.ItemType = ItemHelper.GetItemType(itemStatDef);
             indexItem.Source = itemDef;
             indexItem.SourceInstance = item;
-            indexItem.ItemStats = ItemHelper.GetStats(item, itemDef).Select(x=>x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "")).ToList();
+            indexItem.ItemStats = ItemHelper.GetStats(item, itemStatDef).Select(x=>x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "")).ToList();
             indexItem.Searchable = BuildSearchableString(character, item, itemDef, indexItem.ItemStats);
 
             return indexItem;

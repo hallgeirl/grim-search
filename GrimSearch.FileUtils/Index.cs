@@ -312,7 +312,7 @@ namespace GrimSearch.Utils
             if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
                 indexItem.LevelRequirement = (int)itemStatDef.NumericalParametersRaw["levelRequirement"];
 
-            indexItem.Rarity = ItemHelper.GetItemRarity(itemStatDef);
+            indexItem.Rarity = ItemHelper.GetItemRarity(itemDef);
             indexItem.ItemType = ItemHelper.GetItemType(itemStatDef);
             indexItem.Source = itemDef;
             indexItem.SourceInstance = item;

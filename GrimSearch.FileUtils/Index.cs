@@ -60,6 +60,8 @@ namespace GrimSearch.Utils
             if (characterItems.Select(x => x.Owner.ToLower()).Distinct().Count() > 1)
                 characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
 
+            search = characterItems.FirstOrDefault()?.Owner ?? search;
+
             List<IndexItem> results = new List<IndexItem>();
 
             foreach (var item in characterItems)
@@ -92,6 +94,8 @@ namespace GrimSearch.Utils
             // Otherwise, match the full character name
             if (characterItems.Select(x=>x.Owner.ToLower()).Distinct().Count() > 1)
                 characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+
+            search = characterItems.FirstOrDefault()?.Owner ?? search;
 
             List<IndexItem> results = new List<IndexItem>();
 

@@ -275,6 +275,8 @@ namespace GrimSearch.Utils.DBFiles
                 return false;
 
             var targetItem = ItemCache.Instance.GetItem(itemDef.StringParametersRaw["artifactName"]);
+            if (targetItem == null)
+                return false;
 
             return targetItem.StringParametersRaw["Class"] == "ItemRelic";
         }

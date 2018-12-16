@@ -158,5 +158,28 @@ namespace GrimSearch.Tests.FileUtils
 
             Assert.IsTrue(results.Count(x => x.ItemName == "Fist of Ultos") > 0);
         }
+
+        [TestMethod]
+        public async Task TestFindBlueprint()
+        {
+            var index = new Index();
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
+
+            var results = await index.FindAsync("blueprint: Cowl of Mogdrogen", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
+
+            Assert.IsTrue(results.Count(x => x.ItemName == "Blueprint: Cowl of Mogdrogen") > 0);
+        }
+
+
+        [TestMethod]
+        public async Task TestFindBlueprint_ExternalSource()
+        {
+            var index = new Index("formulas_external_1.gst");
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
+
+            var results = await index.FindAsync("blueprint: Cowl of Mogdrogen", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
+
+            Assert.IsTrue(results.Count(x => x.ItemName == "Blueprint: Cowl of Mogdrogen") > 0);
+        }
     }
 }

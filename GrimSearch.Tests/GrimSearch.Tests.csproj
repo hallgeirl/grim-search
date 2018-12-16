@@ -93,6 +93,9 @@
     <Content Include="Resources\config.vdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\Saves\formulas_external_1.gst">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Elite\conversations.gdd" />
     <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Elite\map.dat" />
     <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Elite\map.fow" />

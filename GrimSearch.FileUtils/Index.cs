@@ -12,15 +12,18 @@ namespace GrimSearch.Utils
 {
     public class Index
     {
-        public Index()
+        string formulasFilename = "formulas.gst";
+        public Index(string formulasFilename = "formulas.gst")
         {
+            this.formulasFilename = formulasFilename;
         }
 
-        public Index(ItemCache itemCache, StringsCache stringsCache)
+        public Index(ItemCache itemCache, StringsCache stringsCache, string formulasFilename = "formulas.gst") : this(formulasFilename)
         {
             _itemCache = itemCache;
             _stringsCache = stringsCache;
         }
+
 
         ItemCache _itemCache = ItemCache.Instance;
         StringsCache _stringsCache = StringsCache.Instance;
@@ -202,7 +205,7 @@ namespace GrimSearch.Utils
 
         private void LoadBlueprintsAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
         {
-            var recipesFilePath = Path.Combine(grimDawnSavesDirectory, "formulas.gst");
+            var recipesFilePath = Path.Combine(grimDawnSavesDirectory, formulasFilename);
             stateChangeCallback("Loading " + recipesFilePath);
             var recipes = new BlueprintFile();
             using (var s = File.OpenRead(recipesFilePath))
@@ -321,6 +324,9 @@ namespace GrimSearch.Utils
             ItemRaw itemStatDef = itemDef;
             if (itemStatDefIdentifier != null)
                 itemStatDef = _itemCache.GetItem(itemStatDefIdentifier);
+
+            if (itemStatDef == null)
+                itemStatDef = itemDef;
 
             var indexItem = new IndexItem();
             indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);

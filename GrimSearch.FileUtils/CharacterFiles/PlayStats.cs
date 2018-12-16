@@ -52,7 +52,7 @@ namespace GrimSearch.Utils.CharacterFiles
                 throw new Exception();
 
             var version = file.ReadInt();
-            if (version != 9 && version != 7) // version
+            if (version < 7 || version > 11) // version
                 throw new Exception();
 
             playTime = file.ReadInt();
@@ -101,6 +101,21 @@ namespace GrimSearch.Utils.CharacterFiles
                 greatestSurvivalScore = file.ReadInt();
                 cooldownRemaining = file.ReadInt();
                 cooldownTotal = file.ReadInt();
+            }
+
+            if (version >= 11)
+            {
+                var skillTrackingMapCount = file.ReadInt();
+
+                for (int i = 0; i < skillTrackingMapCount; i++)
+                {
+                    var s = GDString.Read(file);
+                    var n = file.ReadInt();
+                }
+
+                var endlessSouls = file.ReadInt();
+                var endlessEssence = file.ReadInt();
+                var difficultySkip = file.ReadByte();
             }
 
             uniqueItemsFound = file.ReadInt();

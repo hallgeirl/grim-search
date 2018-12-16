@@ -93,6 +93,49 @@
     <Content Include="Resources\config.vdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Elite\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Elite\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Elite\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Elite\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Normal\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Normal\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Normal\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Normal\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Ultimate\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Ultimate\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Ultimate\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\levels_world001.map\Ultimate\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Normal\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Normal\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Normal\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Normal\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Ultimate\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Ultimate\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Ultimate\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_a.map\Ultimate\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_b.map\Elite\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_b.map\Elite\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_b.map\Elite\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_b.map\Elite\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Elite\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Elite\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Elite\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Elite\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Ultimate\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Ultimate\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Ultimate\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_c.map\Ultimate\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_d.map\Elite\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_d.map\Elite\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_d.map\Elite\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_d.map\Elite\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_f.map\Elite\conversations.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_f.map\Elite\map.dat" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_f.map\Elite\map.fow" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\maps_survivalworld_f.map\Elite\quests.gdd" />
+    <None Include="Resources\Saves\main\_The Peismaker.1.0.7.0\player.gdc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ViewModels\" />

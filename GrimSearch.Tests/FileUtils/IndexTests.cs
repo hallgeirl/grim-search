@@ -33,6 +33,15 @@ namespace GrimSearch.Tests.FileUtils
         }
 
         [TestMethod]
+        public async Task TestBuildIndexV1070()
+        {
+            var index = new Index();
+            var summary = await index.BuildAsync(null, "Resources\\Saves");
+
+            Assert.IsTrue(summary.Characters.Contains("The Peismaker"));
+        }
+
+        [TestMethod]
         public async Task TestBuildIndexRepeated()
         {
             var index = new Index();

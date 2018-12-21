@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -75,8 +76,10 @@ namespace GrimSearch.Utils.DBFiles
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             var targetFile = Path.Combine(tempDir, Path.GetFileName(tagFilePath));
+            LogHelper.GetLog().Debug("Copying " + tagFilePath + " to " + targetFile);
             Directory.CreateDirectory(tempDir);
             File.Copy(tagFilePath, targetFile);
+            
 
             return targetFile;
         }
@@ -108,12 +111,18 @@ namespace GrimSearch.Utils.DBFiles
                 }
                 finally
                 {
-                    if (extractedPath != null && Directory.Exists(extractedPath))
-                        Directory.Delete(extractedPath, true);   
+                    var cleanupSetting = ConfigurationManager.AppSettings["cleanupArchiveFiles"];
+                    var cleanup = string.IsNullOrEmpty(cleanupSetting) || cleanupSetting.ToLowerInvariant() == "true";
 
-                    var tempArcDir = Path.GetDirectoryName(tempArcFile);
-                    if (Directory.Exists(tempArcDir))
-                        Directory.Delete(tempArcDir, true);
+                    if (cleanup)
+                    { 
+                        if (extractedPath != null && Directory.Exists(extractedPath))
+                            Directory.Delete(extractedPath, true);   
+
+                        var tempArcDir = Path.GetDirectoryName(tempArcFile);
+                        if (Directory.Exists(tempArcDir))
+                            Directory.Delete(tempArcDir, true);
+                    }
                 }
 
                 

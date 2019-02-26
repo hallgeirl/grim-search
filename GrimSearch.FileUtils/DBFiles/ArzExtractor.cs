@@ -31,7 +31,7 @@ namespace GrimSearch.Utils.DBFiles
             if (Path.GetExtension(arzPath).ToLower() == ".arc")
                 extractCommand = "-extract";
 
-            var arguments = "\"" + arzPath + "\" " + extractCommand + " " + tempDir;
+            var arguments = "\"" + arzPath + "\" " + extractCommand + " \"" + tempDir + "\"";
 
             LogHelper.GetLog().Debug("Executing: " + archiveTool + " " + arguments);
             var process = new Process();

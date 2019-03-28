@@ -109,13 +109,17 @@ namespace GrimSearch.Utils.DBFiles
         {
             var itemsDirs = new string[] {
                 Path.Combine(path, "records", "items"),
-                Path.Combine(path, "records", "storyelements")
+                Path.Combine(path, "records", "storyelements"),
+                Path.Combine(path, "records", "storyelementsgdx2")
             };
 
             int i = 0;
 
             foreach (var itemsDir in itemsDirs)
             {
+                if (!Directory.Exists(itemsDir))
+                    continue;
+
                 foreach (var f in Directory.EnumerateFiles(itemsDir, "*.dbr", SearchOption.AllDirectories))
                 {
                     if (++i % 1000 == 0)

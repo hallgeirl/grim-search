@@ -94,6 +94,10 @@ namespace GrimSearch.Utils.DBFiles
             foreach (var file in dbFiles)
             {
                 var fullFilePath = Path.Combine(grimDawnDirectory, file);
+
+                if (!File.Exists(fullFilePath))
+                    continue;
+
                 var tempArcFile = GetTagFileCopy(fullFilePath);
                 string extractedPath = null;
 
@@ -109,6 +113,7 @@ namespace GrimSearch.Utils.DBFiles
                             AllStrings[t.Key] = t.Value;
                         }
                     }
+                    MD5Store.Instance.SetHash(fullFilePath);
                 }
                 finally
                 {

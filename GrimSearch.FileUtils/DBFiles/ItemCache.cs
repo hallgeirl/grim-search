@@ -93,7 +93,11 @@ namespace GrimSearch.Utils.DBFiles
             foreach (var file in dbFiles)
             {
                 i++;
+                
                 var fullFilePath = Path.Combine(grimDawnDirectory, file);
+                if (!File.Exists(fullFilePath))
+                    continue;
+
                 stateChangeCallback("Extracting DB file " + file + " (" + i + " of " + dbFiles.Length + ")");
                 LogHelper.GetLog().Debug("Processing: " + fullFilePath);
                 var path = ArzExtractor.Extract(fullFilePath, grimDawnDirectory);
@@ -102,6 +106,7 @@ namespace GrimSearch.Utils.DBFiles
                 PopulateAllItems(path, stateChangeCallback);
 
                 Directory.Delete(path, true);
+                MD5Store.Instance.SetHash(fullFilePath);
             }
         }
 

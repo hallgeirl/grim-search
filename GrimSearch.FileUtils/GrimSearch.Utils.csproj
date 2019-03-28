@@ -96,6 +96,7 @@
     <Compile Include="IndexItem.cs" />
     <Compile Include="IndexSummary.cs" />
     <Compile Include="LogHelper.cs" />
+    <Compile Include="MD5Store.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

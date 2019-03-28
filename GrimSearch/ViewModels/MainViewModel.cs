@@ -275,15 +275,37 @@ namespace GrimSearch.ViewModels
             _savesWatcher.Changed += _savesWatcher_Changed;
         }
 
+        static object _savesLock = new object();
+        static bool _shouldRefresh = false;
+        static DateTimeOffset _lastRefreshed = new DateTime(2000, 1, 1);
         private void _savesWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (Dispatcher == null || !AutoRefresh)
                 return;
 
-            Dispatcher.Invoke(() =>
+            //don't refresh more than every 5 seconds
+            if ((DateTime.Now - _lastRefreshed).Seconds < 5)
+                return;
+
+            if (_shouldRefresh) //already triggered a refresh - don't trigger another one
+                return;
+
+            _shouldRefresh = true;
+            Thread.Sleep(3000); //wait 3 seconds to not interfere with saving
+
+            lock (_savesLock)
             {
-                Refresh();
-            });
+                //another thread refreshed before this one
+                if (!_shouldRefresh)
+                    return;
+
+                Dispatcher.Invoke(() =>
+                {
+                    Refresh();
+                });
+                _shouldRefresh = false;
+                _lastRefreshed = DateTime.Now;
+            }
         }
 
         #endregion

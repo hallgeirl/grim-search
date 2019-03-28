@@ -87,7 +87,8 @@ namespace GrimSearch.Utils.DBFiles
         {
             string[] dbFiles = {
                 "resources\\Text_EN.arc",
-                "gdx1\\resources\\Text_EN.arc"
+                "gdx1\\resources\\Text_EN.arc",
+                "gdx2\\resources\\Text_EN.arc"
             };
 
             foreach (var file in dbFiles)

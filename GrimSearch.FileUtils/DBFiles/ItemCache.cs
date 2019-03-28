@@ -85,7 +85,8 @@ namespace GrimSearch.Utils.DBFiles
         {
             string[] dbFiles = {
                 "database\\database.arz",
-                "gdx1\\database\\GDX1.arz"
+                "gdx1\\database\\GDX1.arz",
+                "gdx2\\database\\GDX2.arz"
             };
 
             int i = 0;

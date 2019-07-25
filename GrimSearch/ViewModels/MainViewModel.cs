@@ -66,6 +66,7 @@ namespace GrimSearch.ViewModels
         bool _initialized = false;
         private Index _index = new Index();
         const string settingsFile = "GDItemSearchSettings.json";
+        StoredSettings _loadedSettings = new StoredSettings();
 
         #region Events
 
@@ -97,11 +98,10 @@ namespace GrimSearch.ViewModels
 
         public Dispatcher Dispatcher;
 
-        private bool _autoRefresh = true;
         public bool AutoRefresh
         {
-            get { return _autoRefresh; }
-            set { _autoRefresh = value; RaisePropertyChangedEvent("AutoRefresh"); }
+            get { return _loadedSettings.AutoRefresh; }
+            set { _loadedSettings.AutoRefresh = value; RaisePropertyChangedEvent("AutoRefresh"); }
         }
 
         private bool _enableInput = true;
@@ -175,13 +175,12 @@ namespace GrimSearch.ViewModels
         }
 
 
-        private string _searchMode = "Regular";
         public string SearchMode
         {
-            get { return _searchMode; }
+            get { return _loadedSettings.LastSearchMode; }
             set
             {
-                _searchMode = value;
+                _loadedSettings.LastSearchMode = value;
                 RaisePropertyChangedEvent("SearchMode");
             }
         }
@@ -240,22 +239,20 @@ namespace GrimSearch.ViewModels
         #region Settings
 
 
-        private string _grimDawnDirectory;
         public string GrimDawnDirectory
         {
-            get { return _grimDawnDirectory; }
-            set { _grimDawnDirectory = value; RaisePropertyChangedEvent("GrimDawnDirectory"); }
+            get { return _loadedSettings.GrimDawnDirectory; }
+            set { _loadedSettings.GrimDawnDirectory = value; RaisePropertyChangedEvent("GrimDawnDirectory"); }
         }
 
 
         private FileSystemWatcher _savesWatcher = null;
-        private string _grimDawnSavesDirectory;
         public string GrimDawnSavesDirectory
         {
-            get { return _grimDawnSavesDirectory; }
+            get { return _loadedSettings.SavesDirectory; }
             set
             {
-                _grimDawnSavesDirectory = value;
+                _loadedSettings.SavesDirectory = value;
                 RaisePropertyChangedEvent("GrimDawnSavesDirectory");
                 WatchDirectory(value);
             }
@@ -332,7 +329,8 @@ namespace GrimSearch.ViewModels
                 SavesDirectory = GrimDawnSavesDirectory,
                 AutoRefresh = AutoRefresh,
                 LastSearchMode = SearchMode,
-                LastSearchText = SearchString
+                LastSearchText = SearchString,
+                KeepExtractedDBFiles = _loadedSettings.KeepExtractedDBFiles
             };
             try
             {
@@ -363,12 +361,12 @@ namespace GrimSearch.ViewModels
                 try
                 {
                     StatusBarText = "Loading settings...";
-                    var settings = JsonConvert.DeserializeObject<StoredSettings>(File.ReadAllText(settingsFile));
-                    GrimDawnDirectory = settings.GrimDawnDirectory;
-                    GrimDawnSavesDirectory = settings.SavesDirectory;
-                    AutoRefresh = settings.AutoRefresh;
-                    SearchMode = settings.LastSearchMode;
-                    SearchString = settings.LastSearchText;
+                    _loadedSettings = JsonConvert.DeserializeObject<StoredSettings>(File.ReadAllText(settingsFile));
+                    GrimDawnDirectory = _loadedSettings.GrimDawnDirectory;
+                    GrimDawnSavesDirectory = _loadedSettings.SavesDirectory;
+                    AutoRefresh = _loadedSettings.AutoRefresh;
+                    SearchMode = _loadedSettings.LastSearchMode;
+                    SearchString = _loadedSettings.LastSearchText;
 
                     await BuildIndexAsync();
 
@@ -388,8 +386,19 @@ namespace GrimSearch.ViewModels
             }
             else
             {
+                _loadedSettings = new StoredSettings()
+                {
+                    AutoRefresh = false,
+                    GrimDawnDirectory = "",
+                    SavesDirectory = "",
+                    LastSearchMode = "Regular",
+                    KeepExtractedDBFiles = false,
+                    LastSearchText = ""
+                };
+
                 GrimDawnDirectory = "";
                 GrimDawnSavesDirectory = "";
+                SearchMode = "Regular";
 
                 SettingsMissing?.Invoke(this, new EventArgs());
             }

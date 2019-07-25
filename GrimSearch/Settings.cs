@@ -19,5 +19,6 @@ namespace GrimSearch
 
         public string LastSearchMode { get; set; }
         public string LastSearchText { get; set; }
+        public bool KeepExtractedDBFiles { get; set; }
     }
 }

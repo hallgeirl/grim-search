@@ -11,6 +11,7 @@ namespace GrimSearch.Utils.DBFiles
 {
     public class ItemCache
     {
+        const string CurrentVersion = "1.0";
         ItemCacheContainer _cache = new ItemCacheContainer();
 
         public string CacheFilename { get; set; }
@@ -33,9 +34,17 @@ namespace GrimSearch.Utils.DBFiles
             if (File.Exists(CacheFilename))
             {
                 stateChangeCallback("Loading items from cache (" + CacheFilename + ")");
-                LogHelper.GetLog().Debug("Found cache version: " + _cache.Version);
+                LogHelper.GetLog().Debug("Found cache version: " + _cache.GrimDawnLastUpdated);
                 _cache = JsonConvert.DeserializeObject<ItemCacheContainer>(File.ReadAllText(CacheFilename));
                 LogHelper.GetLog().Debug("Items loaded from cache");
+            }
+
+            string gdLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
+            if (_cache.GrimDawnLastUpdated != gdLastUpdated || _cache.Version != CurrentVersion)
+            {
+                LogHelper.GetLog().Debug("Either Grim Dawn has been updated, or the Grim Search cache format has been changed. Clearing cache.");
+                ClearCache();
+                _cache = null;
             }
 
             if (!File.Exists(CacheFilename) || _cache == null)
@@ -45,11 +54,10 @@ namespace GrimSearch.Utils.DBFiles
                 _cache = new ItemCacheContainer();
                 LogHelper.GetLog().Debug("Item cache not found - reading from " + grimDawnDirectory);
                 ReadItemsFromFiles(grimDawnDirectory, keepExtractedFiles, stateChangeCallback);
-                _cache.Version = GetGrimDawnVersion(grimDawnDirectory);
+                _cache.GrimDawnLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
+                _cache.Version = CurrentVersion;
                 File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(_cache));
             }
-
-            
         }
 
         public void ClearCache()
@@ -83,27 +91,19 @@ namespace GrimSearch.Utils.DBFiles
 
         private void ReadItemsFromFiles(string grimDawnDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
         {
-            string[] dbFiles = {
-                "database\\database.arz",
-                "gdx1\\database\\GDX1.arz",
-                "gdx2\\database\\GDX2.arz"
-            };
+            string[] dbFiles = GetDBFilesWithFullPaths(grimDawnDirectory);
 
             int i = 0;
             foreach (var file in dbFiles)
             {
                 i++;
-                
-                var fullFilePath = Path.Combine(grimDawnDirectory, file);
-                if (!File.Exists(fullFilePath))
-                    continue;
 
                 stateChangeCallback("Extracting DB file " + file + " (" + i + " of " + dbFiles.Length + ")");
-                LogHelper.GetLog().Debug("Processing: " + fullFilePath);
+                LogHelper.GetLog().Debug("Processing: " + file);
 
                 var extractPath = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath", Path.GetFileNameWithoutExtension(file) + "_" + Guid.NewGuid().ToString());
 
-                ArzExtractor.Extract(fullFilePath, grimDawnDirectory, extractPath);
+                ArzExtractor.Extract(file, grimDawnDirectory, extractPath);
 
                 stateChangeCallback("Reading items (file " + i + " of " + dbFiles.Length + ")");
                 PopulateAllItems(extractPath, stateChangeCallback);
@@ -111,8 +111,31 @@ namespace GrimSearch.Utils.DBFiles
                 if (!keepExtractedFiles)
                     Directory.Delete(extractPath, true);
 
-                MD5Store.Instance.SetHash(fullFilePath);
+                MD5Store.Instance.SetHash(file);
             }
+        }
+
+        private static string[] GetDBFilesWithFullPaths(string grimDawnDirectory)
+        {
+            string[] dbFiles = {
+                "database\\database.arz",
+                "gdx1\\database\\GDX1.arz",
+                "gdx2\\database\\GDX2.arz"
+            };
+
+            List<string> dbFilesThatExist = new List<string>();
+
+            foreach (var file in dbFiles)
+            {
+
+                var fullFilePath = Path.Combine(grimDawnDirectory, file);
+                if (!File.Exists(fullFilePath))
+                    continue;
+
+                dbFilesThatExist.Add(fullFilePath);
+            }
+
+            return dbFilesThatExist.ToArray();
         }
 
         private void PopulateAllItems(string path, Action<string> stateChangeCallback)
@@ -147,13 +170,19 @@ namespace GrimSearch.Utils.DBFiles
             stateChangeCallback("Read item " + i + " of " + i);
         }
 
-        private string GetGrimDawnVersion(string grimDawnDirectory)
+        private string GetGrimDawnLastUpdated(string grimDawnDirectory)
         {
-            var gdExe = Path.Combine(grimDawnDirectory, "Grim Dawn.exe");
+            var dbFiles = GetDBFilesWithFullPaths(grimDawnDirectory);
 
-            var fileInfo = File.GetLastWriteTimeUtc(gdExe);
+            DateTime maxDate = new DateTime(0);
+            foreach (var dbFile in dbFiles)
+            {
+                var fileInfo = File.GetLastWriteTimeUtc(dbFile);
+                if (fileInfo > maxDate)
+                    maxDate = fileInfo;
+            }
 
-            return fileInfo.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return maxDate.ToString("yyyy-MM-dd");
         }
     }
 }

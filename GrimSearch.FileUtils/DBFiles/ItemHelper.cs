@@ -237,6 +237,7 @@ namespace GrimSearch.Utils.DBFiles
             {
                 AddPercentageDamageModifier(modifiers, stat);
                 AddFlatDamageModifier(modifiers, stat);
+                AddAllSkillsModifier(modifiers, stat);
             }
 
             foreach (var stat in itemStringParameters)
@@ -285,6 +286,13 @@ namespace GrimSearch.Utils.DBFiles
                     modifiers.Add("+ to " + s);
             }
         }
+
+        private static void AddAllSkillsModifier(List<string> modifiers, KeyValuePair<string, List<float>> stat)
+        {
+            if (stat.Key == "augmentAllLevel")
+                modifiers.Add("+ to all Skills");
+        }
+
 
         private static void AddFlatDamageModifier(List<string> modifiers, KeyValuePair<string, List<float>> stat)
         {

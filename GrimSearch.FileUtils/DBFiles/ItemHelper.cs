@@ -140,10 +140,17 @@ namespace GrimSearch.Utils.DBFiles
         public static List<string> GetStats(Item item, ItemRaw itemDef)
         {
             var combinedStats = GetCombinedNumericalParameters(item, itemDef);
+            var combinedStringParameters = GetCombinedStringParameters(item, itemDef);
 
-            return GetDamageModifierStats(combinedStats);
+            return GetStatsCore(combinedStats, combinedStringParameters);
         }
 
+        /// <summary>
+        /// Returns all numerical stat parameters, combining the item's and affixes.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="itemDef"></param>
+        /// <returns></returns>
         private static Dictionary<string, List<float>> GetCombinedNumericalParameters(Item item, ItemRaw itemDef)
         {
             Dictionary<string, List<float>> combinedStats = new Dictionary<string, List<float>>();
@@ -152,89 +159,177 @@ namespace GrimSearch.Utils.DBFiles
 
             if (!string.IsNullOrEmpty(item.prefixName))
             {
-                var prefix = ItemCache.Instance.GetItem(item.prefixName);
-                foreach (var s in prefix.NumericalParametersRaw)
-                {
-                    if (!combinedStats.ContainsKey(s.Key))
-                        combinedStats[s.Key] = new List<float>();
-
-                    combinedStats[s.Key].Add(s.Value); 
-                }
-                    
+                AddNumericalStatsFromItemOrSuffix(item.prefixName, combinedStats);
             }
 
             if (!string.IsNullOrEmpty(item.suffixName))
             {
-                var suffix = ItemCache.Instance.GetItem(item.suffixName);
-                foreach (var s in suffix.NumericalParametersRaw)
-                {
-                    if (!combinedStats.ContainsKey(s.Key))
-                        combinedStats[s.Key] = new List<float>();
-
-                    combinedStats[s.Key].Add(s.Value);
-                }
+                AddNumericalStatsFromItemOrSuffix(item.suffixName, combinedStats);
             }
 
             return combinedStats;
         }
 
-        private static List<string> GetDamageModifierStats(Dictionary<string, List<float>> itemParameters)
+        /// <summary>
+        /// Returns all numerical stat parameters, combining the item's and affixes.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="itemDef"></param>
+        /// <returns></returns>
+        private static Dictionary<string, List<string>> GetCombinedStringParameters(Item item, ItemRaw itemDef)
+        {
+            Dictionary<string, List<string>> combinedStats = new Dictionary<string, List<string>>();
+            foreach (var s in itemDef.StringParametersRaw)
+                combinedStats.Add(s.Key, new List<string>() { s.Value });
+
+            if (!string.IsNullOrEmpty(item.prefixName))
+            {
+                AddStringStatsFromItemOrSuffix(item.prefixName, combinedStats);
+            }
+
+            if (!string.IsNullOrEmpty(item.suffixName))
+            {
+                AddStringStatsFromItemOrSuffix(item.suffixName, combinedStats);
+            }
+
+            return combinedStats;
+        }
+
+        private static void AddNumericalStatsFromItemOrSuffix(string recordName, Dictionary<string, List<float>> combinedStats)
+        {
+            var prefix = ItemCache.Instance.GetItem(recordName);
+            foreach (var s in prefix.NumericalParametersRaw)
+            {
+                if (!combinedStats.ContainsKey(s.Key))
+                    combinedStats[s.Key] = new List<float>();
+
+                combinedStats[s.Key].Add(s.Value);
+            }
+        }
+
+        private static void AddStringStatsFromItemOrSuffix(string recordName, Dictionary<string, List<string>> combinedStats)
+        {
+            var prefix = ItemCache.Instance.GetItem(recordName);
+            foreach (var s in prefix.StringParametersRaw)
+            {
+                if (!combinedStats.ContainsKey(s.Key))
+                    combinedStats[s.Key] = new List<string>();
+
+                combinedStats[s.Key].Add(s.Value);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="itemNumericalParameters"></param>
+        /// <returns></returns>
+        private static List<string> GetStatsCore(Dictionary<string, List<float>> itemNumericalParameters, Dictionary<string, List<string>> itemStringParameters)
         {
             //Dictionary<string, string> damageTypesMapping = new Dictionary<string, string>();
-            var offensiveStats = new HashSet<KeyValuePair<string, List<float>>>(itemParameters.Where(x => x.Key.StartsWith("offensive")));
+            var offensiveStats = new HashSet<KeyValuePair<string, List<float>>>(itemNumericalParameters.Where(x => x.Key.StartsWith("offensive")));
             List<string> modifiers = new List<string>();
 
             //GlobalPercentChanceOfAllTag
             //Parameter name = offensive[Slow]<type>Modifier
             //Tag name = Damage[Duration]Modifier<type> -- format: {%+.0f0}% {^E}<type> Damage
-            foreach (var stat in offensiveStats)
+            foreach (var stat in itemNumericalParameters)
             {
-                //% modifier
-                var match = Regex.Match(stat.Key, "offensive([a-zA-Z]+)Modifier");
-                if (match.Success)
-                {
-                    string tagName = "";
+                AddPercentageDamageModifier(modifiers, stat);
+                AddFlatDamageModifier(modifiers, stat);
+            }
 
-                    var matchedDmg = match.Groups[1].Value;
-                    if (matchedDmg.StartsWith("Slow"))
-                    {
-                        tagName = "DamageDurationModifier" + matchedDmg.Replace("Slow", "");
-                    }
-                    else
-                    {
-                        tagName = "DamageModifier" + matchedDmg;
-                    }
-
-                    var s = StringsCache.Instance.GetString(tagName);
-                    if (s != null)
-                        modifiers.Add(s);
-                }
-
-                match = Regex.Match(stat.Key, "offensive([a-zA-Z]+)Min");
-                if (match.Success)
-                {
-                    string tagName = "";
-
-                    var matchedDmg = match.Groups[1].Value;
-                    if (matchedDmg.StartsWith("Slow"))
-                    {
-                        tagName = "DamageDuration" + matchedDmg.Replace("Slow", "");
-                    }
-                    else
-                    {
-                        tagName = "Damage" + matchedDmg;
-                    }
-
-                    var s = StringsCache.Instance.GetString(tagName);
-                    if (s != null)
-                        modifiers.Add(s);
-                }
-
-
-                //flat damage
+            foreach (var stat in itemStringParameters)
+            {
+                AddMasteryModifier(modifiers, stat);
+                AddSkillModifier(modifiers, stat);
             }
 
             return modifiers;
+        }
+
+        private static void AddMasteryModifier(List<string> modifiers, KeyValuePair<string, List<string>> stat)
+        {
+            var match = Regex.Match(stat.Key, "augmentMasteryName[0-9]+");
+            if (match.Success && stat.Value != null && stat.Value.Count > 0)
+            {
+                ItemRaw augmentMastery = ItemCache.Instance.GetItem(stat.Value.First());
+
+                var s = StringsCache.Instance.GetString(augmentMastery.StringParametersRaw["skillDisplayName"]);
+                if (s != null)
+                    modifiers.Add("+ to all skills in " + s);
+            }
+        }
+
+        private static void AddSkillModifier(List<string> modifiers, KeyValuePair<string, List<string>> stat)
+        {
+            var match = Regex.Match(stat.Key, "augmentSkillName[0-9]+");
+            if (match.Success && stat.Value != null && stat.Value.Count > 0)
+            {
+                ItemRaw augmentSkill = ItemCache.Instance.GetItem(stat.Value.First());
+
+                string skillName = null;
+                if (augmentSkill.StringParametersRaw.ContainsKey("skillDisplayName"))
+                    skillName = augmentSkill.StringParametersRaw["skillDisplayName"];
+                else if (augmentSkill.StringParametersRaw.ContainsKey("buffSkillName"))
+                {
+                    ItemRaw actualSkill = ItemCache.Instance.GetItem(augmentSkill.StringParametersRaw["buffSkillName"]);
+                    skillName = actualSkill.StringParametersRaw["skillDisplayName"];
+                }
+
+                if (skillName == null)
+                    return;
+
+                var s = StringsCache.Instance.GetString(skillName);
+                if (s != null)
+                    modifiers.Add("+ to " + s);
+            }
+        }
+
+        private static void AddFlatDamageModifier(List<string> modifiers, KeyValuePair<string, List<float>> stat)
+        {
+            var match = Regex.Match(stat.Key, "offensive([a-zA-Z]+)Min");
+            if (match.Success)
+            {
+                string tagName = "";
+
+                var matchedDmg = match.Groups[1].Value;
+                if (matchedDmg.StartsWith("Slow"))
+                {
+                    tagName = "DamageDuration" + matchedDmg.Replace("Slow", "");
+                }
+                else
+                {
+                    tagName = "Damage" + matchedDmg;
+                }
+
+                var s = StringsCache.Instance.GetString(tagName);
+                if (s != null)
+                    modifiers.Add(s);
+            }
+        }
+
+        private static void AddPercentageDamageModifier(List<string> modifiers, KeyValuePair<string, List<float>> stat)
+        {
+            var match = Regex.Match(stat.Key, "offensive([a-zA-Z]+)Modifier");
+            if (match.Success)
+            {
+                string tagName = "";
+
+                var matchedDmg = match.Groups[1].Value;
+                if (matchedDmg.StartsWith("Slow"))
+                {
+                    tagName = "DamageDurationModifier" + matchedDmg.Replace("Slow", "");
+                }
+                else
+                {
+                    tagName = "DamageModifier" + matchedDmg;
+                }
+
+                var s = StringsCache.Instance.GetString(tagName);
+                if (s != null)
+                    modifiers.Add(s);
+            }
         }
 
         private static string GetAffixName(ItemRaw itemDef)

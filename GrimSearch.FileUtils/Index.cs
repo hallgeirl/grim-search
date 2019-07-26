@@ -340,7 +340,7 @@ namespace GrimSearch.Utils
             indexItem.ItemType = ItemHelper.GetItemType(itemStatDef);
             indexItem.Source = itemDef;
             indexItem.SourceInstance = item;
-            indexItem.ItemStats = ItemHelper.GetStats(item, itemStatDef).Select(x=>x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "")).ToList();
+            indexItem.ItemStats = ItemHelper.GetStats(item, itemStatDef).Select(x=>x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList();
             indexItem.Searchable = BuildSearchableString(character, item, itemDef, indexItem.ItemStats);
 
             return indexItem;

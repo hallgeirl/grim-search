@@ -119,6 +119,7 @@ namespace GrimSearch.Utils.DBFiles
         {
             var itemsDirs = new string[] {
                 Path.Combine(path, "records", "items"),
+                Path.Combine(path, "records", "skills"),
                 Path.Combine(path, "records", "storyelements"),
                 Path.Combine(path, "records", "storyelementsgdx2")
             };

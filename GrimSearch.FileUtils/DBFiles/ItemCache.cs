@@ -29,7 +29,7 @@ namespace GrimSearch.Utils.DBFiles
             return null;
         }
 
-        public void LoadAllItems(string grimDawnDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
+        public void LoadAllItems(string grimDawnDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
         {
             if (File.Exists(CacheFilename))
             {
@@ -38,13 +38,16 @@ namespace GrimSearch.Utils.DBFiles
                 _cache = JsonConvert.DeserializeObject<ItemCacheContainer>(File.ReadAllText(CacheFilename));
                 LogHelper.GetLog().Debug("Items loaded from cache");
             }
-
-            string gdLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
-            if (_cache.GrimDawnLastUpdated != gdLastUpdated || _cache.Version != CurrentVersion)
+        
+            if (!skipVersionCheck)
             {
-                LogHelper.GetLog().Debug("Either Grim Dawn has been updated, or the Grim Search cache format has been changed. Clearing cache.");
-                ClearCache();
-                _cache = null;
+                string gdLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
+                if (_cache.GrimDawnLastUpdated != gdLastUpdated || _cache.Version != CurrentVersion)
+                {
+                    LogHelper.GetLog().Debug("Either Grim Dawn has been updated, or the Grim Search cache format has been changed. Clearing cache.");
+                    ClearCache();
+                    _cache = null;
+                }
             }
 
             if (!File.Exists(CacheFilename) || _cache == null)

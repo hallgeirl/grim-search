@@ -544,7 +544,7 @@ namespace GrimSearch.ViewModels
             IndexSummary result;
 
             var newIndex = new Index();
-            result = await newIndex.BuildAsync(GrimDawnDirectory, GrimDawnSavesDirectory, _loadedSettings.KeepExtractedDBFiles, (msg) => SetStatusbarText(msg)).ConfigureAwait(false);
+            result = await newIndex.BuildAsync(GrimDawnDirectory, GrimDawnSavesDirectory, _loadedSettings.KeepExtractedDBFiles, false, (msg) => SetStatusbarText(msg)).ConfigureAwait(false);
             _index = newIndex;
 
             if (!skipItemTypesReload)

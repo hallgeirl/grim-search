@@ -123,17 +123,17 @@ namespace GrimSearch.Utils
             _stringsCache.ClearCache();
         }
 
-        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles)
+        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck)
         {
-            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, (msg) => { })).ConfigureAwait(false);
+            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, (msg) => { })).ConfigureAwait(false);
         }
 
-        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
+        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
         {
-            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, stateChangeCallback)).ConfigureAwait(false);
+            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback)).ConfigureAwait(false);
         }
 
-        private IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
+        private IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
         {
             LoadAllCharacters(grimDawnSavesDirectory, stateChangeCallback);
 
@@ -141,7 +141,7 @@ namespace GrimSearch.Utils
             _stringsCache.LoadAllStrings(grimDawnDirectory);
 
             stateChangeCallback("Loading items");
-            _itemCache.LoadAllItems(grimDawnDirectory, keepExtractedFiles, stateChangeCallback);
+            _itemCache.LoadAllItems(grimDawnDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback);
 
             var summary = BuildIndex(stateChangeCallback);
 

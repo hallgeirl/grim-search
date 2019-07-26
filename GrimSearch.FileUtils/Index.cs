@@ -30,29 +30,29 @@ namespace GrimSearch.Utils
         List<CharacterFile> _characters = new List<CharacterFile>();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
-        public async Task<List<IndexItem>> FindAsync(string search, IndexFilter filter)
+        public async Task<SearchResult> FindAsync(string search, IndexFilter filter)
         {
             return await Task.Run(() => Find(search, filter)).ConfigureAwait(false);
         }
 
-        private List<IndexItem> Find(string search, IndexFilter filter)
+        private SearchResult Find(string search, IndexFilter filter)
         {
             search = search ?? "";
 
             var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
 
             if (filter.PageSize != null)
-                return result.Take(filter.PageSize.Value).ToList();
+                return new SearchResult(result.Take(filter.PageSize.Value).ToList(), result.Count());
 
-            return result.ToList();
+            return new SearchResult(result.ToList());
         }
 
-        public async Task<List<IndexItem>> FindDuplicatesAsync(string search, IndexFilter filter)
+        public async Task<SearchResult> FindDuplicatesAsync(string search, IndexFilter filter)
         {
             return await Task.Run(() => FindDuplicates(search, filter)).ConfigureAwait(false);
         }
 
-        private List<IndexItem> FindDuplicates(string search, IndexFilter filter)
+        private SearchResult FindDuplicates(string search, IndexFilter filter)
         {
             search = search ?? "";
 
@@ -78,16 +78,16 @@ namespace GrimSearch.Utils
                     item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
                 }
             }
-            return results.OrderBy(x => x.Bag).ToList();
+            return new SearchResult(results.OrderBy(x => x.Bag).ToList());
         }
 
 
-        public async Task<List<IndexItem>> FindUniqueAsync(string search, IndexFilter filter)
+        public async Task<SearchResult> FindUniqueAsync(string search, IndexFilter filter)
         {
             return await Task.Run(() => FindUnique(search, filter)).ConfigureAwait(false);
         }
 
-        private List<IndexItem> FindUnique(string search, IndexFilter filter)
+        private SearchResult FindUnique(string search, IndexFilter filter)
         {
             search = search ?? "";
 
@@ -113,7 +113,7 @@ namespace GrimSearch.Utils
                     item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
                 }
             }
-            return results.OrderBy(x => x.Bag).ToList();
+            return new SearchResult(results.OrderBy(x => x.Bag).ToList());
         }
 
 

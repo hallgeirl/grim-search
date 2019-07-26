@@ -234,6 +234,21 @@ namespace GrimSearch.ViewModels
             }
         }
 
+        private string _searchResultText;
+        public string SearchResultText
+        {
+            get
+            {
+                return _searchResultText;
+            }
+            set
+            {
+                _searchResultText = value;
+                RaisePropertyChangedEvent("SearchResultText");
+            }
+        }
+
+
         #endregion
 
         #region Settings
@@ -574,7 +589,7 @@ namespace GrimSearch.ViewModels
             var filter = CreateIndexFilter();
             SetStatusbarText("Searching for " + SearchString);
 
-            List<IndexItem> items;
+            SearchResult items;
 
             if (SearchMode == "Find duplicates")
                 items = await _index.FindDuplicatesAsync(SearchString, filter).ConfigureAwait(false);
@@ -586,7 +601,9 @@ namespace GrimSearch.ViewModels
             Dispatcher.Invoke(() =>
             {
                 SearchResults.Clear();
-                SearchResults.AddRange(items.Select(x => ItemViewModel.FromModel(x)));
+                SearchResults.AddRange(items.Results.Select(x => ItemViewModel.FromModel(x)));
+
+                SearchResultText = "(showing " + items.Results.Count + " of " + items.TotalCount + ")";
             });
 
             ResetStatusBarText();

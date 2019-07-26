@@ -28,7 +28,7 @@ namespace GrimSearch.Utils.DBFiles
             return null;
         }
 
-        public void LoadAllItems(string grimDawnDirectory, Action<string> stateChangeCallback)
+        public void LoadAllItems(string grimDawnDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
         {
             if (File.Exists(CacheFilename))
             {
@@ -44,7 +44,7 @@ namespace GrimSearch.Utils.DBFiles
 
                 _cache = new ItemCacheContainer();
                 LogHelper.GetLog().Debug("Item cache not found - reading from " + grimDawnDirectory);
-                ReadItemsFromFiles(grimDawnDirectory, stateChangeCallback);
+                ReadItemsFromFiles(grimDawnDirectory, keepExtractedFiles, stateChangeCallback);
                 _cache.Version = GetGrimDawnVersion(grimDawnDirectory);
                 File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(_cache));
             }
@@ -81,7 +81,7 @@ namespace GrimSearch.Utils.DBFiles
         }
 
 
-        private void ReadItemsFromFiles(string grimDawnDirectory, Action<string> stateChangeCallback)
+        private void ReadItemsFromFiles(string grimDawnDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
         {
             string[] dbFiles = {
                 "database\\database.arz",
@@ -100,12 +100,17 @@ namespace GrimSearch.Utils.DBFiles
 
                 stateChangeCallback("Extracting DB file " + file + " (" + i + " of " + dbFiles.Length + ")");
                 LogHelper.GetLog().Debug("Processing: " + fullFilePath);
-                var path = ArzExtractor.Extract(fullFilePath, grimDawnDirectory);
+
+                var extractPath = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath", Path.GetFileNameWithoutExtension(file) + "_" + Guid.NewGuid().ToString());
+
+                ArzExtractor.Extract(fullFilePath, grimDawnDirectory, extractPath);
 
                 stateChangeCallback("Reading items (file " + i + " of " + dbFiles.Length + ")");
-                PopulateAllItems(path, stateChangeCallback);
+                PopulateAllItems(extractPath, stateChangeCallback);
 
-                Directory.Delete(path, true);
+                if (!keepExtractedFiles)
+                    Directory.Delete(extractPath, true);
+
                 MD5Store.Instance.SetHash(fullFilePath);
             }
         }

@@ -8,7 +8,7 @@ namespace GrimSearch.Utils.DBFiles
 {
     public static class ArzExtractor
     {
-        public static string Extract(string arzPath, string grimDawnDirectory)
+        public static string Extract(string arzPath, string grimDawnDirectory, string targetPath)
         {
             var archiveTool = Path.Combine(grimDawnDirectory, "ArchiveTool.exe");
             if (!File.Exists(archiveTool))
@@ -18,20 +18,18 @@ namespace GrimSearch.Utils.DBFiles
             }
             LogHelper.GetLog().Debug("Found ArchiveTool.exe in " + grimDawnDirectory);
 
-            var tempDir = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath");
+            if (Directory.Exists(targetPath))
+                Directory.Delete(targetPath, true);
 
-            if (Directory.Exists(tempDir))
-                Directory.Delete(tempDir, true);
-
-            Directory.CreateDirectory(tempDir);
-            LogHelper.GetLog().Debug("Created temp dir at: " + tempDir);
+            Directory.CreateDirectory(targetPath);
+            LogHelper.GetLog().Debug("Created temp dir at: " + targetPath);
 
             var extractCommand = "-database";
 
             if (Path.GetExtension(arzPath).ToLower() == ".arc")
                 extractCommand = "-extract";
 
-            var arguments = "\"" + arzPath + "\" " + extractCommand + " \"" + tempDir + "\"";
+            var arguments = "\"" + arzPath + "\" " + extractCommand + " \"" + targetPath + "\"";
 
             LogHelper.GetLog().Debug("Executing: " + archiveTool + " " + arguments);
             var process = new Process();
@@ -50,9 +48,9 @@ namespace GrimSearch.Utils.DBFiles
             if (process.ExitCode != 0)
                 throw new Exception("ArchiveTool.exe exited with exit code " + process.ExitCode);
 
-            LogHelper.GetLog().Debug(arzPath + " was successfully extracted to " + tempDir);
+            LogHelper.GetLog().Debug(arzPath + " was successfully extracted to " + targetPath);
 
-            return tempDir;
+            return targetPath;
         }
     }
 }

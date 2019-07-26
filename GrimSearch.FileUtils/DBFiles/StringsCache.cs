@@ -99,11 +99,11 @@ namespace GrimSearch.Utils.DBFiles
                     continue;
 
                 var tempArcFile = GetTagFileCopy(fullFilePath);
-                string extractedPath = null;
+                string extractedPath = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath", Path.GetFileNameWithoutExtension(file) + "_" + Guid.NewGuid().ToString());
 
                 try
                 {
-                    extractedPath = ArzExtractor.Extract(tempArcFile, grimDawnDirectory);
+                    ArzExtractor.Extract(tempArcFile, grimDawnDirectory, extractedPath);
                     var tagsDir = Path.Combine(extractedPath, "text_en");
                     foreach (var f in Directory.EnumerateFiles(tagsDir, "*.txt", SearchOption.AllDirectories))
                     {

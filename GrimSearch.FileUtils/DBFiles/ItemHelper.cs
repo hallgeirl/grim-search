@@ -238,6 +238,8 @@ namespace GrimSearch.Utils.DBFiles
                 AddPercentageDamageModifier(modifiers, stat);
                 AddFlatDamageModifier(modifiers, stat);
                 AddAllSkillsModifier(modifiers, stat);
+                AddRetaliationFlatDamageModifier(modifiers, stat);
+                AddRetaliationPercentageDamageModifier(modifiers, stat);
             }
 
             foreach (var stat in itemStringParameters)
@@ -309,6 +311,56 @@ namespace GrimSearch.Utils.DBFiles
                 else
                 {
                     tagName = "Damage" + matchedDmg;
+                }
+
+                var s = StringsCache.Instance.GetString(tagName);
+                if (s != null)
+                    modifiers.Add(s);
+            }
+        }
+
+        private static void AddRetaliationFlatDamageModifier(List<string> modifiers, KeyValuePair<string, List<float>> stat)
+        {
+            var match = Regex.Match(stat.Key, "retaliation([a-zA-Z]+)Min");
+            if (match.Success)
+            {
+                string tagName = "";
+
+                var matchedDmg = match.Groups[1].Value;
+                if (matchedDmg.StartsWith("Slow"))
+                {
+                    tagName = "RetaliationDuration" + matchedDmg.Replace("Slow", "");
+                }
+                else
+                {
+                    tagName = "Retaliation" + matchedDmg;
+                }
+
+                var s = StringsCache.Instance.GetString(tagName);
+                if (s != null)
+                    modifiers.Add(s);
+            }
+        }
+
+        private static void AddRetaliationPercentageDamageModifier(List<string> modifiers, KeyValuePair<string, List<float>> stat)
+        {
+            var match = Regex.Match(stat.Key, "retaliation([a-zA-Z]+)Modifier");
+            if (match.Success)
+            {
+                string tagName = "";
+
+                var matchedDmg = match.Groups[1].Value;
+                if (matchedDmg == "TotalDamage")
+                {
+                    tagName = "tagRetaliationModifierTotalDamage";
+                }
+                else if (matchedDmg.StartsWith("Slow"))
+                {
+                    tagName = "RetaliationDurationModifier" + matchedDmg.Replace("Slow", "");
+                }
+                else
+                {
+                    tagName = "RetaliationModifier" + matchedDmg;
                 }
 
                 var s = StringsCache.Instance.GetString(tagName);

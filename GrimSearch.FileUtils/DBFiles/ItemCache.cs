@@ -11,7 +11,7 @@ namespace GrimSearch.Utils.DBFiles
 {
     public class ItemCache
     {
-        const string CurrentVersion = "1.0";
+        const string CurrentVersion = "1.1";
         ItemCacheContainer _cache = new ItemCacheContainer();
 
         public string CacheFilename { get; set; }
@@ -147,7 +147,8 @@ namespace GrimSearch.Utils.DBFiles
                 Path.Combine(path, "records", "items"),
                 Path.Combine(path, "records", "skills"),
                 Path.Combine(path, "records", "storyelements"),
-                Path.Combine(path, "records", "storyelementsgdx2")
+                Path.Combine(path, "records", "storyelementsgdx2"),
+                Path.Combine(path, "records", "endlessdungeon", "items")
             };
 
             int i = 0;

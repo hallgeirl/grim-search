@@ -197,7 +197,7 @@ namespace GrimSearch.ViewModels
         }
 
 
-        private int _maximumLevel = 100;
+        private int _maximumLevel = 101;
         public int MaximumLevel
         {
             get { return _maximumLevel; }

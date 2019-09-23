@@ -325,7 +325,18 @@ namespace GrimSearch.Utils
 
             ItemRaw itemStatDef = itemDef;
             if (itemStatDefIdentifier != null)
+            {
                 itemStatDef = _itemCache.GetItem(itemStatDefIdentifier);
+                // Some items are defined slightly differently - where the target item actually refers to a loot table instead of the item itself.
+                if (itemStatDef != null && itemStatDef.StringParametersRaw.ContainsKey("Class") && itemStatDef.StringParametersRaw["Class"] == "LootItemTable_DynWeight")
+                {
+                    var lootName1 = itemStatDef.StringParametersRaw.ContainsKey("lootName1") ? itemStatDef.StringParametersRaw["lootName1"] : null;
+                    if (lootName1 == null)
+                        itemStatDef = null;
+                    else
+                        itemStatDef = _itemCache.GetItem(lootName1);
+                }
+            }
 
             if (itemStatDef == null)
                 itemStatDef = itemDef;

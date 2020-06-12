@@ -59,7 +59,7 @@ namespace GrimSearch.Utils.DBFiles
                 ReadItemsFromFiles(grimDawnDirectory, keepExtractedFiles, stateChangeCallback);
                 _cache.GrimDawnLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
                 _cache.Version = CurrentVersion;
-                File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(_cache));
+                File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(_cache, Formatting.Indented));
             }
         }
 

@@ -101,6 +101,8 @@ namespace GrimSearch.Utils.DBFiles
                     return "Relics";
                 case "ItemRelic":
                     return "Components";
+                case "WeaponMelee_Axe":
+                    return "Axes";
                 case "WeaponMelee_Sword":
                     return "Swords";
                 case "WeaponMelee_Dagger":
@@ -109,6 +111,8 @@ namespace GrimSearch.Utils.DBFiles
                     return "Mace";
                 case "WeaponMelee_Scepter":
                     return "Scepters";
+                case "WeaponArmor_Offhand":
+                    return "Off-hand";
                 case "WeaponArmor_Shield":
                     return "Shields";
                 case "WeaponMelee_Mace2h":
@@ -125,6 +129,10 @@ namespace GrimSearch.Utils.DBFiles
                     return "Devotion Reset Potion";
                 case "ItemAttributeReset":
                     return "Attribute Reset Potion";
+                case "ItemFactionBooster":
+                    return "Faction Boosters";
+                case "ItemFactionWarrant":
+                    return "Faction Warrants";
                 default:
                     return itemType;
             }

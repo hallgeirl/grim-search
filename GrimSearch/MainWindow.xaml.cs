@@ -75,7 +75,7 @@ namespace GrimSearch
             }
         }
 
-       
+
         private void DisplayError(string errorMessage, Exception ex)
         {
             var debugMode = ConfigurationManager.AppSettings["debugMode"];
@@ -95,7 +95,7 @@ namespace GrimSearch
         private void ResultsListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var selected = ResultsListView.SelectedItem as ItemViewModel;
-            
+
             if (selected == null)
                 return;
 
@@ -111,7 +111,7 @@ namespace GrimSearch
 
         private void ResultsListView_KeyUp(object sender, KeyEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) && e.Key == Key.C )
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) && e.Key == Key.C)
                 CopySelectedValuesToClipboard();
         }
 

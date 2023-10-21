@@ -3,19 +3,19 @@ using GrimSearch.Utils;
 using GrimSearch.Utils.DBFiles;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using Prism.Commands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
+using Avalonia.Threading;
+using Index = GrimSearch.Utils.Index;
+using ReactiveUI;
+using GrimSearch.Views;
+using static GrimSearch.Views.MessageBox;
 
 namespace GrimSearch.ViewModels
 {
@@ -28,31 +28,31 @@ namespace GrimSearch.ViewModels
 
         public MainViewModel()
         {
-            SearchCommand = new DelegateCommand(async () => 
+            SearchCommand = ReactiveCommand.Create(async () =>
             {
                 await SearchAsync();
             });
 
-            SaveSettingsCommand = new DelegateCommand(async () =>
+            SaveSettingsCommand = ReactiveCommand.Create(async () =>
             {
                 await SaveSettingsAsync();
             });
 
-            ClearCacheCommand = new DelegateCommand(() =>
+            ClearCacheCommand = ReactiveCommand.Create(() =>
             {
                 ClearCache();
             });
 
-            RefreshCommand = new DelegateCommand(() =>
+            RefreshCommand = ReactiveCommand.Create(() =>
             {
                 Refresh();
             });
-            DetectGDSettingsCommand = new DelegateCommand(async () =>
+            DetectGDSettingsCommand = ReactiveCommand.Create(async () =>
             {
                 await TryDetectGDSettings();
             });
 
-            UpdateSearchBoxVisibilityCommand = new DelegateCommand(() =>
+            UpdateSearchBoxVisibilityCommand = ReactiveCommand.Create(() =>
             {
                 UpdateSearchBoxVisibility();
             });
@@ -92,7 +92,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _statusBarText = value;
-                RaisePropertyChangedEvent("StatusBarText");
+                this.RaisePropertyChanged("StatusBarText");
             }
         }
 
@@ -101,21 +101,21 @@ namespace GrimSearch.ViewModels
         public bool AutoRefresh
         {
             get { return _loadedSettings.AutoRefresh; }
-            set { _loadedSettings.AutoRefresh = value; RaisePropertyChangedEvent("AutoRefresh"); }
+            set { _loadedSettings.AutoRefresh = value; this.RaisePropertyChanged("AutoRefresh"); }
         }
 
         private bool _enableInput = true;
         public bool EnableInput
         {
             get { return _enableInput; }
-            set { _enableInput = value; RaisePropertyChangedEvent("EnableInput"); }
+            set { _enableInput = value; this.RaisePropertyChanged("EnableInput"); }
         }
 
         private ObservableCollection<string> _searchModes = new ObservableCollection<string> { "Regular", "Find duplicates", "Find new items" };
         public ObservableCollection<string> SearchModes
         {
             get { return _searchModes; }
-            set { _searchModes = value; RaisePropertyChangedEvent("SearchModes"); }
+            set { _searchModes = value; this.RaisePropertyChanged("SearchModes"); }
         }
 
 
@@ -123,7 +123,7 @@ namespace GrimSearch.ViewModels
         public ObservableCollection<MultiselectComboItem> ItemTypes
         {
             get { return _itemTypes; }
-            set { _itemTypes = value; RaisePropertyChangedEvent("ItemTypes"); }
+            set { _itemTypes = value; this.RaisePropertyChanged("ItemTypes"); }
         }
 
 
@@ -131,14 +131,14 @@ namespace GrimSearch.ViewModels
         public ObservableCollection<MultiselectComboItem> ItemQualities
         {
             get { return _itemQualities; }
-            set { _itemQualities = value; RaisePropertyChangedEvent("ItemQualities"); }
+            set { _itemQualities = value; this.RaisePropertyChanged("ItemQualities"); }
         }
 
         private ObservableCollection<string> _allCharacters = new ObservableCollection<string>() { "(select character)" };
         public ObservableCollection<string> AllCharacters
         {
             get { return _allCharacters; }
-            set { _allCharacters = value; RaisePropertyChangedEvent("AllCharacters"); }
+            set { _allCharacters = value; this.RaisePropertyChanged("AllCharacters"); }
         }
 
 
@@ -146,31 +146,31 @@ namespace GrimSearch.ViewModels
         public ObservableCollection<ItemViewModel> SearchResults
         {
             get { return _searchResults; }
-            set { _searchResults = value; RaisePropertyChangedEvent("SearchResults"); }
+            set { _searchResults = value; this.RaisePropertyChanged("SearchResults"); }
         }
 
         #endregion
 
         #region Search filters
-        private Visibility _freeTextSearchVisibility = Visibility.Visible;
-        public Visibility FreeTextSearchVisibility
+        private ControlVisibility _freeTextSearchVisibility = ControlVisibility.Visible;
+        public ControlVisibility FreeTextSearchVisibility
         {
             get { return _freeTextSearchVisibility; }
             set
             {
                 _freeTextSearchVisibility = value;
-                RaisePropertyChangedEvent("FreeTextSearchVisibility");
+                this.RaisePropertyChanged("FreeTextSearchVisibility");
             }
         }
 
-        private Visibility _characterBasedSearchVisibility = Visibility.Visible;
-        public Visibility CharacterBasedSearchVisibility
+        private ControlVisibility _characterBasedSearchVisibility = ControlVisibility.Visible;
+        public ControlVisibility CharacterBasedSearchVisibility
         {
             get { return _characterBasedSearchVisibility; }
             set
             {
                 _characterBasedSearchVisibility = value;
-                RaisePropertyChangedEvent("CharacterBasedSearchVisibility");
+                this.RaisePropertyChanged("CharacterBasedSearchVisibility");
             }
         }
 
@@ -181,7 +181,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _loadedSettings.LastSearchMode = value;
-                RaisePropertyChangedEvent("SearchMode");
+                this.RaisePropertyChanged("SearchMode");
             }
         }
 
@@ -192,7 +192,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _minimumLevel = value;
-                RaisePropertyChangedEvent("MinimumLevel");
+                this.RaisePropertyChanged("MinimumLevel");
             }
         }
 
@@ -204,7 +204,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _maximumLevel = value;
-                RaisePropertyChangedEvent("MaximumLevel");
+                this.RaisePropertyChanged("MaximumLevel");
             }
         }
 
@@ -216,7 +216,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _showEquipped = value;
-                RaisePropertyChangedEvent("ShowEquipped");
+                this.RaisePropertyChanged("ShowEquipped");
             }
         }
 
@@ -230,7 +230,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _searchString = value;
-                RaisePropertyChangedEvent("SearchString");
+                this.RaisePropertyChanged("SearchString");
             }
         }
 
@@ -244,7 +244,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _searchResultText = value;
-                RaisePropertyChangedEvent("SearchResultText");
+                this.RaisePropertyChanged("SearchResultText");
             }
         }
 
@@ -257,7 +257,7 @@ namespace GrimSearch.ViewModels
         public string GrimDawnDirectory
         {
             get { return _loadedSettings.GrimDawnDirectory; }
-            set { _loadedSettings.GrimDawnDirectory = value; RaisePropertyChangedEvent("GrimDawnDirectory"); }
+            set { _loadedSettings.GrimDawnDirectory = value; this.RaisePropertyChanged("GrimDawnDirectory"); }
         }
 
 
@@ -268,7 +268,8 @@ namespace GrimSearch.ViewModels
             set
             {
                 _loadedSettings.SavesDirectory = value;
-                RaisePropertyChangedEvent("GrimDawnSavesDirectory");
+
+                this.RaisePropertyChanged("GrimDawnSavesDirectory");
                 WatchDirectory(value);
             }
         }
@@ -467,7 +468,7 @@ namespace GrimSearch.ViewModels
                 GrimDawnDirectory = gdDir;
             }
 
-            
+
             if (!Directory.Exists(System.IO.Path.Combine(savesDir, "main")))
             {
                 errors += "Grim Dawn saves directory was not found at " + savesDir + ". Please specify this manually.";
@@ -483,9 +484,9 @@ namespace GrimSearch.ViewModels
             {
                 await Dispatcher.Invoke(async () =>
                 {
-                    var answer = MessageBox.Show("The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (answer == MessageBoxResult.Yes)
-                        await SaveSettingsAsync();
+                    //var answer = MessageBox.Show(this, "The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButtons.YesNo);
+                    //if (answer == MessageBoxResult.Yes)
+                    //    await SaveSettingsAsync();
                 });
             }
         }
@@ -495,7 +496,7 @@ namespace GrimSearch.ViewModels
             List<string> locations = new List<string>();
             locations.Add(Path.Combine(steamPath, "SteamApps", "common", "Grim Dawn").Replace('/', '\\'));
             locations.AddRange(GetInstallLocationsFromSteamConfig(steamPath));
-            
+
 
             return locations.ToArray();
         }
@@ -506,7 +507,7 @@ namespace GrimSearch.ViewModels
             if (!File.Exists(configPath))
                 return new string[0];
             var configContent = File.ReadAllText(configPath);
-            
+
             var configJson = VdfFileReader.ToJson(configContent);
 
             var deserialized = JsonConvert.DeserializeObject<SteamConfig>(configJson);
@@ -523,7 +524,7 @@ namespace GrimSearch.ViewModels
                 var fullGDPath = Path.Combine(val, "SteamApps", "common", "Grim Dawn").Replace('/', '\\');
                 results.Add(fullGDPath);
             }
-                
+
             return results.ToArray();
         }
 
@@ -597,7 +598,7 @@ namespace GrimSearch.ViewModels
                 items = await _index.FindUniqueAsync(SearchString, filter).ConfigureAwait(false);
             else
                 items = await _index.FindAsync(SearchString, filter).ConfigureAwait(false);
-            
+
             Dispatcher.Invoke(() =>
             {
                 SearchResults.Clear();
@@ -640,8 +641,8 @@ namespace GrimSearch.ViewModels
         private void UpdateSearchBoxVisibility()
         {
             // use only search textbox for now
-            FreeTextSearchVisibility = Visibility.Visible;
-            CharacterBasedSearchVisibility = Visibility.Visible;
+            FreeTextSearchVisibility = ControlVisibility.Visible;
+            CharacterBasedSearchVisibility = ControlVisibility.Visible;
 
             /*
             if (SearchMode == "Regular")

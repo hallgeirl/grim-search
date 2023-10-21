@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace GrimSearch.ViewModels
 {
@@ -15,7 +16,7 @@ namespace GrimSearch.ViewModels
         public string Header
         {
             get { return _header; }
-            set { _header = value; RaisePropertyChangedEvent("Header"); }
+            set => this.RaiseAndSetIfChanged(ref _header, value);
         }
 
 
@@ -23,7 +24,7 @@ namespace GrimSearch.ViewModels
         public ObservableCollection<MultiselectComboItem> Items
         {
             get { return _items; }
-            set { _items = value; RaisePropertyChangedEvent("Items"); }
+            set { _items = value; this.RaisePropertyChanged("Items"); }
         }
     }
 }

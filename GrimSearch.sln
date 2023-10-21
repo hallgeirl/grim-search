@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrimSearch", "GrimSearch\GrimSearch.csproj", "{8D53CD2D-5B88-42BA-B3C0-F8A7312D0392}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrimSearch.Utils", "GrimSearch.FileUtils\GrimSearch.Utils.csproj", "{CB1650F8-DF00-42CE-8488-D421C347ACA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrimSearch.Utils", "GrimSearch.Utils\GrimSearch.Utils.csproj", "{CB1650F8-DF00-42CE-8488-D421C347ACA3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrimSearch.Tests", "GrimSearch.Tests\GrimSearch.Tests.csproj", "{02399D91-6A4E-4F49-98B7-B59DC995BB38}"
 EndProject

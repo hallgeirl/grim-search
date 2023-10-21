@@ -1,21 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ReactiveUI;
 
 namespace GrimSearch.ViewModels
 {
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    public abstract class ViewModelBase : ReactiveObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void RaisePropertyChangedEvent(string propertyName)
-        {
-            var handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

@@ -152,8 +152,8 @@ namespace GrimSearch.ViewModels
         #endregion
 
         #region Search filters
-        private ControlVisibility _freeTextSearchVisibility = ControlVisibility.Visible;
-        public ControlVisibility FreeTextSearchVisibility
+        private bool _freeTextSearchVisibility = true;
+        public bool FreeTextSearchVisibility
         {
             get { return _freeTextSearchVisibility; }
             set
@@ -163,8 +163,8 @@ namespace GrimSearch.ViewModels
             }
         }
 
-        private ControlVisibility _characterBasedSearchVisibility = ControlVisibility.Visible;
-        public ControlVisibility CharacterBasedSearchVisibility
+        private bool _characterBasedSearchVisibility = true;
+        public bool CharacterBasedSearchVisibility
         {
             get { return _characterBasedSearchVisibility; }
             set
@@ -641,8 +641,8 @@ namespace GrimSearch.ViewModels
         private void UpdateSearchBoxVisibility()
         {
             // use only search textbox for now
-            FreeTextSearchVisibility = ControlVisibility.Visible;
-            CharacterBasedSearchVisibility = ControlVisibility.Visible;
+            FreeTextSearchVisibility = true;
+            CharacterBasedSearchVisibility = true;
 
             /*
             if (SearchMode == "Regular")

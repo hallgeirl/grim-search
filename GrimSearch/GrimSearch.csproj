@@ -3,7 +3,7 @@
     <TargetFramework>net7.0</TargetFramework>
 
     <OutputType>Exe</OutputType>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -23,12 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Assets/**" />
 
     <Compile Remove="MainWindow.xaml.cs" />
     <None Remove="MainWindow.xaml" />
-    <Compile Remove="Controls/MultiselectComboControl.xaml.cs" />
-    <None Remove="Controls/MultiselectComboControl.xaml" />
   </ItemGroup>
 
   <ItemGroup>

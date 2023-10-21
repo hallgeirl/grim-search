@@ -1,14 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
         <PackageReference Include="log4net" Version="2.0.15" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="CommonServiceLocator" Version="2.0.7" />
   </ItemGroup>
-    <ItemGroup>
-    <ProjectReference Include="..\GrimSearch.Utils\GrimSearch.Utils.csproj" />
-  </ItemGroup>
-
 </Project>

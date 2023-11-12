@@ -38,7 +38,7 @@ namespace GrimSearch.Utils.DBFiles
                 _cache = JsonConvert.DeserializeObject<ItemCacheContainer>(File.ReadAllText(CacheFilename));
                 LogHelper.GetLog().Debug("Items loaded from cache");
             }
-        
+
             if (!skipVersionCheck)
             {
                 string gdLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
@@ -121,9 +121,9 @@ namespace GrimSearch.Utils.DBFiles
         private static string[] GetDBFilesWithFullPaths(string grimDawnDirectory)
         {
             string[] dbFiles = {
-                "database\\database.arz",
-                "gdx1\\database\\GDX1.arz",
-                "gdx2\\database\\GDX2.arz"
+                "database/database.arz",
+                "gdx1/database/GDX1.arz",
+                "gdx2/database/GDX2.arz"
             };
 
             List<string> dbFilesThatExist = new List<string>();

@@ -17,7 +17,7 @@ namespace GrimSearch.Tests.FileUtils
         {
             BlueprintFile blueprints = new BlueprintFile();
 
-            using (var s = File.OpenRead("Resources\\Saves\\formulas.gst"))
+            using (var s = File.OpenRead("Resources/Saves/formulas.gst"))
             {
                 blueprints.Read(s);
             }

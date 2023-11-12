@@ -2,6 +2,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:GrimSearch.ViewModels"
     xmlns:c="using:GrimSearch.Controls"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335">
 
@@ -38,11 +39,11 @@
                             </Grid.RowDefinitions>
                             <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
                             <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString}" IsVisible="{Binding FreeTextSearchVisibility}">
-                                <!-- <i:Interaction.Triggers>
+                                <!-- <i:Interaction.Behaviors>
                                     <i:EventTrigger EventName="TextChanged">
                                         <i:InvokeCommandAction Command="{Binding SearchCommand}" />
                                     </i:EventTrigger>
-                                </i:Interaction.Triggers> -->
+                                </i:Interaction.Behaviors> -->
                             </TextBox>
                             <ComboBox Name="CharacterSelectionComboBox" Grid.Column="2" Height="20" SelectedValue="{Binding SearchString}" ItemsSource="{Binding AllCharacters}" IsVisible="{Binding CharacterBasedSearchVisibility}">
 
@@ -201,7 +202,7 @@
             <TabItem Header="About">
                 <StackPanel Margin="24,19,24,19">
                     <TextBlock FontWeight="Bold">Disclaimer &amp; License</TextBlock>
-                    <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see:                                                                                                                                                                                                                                                                                                                 <!-- <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink> -->. For simplicity, the license is provided below as well.</TextBlock>
+                    <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <!-- <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink> -->. For simplicity, the license is provided below as well.</TextBlock>
 
                     <StackPanel Margin="16,10,16,0">
                         <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</TextBlock>
@@ -212,7 +213,7 @@
                         <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</TextBlock>
                     </StackPanel>
                     <TextBlock Margin="0,10,0,0" FontWeight="Bold">Attributions</TextBlock>
-                    <TextBlock>Icons within this application (except the application's icon) is from the Silk Icons pack from http://www.famfamfam.com/. The icons are licensed under the Creative Commons 3.0 license found                                                                                                                                                                                                                                                                                                                 <!-- <Hyperlink NavigateUri="https://creativecommons.org/licenses/by/3.0/">here</Hyperlink> -->. 
+                    <TextBlock>Icons within this application (except the application's icon) is from the Silk Icons pack from http://www.famfamfam.com/. The icons are licensed under the Creative Commons 3.0 license found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <!-- <Hyperlink NavigateUri="https://creativecommons.org/licenses/by/3.0/">here</Hyperlink> -->. 
                     </TextBlock>
                 </StackPanel>
             </TabItem>

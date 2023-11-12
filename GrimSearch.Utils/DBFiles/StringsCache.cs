@@ -17,7 +17,7 @@ namespace GrimSearch.Utils.DBFiles
 
         private StringsCache()
         {
-            CacheFilename = "TagsCache.json"; 
+            CacheFilename = "TagsCache.json";
         }
 
         public string GetString(string tagName)
@@ -79,16 +79,16 @@ namespace GrimSearch.Utils.DBFiles
             LogHelper.GetLog().Debug("Copying " + tagFilePath + " to " + targetFile);
             Directory.CreateDirectory(tempDir);
             File.Copy(tagFilePath, targetFile);
-            
+
 
             return targetFile;
         }
         private void ReadTagsFromFiles(string grimDawnDirectory)
         {
             string[] dbFiles = {
-                "resources\\Text_EN.arc",
-                "gdx1\\resources\\Text_EN.arc",
-                "gdx2\\resources\\Text_EN.arc"
+                "resources/Text_EN.arc",
+                "gdx1/resources/Text_EN.arc",
+                "gdx2/resources/Text_EN.arc"
             };
 
             foreach (var file in dbFiles)
@@ -121,9 +121,9 @@ namespace GrimSearch.Utils.DBFiles
                     var cleanup = string.IsNullOrEmpty(cleanupSetting) || cleanupSetting.ToLowerInvariant() == "true";
 
                     if (cleanup)
-                    { 
+                    {
                         if (extractedPath != null && Directory.Exists(extractedPath))
-                            Directory.Delete(extractedPath, true);   
+                            Directory.Delete(extractedPath, true);
 
                         var tempArcDir = Path.GetDirectoryName(tempArcFile);
                         if (Directory.Exists(tempArcDir))
@@ -131,7 +131,7 @@ namespace GrimSearch.Utils.DBFiles
                     }
                 }
 
-                
+
             }
         }
 

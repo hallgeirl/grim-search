@@ -16,7 +16,7 @@ namespace GrimSearch.Tests.Common
         [TestMethod]
         public void TestConvertVdfToJson()
         {
-            var fileContent = File.ReadAllText("Resources\\config.vdf");
+            var fileContent = File.ReadAllText("Resources/config.vdf");
             var jsonContent = VdfFileReader.ToJson(fileContent);
 
             var jsonObject = JsonConvert.DeserializeObject(jsonContent);

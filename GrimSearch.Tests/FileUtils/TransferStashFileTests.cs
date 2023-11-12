@@ -17,7 +17,7 @@ namespace GrimSearch.Tests.FileUtils
         {
             TransferStashFile stash = new TransferStashFile();
 
-            using (var s = File.OpenRead("Resources\\Saves\\transfer.gst"))
+            using (var s = File.OpenRead("Resources/Saves/transfer.gst"))
             {
                 stash.Read(s);
             }

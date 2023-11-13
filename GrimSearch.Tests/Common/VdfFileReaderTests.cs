@@ -1,12 +1,7 @@
-﻿using GrimSearch.Common;
+﻿using GrimSearch.Utils.Steam;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GrimSearch.Tests.Common
 {

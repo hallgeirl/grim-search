@@ -1,0 +1,41 @@
+"Registry"
+{
+	"HKLM"
+	{
+		"Software"
+		{
+			"Valve"
+			{
+				"Steam"
+				{
+					"SteamPID"		"1234"
+					"TempAppCmdLine"		""
+					"ReLaunchCmdLine"		""
+					"ClientLauncherType"		"0"
+				}
+			}
+		}
+	}
+	"HKCU"
+	{
+		"Software"
+		{
+			"Valve"
+			{
+				"Steam"
+				{
+					"StartupModeTmpIsValid"		"0"
+					"steamglobal"
+					{
+						"language"		"english"
+					}
+					"language"		"english"
+					"SourceModInstallPath"		"/home/whoever/.steam/debian-installation/steamapps\\sourcemods"
+					"AutoLoginUser"		"whoever"
+					"Rate"		"30000"
+					"AlreadyRetriedOfflineMode"		"0"
+				}
+			}
+		}
+	}
+}

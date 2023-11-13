@@ -16,6 +16,7 @@ using Index = GrimSearch.Utils.Index;
 using ReactiveUI;
 using GrimSearch.Views;
 using static GrimSearch.Views.MessageBox;
+using GrimSearch.Utils.Steam;
 
 namespace GrimSearch.ViewModels
 {
@@ -445,37 +446,25 @@ namespace GrimSearch.ViewModels
 
         private async Task TryDetectGDSettings()
         {
-            string steamPath = GetRegistryValue<string>("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath");
-            int activeUser = GetRegistryValue<int>("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\ActiveProcess", "ActiveUser");
-
-            if (!Directory.Exists(steamPath))
-                throw new InvalidOperationException("Steam path was not found. Is it installed?");
-
-            if (activeUser == 0)
-                throw new InvalidOperationException("Steam is not running, or you are not logged in.");
-
             string errors = "";
 
-            string gdDir = GetInstallLocation(steamPath);
-            string savesDir = System.IO.Path.Combine(steamPath, "userdata", activeUser.ToString(), "219990", "remote", "save").Replace('/', '\\');
-
-            if (!File.Exists(System.IO.Path.Combine(gdDir, "ArchiveTool.exe")))
+            var gdFolderDetect = new GrimDawnWindowsFolderDetectionHelper();
+            try
             {
-                errors += "The Grim Dawn directory was not found in the default install location for Steam games. Please specify this manually.";
+                GrimDawnSavesDirectory = gdFolderDetect.DetectGrimDawnSavesDirectory();
             }
-            else
+            catch (Exception ex)
             {
-                GrimDawnDirectory = gdDir;
+                errors += ex.Message;
             }
 
-
-            if (!Directory.Exists(System.IO.Path.Combine(savesDir, "main")))
+            try
             {
-                errors += "Grim Dawn saves directory was not found at " + savesDir + ". Please specify this manually.";
+                GrimDawnDirectory = gdFolderDetect.DetectGrimDawnDirectory();
             }
-            else
+            catch (Exception ex)
             {
-                GrimDawnSavesDirectory = savesDir;
+                errors += ex.Message;
             }
 
             if (!string.IsNullOrEmpty(errors))
@@ -484,70 +473,12 @@ namespace GrimSearch.ViewModels
             {
                 await Dispatcher.Invoke(async () =>
                 {
+                    //TODO
                     //var answer = MessageBox.Show(this, "The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButtons.YesNo);
                     //if (answer == MessageBoxResult.Yes)
                     //    await SaveSettingsAsync();
                 });
             }
-        }
-
-        private string[] GetAllPossibleInstallLocations(string steamPath)
-        {
-            List<string> locations = new List<string>();
-            locations.Add(Path.Combine(steamPath, "SteamApps", "common", "Grim Dawn").Replace('/', '\\'));
-            locations.AddRange(GetInstallLocationsFromSteamConfig(steamPath));
-
-
-            return locations.ToArray();
-        }
-
-        private string[] GetInstallLocationsFromSteamConfig(string steamPath)
-        {
-            var configPath = Path.Combine(steamPath, "config", "config.vdf");
-            if (!File.Exists(configPath))
-                return new string[0];
-            var configContent = File.ReadAllText(configPath);
-
-            var configJson = VdfFileReader.ToJson(configContent);
-
-            var deserialized = JsonConvert.DeserializeObject<SteamConfig>(configJson);
-
-            var steamConfigInstallKeys = deserialized.Software.Valve.Steam.Keys.Where(x => x.StartsWith("BaseInstallFolder_"));
-
-            List<string> results = new List<string>();
-
-            foreach (var k in steamConfigInstallKeys)
-            {
-                var val = deserialized.Software.Valve.Steam[k] as string;
-                if (string.IsNullOrEmpty(val))
-                    continue;
-                var fullGDPath = Path.Combine(val, "SteamApps", "common", "Grim Dawn").Replace('/', '\\');
-                results.Add(fullGDPath);
-            }
-
-            return results.ToArray();
-        }
-
-        private string GetInstallLocation(string steamPath)
-        {
-            var allLocations = GetAllPossibleInstallLocations(steamPath);
-            foreach (var l in allLocations)
-            {
-                if (File.Exists(System.IO.Path.Combine(l, "ArchiveTool.exe")))
-                    return l;
-            }
-
-            return null;
-        }
-
-        private T GetRegistryValue<T>(string path, string valueName)
-        {
-            var value = Registry.GetValue(path, valueName, null);
-
-            if (value == null)
-                return default(T);
-
-            return (T)value;
         }
 
         #endregion

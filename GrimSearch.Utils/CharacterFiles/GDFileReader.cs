@@ -97,7 +97,7 @@ namespace GrimSearch.Utils.CharacterFiles
             byte val = file.ReadByte();
             byte smallKey = (byte)(key & 0xFF);
             byte ret = (byte)(val ^ smallKey); //TODO: Check
-            UpdateKey(BitConverter.GetBytes(val), 1);
+            UpdateKey(new byte[] { val }, 1);
 
             return ret;
         }

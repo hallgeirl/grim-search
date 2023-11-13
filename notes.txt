@@ -3,4 +3,4 @@ Detecting GD folder on linux:
 - get libraryfolders.vdf from steam folder (e.g. ~/.steam/debian-installation/steamapps/libraryfolders.vdf) and find the library for the game id (219990)
 
 - for saves: find userid by checking list of folders in ~/.steam/steam/userdata
-- save folder would be: /.steam/debian-installation/userdata/<userid>/219990/remote/save
+- save folder would be: /.steam/steam/userdata/<userid>/219990/remote/save

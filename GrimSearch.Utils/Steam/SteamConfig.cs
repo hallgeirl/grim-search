@@ -31,4 +31,10 @@ namespace GrimSearch.Utils.Steam
     {
         public SteamConfigHKCUElement HKCU { get; set; }
     }
+
+    public class SteamLibraryFolderElement
+    {
+        public string Path { get; set; }
+        public Dictionary<string, string> Apps { get; set; }
+    }
 }

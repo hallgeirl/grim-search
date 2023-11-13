@@ -18,7 +18,7 @@ namespace GrimSearch.Utils.Steam
             }
             else if (OperatingSystem.IsLinux())
             {
-
+                return DetectGrimDawnDirectoryOnLinux();
             }
             throw new NotSupportedException("Only Windows and Linux is supported for folder detection as of now. Please specify folders manually.");
         }
@@ -31,39 +31,85 @@ namespace GrimSearch.Utils.Steam
             }
             else if (OperatingSystem.IsLinux())
             {
-
+                return DetectGrimDawnSavesDirectoryOnLinux();
             }
             throw new NotSupportedException("Only Windows and Linux is supported for folder detection as of now. Please specify folders manually.");
         }
 
-
-
-
+        /*
+        Detecting GD folder on linux:
+        - read ~/.steam/registry.vdf to get steam install folder from SourceModInstallPath, e.g. ~/.steam/debian-installation/steamapps/sourcemods (so steam folder is ~/.steam/debian-installation)
+        - get libraryfolders.vdf from steamapps folder (e.g. ~/.steam/debian-installation/steamapps/libraryfolders.vdf) and find the library for the game id (219990)
+        */
         [SupportedOSPlatform("linux")]
         private string DetectGrimDawnDirectoryOnLinux()
         {
-            return null;
-            /*var registryVdfPath = "~/.steam/registry.vdf";
+            var registryVdfPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam", "registry.vdf");
+
             if (!File.Exists(registryVdfPath))
             {
                 throw new NotSupportedException("~/.steam/registry.vdf was not found -- folder detection not supported for your installation. Please specify folders manually.");
             }
 
-            var config = JsonConvert.DeserializeObject(VdfFileReader.ToJson(File.ReadAllText(registryVdfPath)));
+            // Step 1: Find steamapps directory from SourceModInstallPath in registry.vdf
+            var config = JsonConvert.DeserializeObject<SteamRegistryConfig>(VdfFileReader.ToJson(File.ReadAllText(registryVdfPath)));
+            var sourcemodsFolder = config.HKCU.Software.Valve.Steam["SourceModInstallPath"].ToString().Replace("\\", "/");
 
-            if (!Directory.Exists(steamPath))
-                throw new InvalidOperationException("Steam path was not found. Is it installed?");
+            // Step 2: Find the library directory that contains game ID 219990 (which is Grim Dawn)
+            var libraryFoldersVdf = Path.GetFullPath(Path.Combine(sourcemodsFolder, "..", "libraryfolders.vdf"));
+            var libraryFoldersVdfJson = VdfFileReader.ToJson(File.ReadAllText(libraryFoldersVdf));
+            var libraryFoldersParsed = JsonConvert.DeserializeObject<Dictionary<string, SteamLibraryFolderElement>>(libraryFoldersVdfJson);
 
-            string gdDir = GetInstallLocationOnWindows(steamPath);
-
-            if (!File.Exists(System.IO.Path.Combine(gdDir, "ArchiveTool.exe")))
+            foreach (var entry in libraryFoldersParsed)
             {
-                throw new Exception("The Grim Dawn directory was not found in the default install location for Steam games. Please specify this manually.");
+                if (entry.Value.Apps.ContainsKey("219990"))
+                {
+                    var gdDir = Path.Combine(entry.Value.Path, "steamapps", "common", "Grim Dawn");
+                    if (File.Exists(System.IO.Path.Combine(gdDir, "ArchiveTool.exe")))
+                    {
+                        return gdDir;
+                    }
+                }
             }
 
-            return gdDir;*/
+            throw new Exception("The Grim Dawn directory was not found in any of the library folders that were searched. Please specify folders manually.");
         }
 
+
+        /*
+        Detecting GD saves folder on linux:
+        - for saves: find userid by checking list of folders in ~/.steam/steam/userdata
+        - save folder would be: /.steam/steam/userdata/<userid>/219990/remote/save
+        */
+        [SupportedOSPlatform("linux")]
+        private string DetectGrimDawnSavesDirectoryOnLinux()
+        {
+            var userdataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam", "steam", "userdata");
+
+            if (!Directory.Exists(userdataPath))
+            {
+                throw new NotSupportedException("~/.steam/steam/useradata was not found -- folder detection not supported for your installation. Please specify folders manually.");
+            }
+
+            // Step 1: Find steamapps directory from SourceModInstallPath in registry.vdf
+            var userIds = Directory.EnumerateDirectories(userdataPath);
+            if (userIds.Count() == 0)
+            {
+                throw new Exception("No user folder found in ~/.steam/steam/useradata.");
+            }
+            else if (userIds.Count() > 1)
+            {
+                throw new Exception("More than one user folder found in ~/.steam/steam/useradata. That most likely means more than one Steam account is used for this installation. Currently, folder detection is not supported for this scenario on Linux.");
+            }
+            var userIdFolder = userIds.First();
+
+            var savesFolder = Path.Combine(userIdFolder, "219990", "remote", "save");
+            if (!Path.Exists(savesFolder))
+            {
+                throw new Exception("Saves folder not found at " + savesFolder);
+            }
+            return savesFolder;
+        }
 
         [SupportedOSPlatform("windows")]
         private string DetectGrimDawnDirectoryOnWindows()

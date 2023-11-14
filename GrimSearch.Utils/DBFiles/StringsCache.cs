@@ -103,7 +103,7 @@ namespace GrimSearch.Utils.DBFiles
 
                 try
                 {
-                    ArzExtractor.Extract(tempArcFile, grimDawnDirectory, extractedPath);
+                    ArzExtractor.ExtractArc(tempArcFile, extractedPath);
                     var tagsDir = Path.Combine(extractedPath, "text_en");
                     foreach (var f in Directory.EnumerateFiles(tagsDir, "*.txt", SearchOption.AllDirectories))
                     {

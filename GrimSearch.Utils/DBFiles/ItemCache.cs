@@ -106,7 +106,7 @@ namespace GrimSearch.Utils.DBFiles
 
                 var extractPath = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath", Path.GetFileNameWithoutExtension(file) + "_" + Guid.NewGuid().ToString());
 
-                ArzExtractor.Extract(file, grimDawnDirectory, extractPath);
+                ArzExtractor.ExtractArz(file, grimDawnDirectory, extractPath);
 
                 stateChangeCallback("Reading items (file " + i + " of " + dbFiles.Length + ")");
                 PopulateAllItems(extractPath, stateChangeCallback);

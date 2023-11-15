@@ -7,3 +7,6 @@
 **/.vs
 /packages
 GrimSearch/GDItemSearchSettings.json
+GrimSearch/DatabaseHashes.json
+GrimSearch/ItemsCache.json
+GrimSearch/TagsCache.json

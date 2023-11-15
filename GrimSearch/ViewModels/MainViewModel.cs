@@ -530,6 +530,7 @@ namespace GrimSearch.ViewModels
             else
                 items = await _index.FindAsync(SearchString, filter).ConfigureAwait(false);
 
+
             Dispatcher.Invoke(() =>
             {
                 SearchResults.Clear();

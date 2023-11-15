@@ -104,7 +104,7 @@ namespace GrimSearch.Utils.DBFiles
                 try
                 {
                     ArzExtractor.ExtractArc(tempArcFile, extractedPath);
-                    var tagsDir = Path.Combine(extractedPath, "text_en");
+                    var tagsDir = extractedPath;
                     foreach (var f in Directory.EnumerateFiles(tagsDir, "*.txt", SearchOption.AllDirectories))
                     {
                         var tags = TagsReader.ReadAllTags(f);

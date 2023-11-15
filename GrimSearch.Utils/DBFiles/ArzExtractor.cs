@@ -32,7 +32,7 @@ namespace GrimSearch.Utils.DBFiles
         }
         public static void ExtractArc(string arcPath, string targetPath)
         {
-            // load archive into memory
+            // Load archive into memory.
             var buffer = File.ReadAllBytes(arcPath);
             using var stream = new MemoryStream(buffer);
             var reader = new BinaryReader(stream);
@@ -48,7 +48,7 @@ namespace GrimSearch.Utils.DBFiles
 
             if (magic != 0x435241 || version != 3)
             {
-                throw new Exception($"File is not in the correct format: Header mismatch -- expected magic number: 4411969, got: {magic}, and expected version: 3 but got: {version}");
+                throw new Exception($"Arc file {arcPath} is not in the correct format: Header mismatch -- expected magic number: 4411969, got: {magic}, and expected version: 3 but got: {version}");
             }
 
             for (var i = 0; i < numberOfFileEntries; i++)
@@ -84,7 +84,7 @@ namespace GrimSearch.Utils.DBFiles
                 else
                 {
                     // If it is compressed, we have to iterate over each file part, and copy or decompress each of them.
-                    using var outputStream = File.OpenWrite(fullOutputPath);
+                    using var outputStream = File.Open(fullOutputPath, FileMode.Create);
                     var writer = new BinaryWriter(outputStream);
                     for (int j = 0; j < fileParts; j++)
                     {
@@ -109,24 +109,197 @@ namespace GrimSearch.Utils.DBFiles
             }
         }
 
-        public static string ExtractArz(string arzPath, string grimDawnDirectory, string targetPath)
+        public static void ExtractArz(string arzPath, string grimDawnDirectory, string targetPath)
         {
-            /*
-            struct ARZ_V3_HEADER
+            // Load archive into memory.
+            var buffer = File.ReadAllBytes(arzPath);
+            using var stream = new MemoryStream(buffer);
+            var reader = new BinaryReader(stream);
+
+            var unknown = reader.ReadUInt16();
+            var version = reader.ReadUInt16();
+            var recordTableStart = reader.ReadUInt32();
+            var recordTableSize = reader.ReadUInt32();
+            var recordTableEntries = reader.ReadUInt32();
+            var stringTableStart = reader.ReadUInt32();
+            var stringTableSize = reader.ReadUInt32();
+
+            if (unknown != 2 || version != 3)
             {
-                unsigned short  Unknown;
-                unsigned short  Version;
-                unsigned int    RecordTableStart;
-                unsigned int    RecordTableSize;
-                unsigned int    RecordTableEntries;
-                unsigned int    StringTableStart;
-                unsigned int    StringTableSize;
-            };
+                throw new Exception($"Arz file {arzPath} is not in the correct format: Header mismatch -- expected magic number: 2, got: {unknown}, and expected version: 3 but got: {version}");
+            }
+            var stringTable = ReadStringTable(buffer, stringTableStart, stringTableSize);
+
+            //var recordStart = recordTableStart;
+            stream.Seek(recordTableStart, SeekOrigin.Begin);
+            for (int i = 0; i < recordTableEntries; i++)
+            {
+
+                var recordFileIndex = reader.ReadInt32();
+                var recordFile = stringTable[recordFileIndex];
+                var fullOutputPath = Path.Combine(targetPath, recordFile);
+                var recordTypeLength = reader.ReadInt32();
+                var recordTypeBytes = reader.ReadBytes(recordTypeLength);
+                var recordType = Encoding.ASCII.GetString(recordTypeBytes);
+                var recordDataOffset = reader.ReadInt32();
+                var recordDataSizeCompressed = reader.ReadInt32();
+                var recordDataSizeDecompressed = reader.ReadInt32();
+                reader.ReadInt32(); reader.ReadInt32(); //Skip ahead 8 bytes
+
+                // Decompress with LZ4
+                var decompressed = new byte[recordDataSizeDecompressed];
+                var decoded = LZ4Codec.Decode(buffer, recordDataOffset + 24, recordDataSizeCompressed, decompressed, 0, decompressed.Length);
+
+                if ((decoded < 0) || (recordDataSizeDecompressed % 4) != 0)
+                {
+                    throw new Exception("Failed to decompress entry " + recordFile);
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(fullOutputPath));
+                using var outputWriter = new StreamWriter(File.Open(fullOutputPath, FileMode.Create));
+                using var blockStream = new MemoryStream(decompressed);
+                using var blockReader = new BinaryReader(blockStream);
+                int currentPosition = 0;
+                while (currentPosition < recordDataSizeDecompressed / 4)
+                {
+                    var dataType = blockReader.ReadInt16();
+                    var dataCount = blockReader.ReadInt16();
+                    var dataStringIndex = blockReader.ReadInt32();
+
+                    outputWriter.Write(stringTable[dataStringIndex] + ",");
+                    for (int j = 0; j < dataCount; j++)
+                    {
+                        switch (dataType)
+                        {
+                            case 1:
+                                var floatValue = blockReader.ReadSingle();
+                                outputWriter.Write(floatValue.ToString() + ",");
+                                break;
+                            case 2:
+                                var stringIndex = blockReader.ReadInt32();
+                                outputWriter.Write(stringTable[stringIndex] + ",");
+                                break;
+                            case 0:
+                            case 3:
+                            default:
+                                var intValue = blockReader.ReadInt32();
+                                outputWriter.Write(intValue);
+                                break;
+
+                        }
+                    }
+                    outputWriter.WriteLine();
+                    currentPosition += 2 + dataCount;
+
+                }
+                //File.WriteAllBytes(fullOutputPath, target);
+            }
+
+            /*
+
+                        // Set the floating point percision..
+                        ofs << std::fixed << std::setprecision(6);
+
+                        
+                            ofs << g_StringTable[dataString]->GetString() << ",";
+
+                            for (auto y = 0; y < dataCount; y++)
+                            {
+                                switch (dataType)
+                                {
+                                case 0:
+                                case 3:
+                                default:
+                                    ofs << *(unsigned int*)((data_ptr + 8) + (y * 4)) << ",";
+                                    break;
+                                case 1:
+                                    ofs << *(float*)((data_ptr + 8) + (y * 4)) << ",";
+                                    break;
+                                case 2:
+                                    ofs << g_StringTable[*(unsigned int*)((data_ptr + 8) + (y * 4))]->GetString() << ",";
+                                    break;
+                                }
+                            }
+
+                            ofs << std::endl;
+
+                            // Adjust the positions..
+                            data_ptr += 8 + (dataCount * 4);
+                            current += (2 + dataCount);
+                        }
+                    }
+
+                    return true;
+                }();
+
+                // Cleanup the file buffer..
+                printf_s("Finished processing file, status: %s\n", dump_file == true ? "success!" : "failed!");
+                delete[] buffer;
+
+                // Cleanup global string table..
+                std::for_each(g_StringTable.begin(), g_StringTable.end(), [&](ARZString* str) { delete str; });
+                g_StringTable.clear();
+
+                return 0;
+
+
+
             */
-            return null;
         }
 
-        public static string Extract(string arzPath, string grimDawnDirectory, string targetPath)
+        static IList<string> ReadStringTable(byte[] buffer, uint offset, uint size)
+        {
+            using var stream = new MemoryStream(buffer);
+            using BinaryReader reader = new BinaryReader(stream);
+
+            List<string> stringTable = new List<string>();
+
+            uint end = offset + size;
+            stream.Seek(offset, SeekOrigin.Begin);
+
+            while (stream.Position < end)
+            {
+                var count = reader.ReadUInt32();
+
+                for (var i = 0; i < count; i++)
+                {
+                    var length = reader.ReadInt32();
+                    var stringBytes = reader.ReadBytes(length);
+                    stringTable.Add(Encoding.ASCII.GetString(stringBytes));
+                }
+            }
+            return stringTable;
+        }
+        /*
+        bool ReadStringTable(unsigned char* buffer, int offset, int size)
+        {
+            if (buffer == nullptr || size == 0)
+                return false;
+
+            auto ptr = &buffer[offset];
+            auto end = ptr + size;
+
+            while (ptr < end)
+            {
+                auto count = *(DWORD*)ptr;
+                ptr += 4;
+
+                for (auto x = 0; x < count; x++)
+                {
+                    auto length = *(DWORD*)ptr;
+                    ptr += 4;
+
+                    auto str = new ARZString(ptr, length);
+                    g_StringTable.push_back(str);
+
+                    ptr += length;
+                }
+            }
+
+            return true;
+        }
+        */
+        private static string Extract(string arzPath, string grimDawnDirectory, string targetPath)
         {
             var archiveTool = Path.Combine(grimDawnDirectory, "ArchiveTool.exe");
             if (!File.Exists(archiveTool))

@@ -21,7 +21,7 @@
             <TabItem Header="Search" Name="SearchTab">
                 <ScrollViewer>
                     <StackPanel Margin="24,19,24,19">
-                        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="This little app lets you search for items across all your Grim Dawn characters! Wow!" VerticalAlignment="Top"/>
+                        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="TTTThis little app lets you search for items across all your Grim Dawn characters! Wow!" VerticalAlignment="Top"/>
                         <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Just type in something to search for (e.g. an item name, or parts of it), select some filters (if you want), and go nuts!" VerticalAlignment="Top"/>
 
                         <Grid Margin="0,20,0,0">
@@ -141,7 +141,7 @@
 
 
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
-                        <ListView Height="Auto" MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" KeyUp="ResultsListView_KeyUp" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
+                        <!--<ListView Height="Auto" MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" KeyUp="ResultsListView_KeyUp" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Header="Item name" Width="200">
@@ -158,7 +158,34 @@
                                     <GridViewColumn Header="Also exists on" DisplayMemberBinding="{Binding DuplicatesOn}" Width="200" />
                                 </GridView>
                             </ListView.View>
-                        </ListView>
+                        </ListView>-->
+                        <TextBlock Text="Whatever" />
+                        <ListBox Height="500" MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" KeyUp="ResultsListView_KeyUp" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" Items="{Binding SearchResults}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="Red" CornerRadius="4" Padding="4">
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <!--<ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Item name" Width="200">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Foreground="{Binding ItemColor}" FontWeight="DemiBold" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Character" DisplayMemberBinding="{Binding Owner}" Width="150"/>
+                                    <GridViewColumn Header="Level" DisplayMemberBinding="{Binding LevelRequirement}" Width="50"/>
+                                    <GridViewColumn Header="Core stats" DisplayMemberBinding="{Binding CoreStats}" Width="400"/>
+                                    <GridViewColumn Header="Bag" DisplayMemberBinding="{Binding Bag}" Width="100"/>
+                                    <GridViewColumn Header="Also exists on" DisplayMemberBinding="{Binding DuplicatesOn}" Width="200" />
+                                </GridView>
+                            </ListView.View>-->
+                        </ListBox>
+                        <TextBlock Text="Whatever Else" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

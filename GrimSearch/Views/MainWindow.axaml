@@ -149,24 +149,60 @@
 
 
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
-                        <!-- <ListView Height="Auto" MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" MouseDoubleClick="ResultsListView_MouseDoubleClick" KeyUp="ResultsListView_KeyUp" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="Item name" Width="200">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Name}" Foreground="{Binding ItemColor}" FontWeight="DemiBold" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="Character" DisplayMemberBinding="{Binding Owner}" Width="150"/>
-                                    <GridViewColumn Header="Level" DisplayMemberBinding="{Binding LevelRequirement}" Width="50"/>
-                                    <GridViewColumn Header="Core stats" DisplayMemberBinding="{Binding CoreStats}" Width="400"/>
-                                    <GridViewColumn Header="Bag" DisplayMemberBinding="{Binding Bag}" Width="100"/>
-                                    <GridViewColumn Header="Also exists on" DisplayMemberBinding="{Binding DuplicatesOn}" Width="200" />
-                                </GridView>
-                            </ListView.View>
-                        </ListView> -->
+                        <ListBox MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
+                            <ListBox.Template>
+                                <ControlTemplate>
+                                    <DockPanel LastChildFill="True">
+                                        <Grid DockPanel.Dock="Top">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="200"></ColumnDefinition>
+                                                <ColumnDefinition Width="150"></ColumnDefinition>
+                                                <ColumnDefinition Width="50"></ColumnDefinition>
+                                                <ColumnDefinition Width="400"></ColumnDefinition>
+                                                <ColumnDefinition Width="100"></ColumnDefinition>
+                                                <ColumnDefinition Width="200"></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0">Item name</Label>
+                                            <Label Grid.Column="1">Character</Label>
+                                            <Label Grid.Column="2">Level</Label>
+                                            <Label Grid.Column="3">Core stats</Label>
+                                            <Label Grid.Column="4">Bag</Label>
+                                            <Label Grid.Column="5">Also exists on</Label>
+                                        </Grid>
+                                        <ItemsPresenter></ItemsPresenter>
+                                    </DockPanel>
+                                </ControlTemplate>
+                            </ListBox.Template>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="Red" CornerRadius="4" Padding="4">
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="200"></ColumnDefinition>
+                                            <ColumnDefinition Width="150"></ColumnDefinition>
+                                            <ColumnDefinition Width="50"></ColumnDefinition>
+                                            <ColumnDefinition Width="400"></ColumnDefinition>
+                                            <ColumnDefinition Width="100"></ColumnDefinition>
+                                            <ColumnDefinition Width="200"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" Grid.Column="0" Foreground="{Binding ItemColor}" FontWeight="DemiBold"></TextBlock>
+                                        <TextBlock Text="{Binding Owner}" Grid.Column="1"></TextBlock>
+                                        <TextBlock Text="{Binding LevelRequirement}" Grid.Column="2"></TextBlock>
+                                        <TextBlock Text="{Binding CoreStats}" Grid.Column="3"></TextBlock>
+                                        <TextBlock Text="{Binding Bag}" Grid.Column="4"></TextBlock>
+                                        <TextBlock Text="{Binding DuplicatesOn}" Grid.Column="5"></TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -202,7 +238,7 @@
             <TabItem Header="About">
                 <StackPanel Margin="24,19,24,19">
                     <TextBlock FontWeight="Bold">Disclaimer &amp; License</TextBlock>
-                    <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <!-- <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink> -->. For simplicity, the license is provided below as well.</TextBlock>
+                    <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <!-- <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink> -->. For simplicity, the license is provided below as well.</TextBlock>
 
                     <StackPanel Margin="16,10,16,0">
                         <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</TextBlock>
@@ -213,14 +249,10 @@
                         <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</TextBlock>
                     </StackPanel>
                     <TextBlock Margin="0,10,0,0" FontWeight="Bold">Attributions</TextBlock>
-                    <TextBlock>Icons within this application (except the application's icon) is from the Silk Icons pack from http://www.famfamfam.com/. The icons are licensed under the Creative Commons 3.0 license found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <!-- <Hyperlink NavigateUri="https://creativecommons.org/licenses/by/3.0/">here</Hyperlink> -->. 
-                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap">Icons within this application (except the application's icon) is from the Silk Icons pack from http://www.famfamfam.com/. The icons are licensed under the Creative Commons 3.0 license found at https://creativecommons.org/licenses/by/3.0/.</TextBlock>
+                    <TextBlock TextWrapping="Wrap">The code used to parse the .arc and .arz files from Grim Dawn is loosely translated from grimarc/grimarz made by github user atom0s [atom0s@live.com]. Their work is found at https://github.com/atom0s/grimarz and https://github.com/atom0s/grimarc, and is licensed under GPL v3, found at http://www.gnu.org/licenses/.</TextBlock>
                 </StackPanel>
             </TabItem>
         </TabControl>
-
-
     </DockPanel>
-
-
 </Window>

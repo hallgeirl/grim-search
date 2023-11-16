@@ -17,6 +17,8 @@ using ReactiveUI;
 using GrimSearch.Views;
 using static GrimSearch.Views.MessageBox;
 using GrimSearch.Utils.Steam;
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace GrimSearch.ViewModels
 {
@@ -57,6 +59,27 @@ namespace GrimSearch.ViewModels
             {
                 UpdateSearchBoxVisibility();
             });
+            this.PropertyChanged += SearchablePropertyChanged;
+
+        }
+
+        private async void SearchablePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var searchableProperties = new string[]{
+                "SearchMode",
+                "MinimumLevel",
+                "MaximumLevel",
+                "ShowEquipped",
+                "SearchString"
+            };
+            if (searchableProperties.Contains(e.PropertyName))
+            {
+                await SearchAsync();
+            }
+            if (e.PropertyName == "SearchMode")
+            {
+                UpdateSearchBoxVisibility();
+            }
         }
 
         public async Task Initialize()
@@ -333,7 +356,7 @@ namespace GrimSearch.ViewModels
         public ICommand RefreshCommand { get; set; }
         public ICommand DetectGDSettingsCommand { get; set; }
         public ICommand UpdateSearchBoxVisibilityCommand { get; set; }
-
+        public ICommand OpenGDTools { get; set; }
 
         #endregion
 
@@ -572,23 +595,36 @@ namespace GrimSearch.ViewModels
 
         private void UpdateSearchBoxVisibility()
         {
-            // use only search textbox for now
-            FreeTextSearchVisibility = true;
-            CharacterBasedSearchVisibility = true;
-
-            /*
             if (SearchMode == "Regular")
             {
-                FreeTextSearchVisibility = Visibility.Visible;
-                CharacterBasedSearchVisibility = Visibility.Hidden;
+                FreeTextSearchVisibility = true;
+                CharacterBasedSearchVisibility = false;
             }
             else
             {
-                FreeTextSearchVisibility = Visibility.Hidden;
-                CharacterBasedSearchVisibility = Visibility.Visible;
-            }*/
+                FreeTextSearchVisibility = false;
+                CharacterBasedSearchVisibility = true;
+            }
 
         }
+
+        /*        private void OpenGDTools()
+                {
+                    //var selected = ResultsListView.SelectedItem as ItemViewModel;
+
+                    if (selected == null)
+                        return;
+
+                    var url = GetGDToolsURLForItem(selected);
+                    Process.Start(url);
+                }
+
+                private string GetGDToolsURLForItem(ItemViewModel item)
+                {
+                    var searchNameInURL = Uri.EscapeDataString(item.Name);
+                    return "https://www.grimtools.com/db/search?query=" + searchNameInURL + "&in_description=0&exact_match=1";
+                }
+        */
         #endregion
     }
 }

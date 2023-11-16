@@ -3,6 +3,7 @@
     xmlns:vm="using:GrimSearch.ViewModels"
     xmlns:c="using:GrimSearch.Controls"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335">
 
@@ -13,11 +14,9 @@
     </Design.DataContext>
 
     <DockPanel>
-        <!--         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>
-                <TextBlock Name="StatusBarText" Text="{Binding StatusBarText}" />
-            </StatusBarItem>
-        </StatusBar> -->
+        <DockPanel Dock="Bottom">
+            <TextBlock Text="{Binding StatusBarText}" Margin="5,5,5,5" />
+        </DockPanel>
 
         <TabControl Name="MainTabControl" SelectedItem="">
             <TabItem Header="Search" Name="SearchTab">
@@ -28,7 +27,7 @@
 
                         <Grid Margin="0,20,0,0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="250" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="200" />
                             </Grid.ColumnDefinitions>
@@ -38,23 +37,9 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
-                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString}" IsVisible="{Binding FreeTextSearchVisibility}">
-                                <!-- <i:Interaction.Behaviors>
-                                    <i:EventTrigger EventName="TextChanged">
-                                        <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                    </i:EventTrigger>
-                                </i:Interaction.Behaviors> -->
-                            </TextBox>
+                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString}" IsVisible="{Binding FreeTextSearchVisibility}" />
                             <ComboBox Name="CharacterSelectionComboBox" Grid.Column="2" Height="20" SelectedValue="{Binding SearchString}" ItemsSource="{Binding AllCharacters}" IsVisible="{Binding CharacterBasedSearchVisibility}">
-
-
-                                <!-- Text="Select character..."
-
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="TextChanged">
-                                        <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers> -->
+                                <!-- Text="Select character..."-->
                             </ComboBox>
                             <Label Name="FiltersLabel" Grid.Column="0" Grid.Row="1" Content="Filters" Margin="0,0,0,0" FontWeight="Bold" />
 
@@ -69,54 +54,27 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
-
                                 </Grid.RowDefinitions>
 
                                 <Label Content="Include equipped" VerticalAlignment="Top" />
                                 <CheckBox Margin="0,6,0,0" Name="IncludeEquippedCheckBox" VerticalAlignment="Top" Grid.Column="1" IsChecked="{Binding ShowEquipped}">
-                                    <!--                                  <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="Checked">
-                                            <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                        </i:EventTrigger>
-                                        <i:EventTrigger EventName="Unchecked">
-                                            <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers> -->
                                 </CheckBox>
 
                                 <Label Content="Level range" Grid.Row="1" VerticalAlignment="Top"/>
                                 <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" VerticalAlignment="Top">
-                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel}" Width="30" Height="20">
-                                        <!--                               <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="TextChanged">
-                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers> -->
-                                    </TextBox>
+                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel}" Width="30" Height="20" />
                                     <TextBlock Text="-" />
-                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel}" Width="30" Height="20">
-                                        <!--                                  <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="TextChanged">
-                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers> -->
-                                    </TextBox>
+                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel}" Width="30" Height="20" />
                                 </StackPanel>
 
                                 <Label Content="Search mode" Grid.Row="2"></Label>
                                 <ComboBox x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes, Mode=TwoWay}" SelectedItem="{Binding SearchMode}" Height="25" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="1,0,129,0">
-                                    <!-- Text="Search mode" 
-                                        
-                                                                 <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="SelectionChanged">
-                                            <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                            <i:InvokeCommandAction Command="{Binding UpdateSearchBoxVisibilityCommand}" />
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers> -->
+                                    <!-- Text="Search mode" -->
                                 </ComboBox>
 
                                 <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3">
                                     <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" Command="{Binding SearchCommand}">
+                                        
                                         <!--                                  <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="SelectionChanged">
                                                 <i:InvokeCommandAction Command="{Binding SearchCommand}" />
@@ -132,7 +90,7 @@
                                     </c:MultiselectComboControl>
                                 </StackPanel>
                             </Grid>
-                            <StackPanel Orientation="Horizontal" Grid.Row="2">
+                            <StackPanel Orientation="Horizontal" Grid.Row="2" VerticalAlignment="Center">
                                 <Label Content="Results" FontWeight="Bold" />
                                 <TextBlock Text="{Binding SearchResultText}" FontWeight="Bold" VerticalAlignment="Center" />
                             </StackPanel>
@@ -149,25 +107,31 @@
 
 
                         <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
-                        <ListBox MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}">
+
+                        <ListBox MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}" DoubleTapped="ResultsListView_MouseDoubleClick" SelectionMode="Multiple" KeyUp="ResultsListView_KeyUp">
+                            <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="0,5,0,5"/>
+                            </Style>
+                            </ListBox.Styles>
                             <ListBox.Template>
                                 <ControlTemplate>
                                     <DockPanel LastChildFill="True">
                                         <Grid DockPanel.Dock="Top">
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="250"></ColumnDefinition>
                                                 <ColumnDefinition Width="200"></ColumnDefinition>
-                                                <ColumnDefinition Width="150"></ColumnDefinition>
                                                 <ColumnDefinition Width="50"></ColumnDefinition>
-                                                <ColumnDefinition Width="400"></ColumnDefinition>
+                                                <ColumnDefinition Width="*"></ColumnDefinition>
                                                 <ColumnDefinition Width="100"></ColumnDefinition>
                                                 <ColumnDefinition Width="200"></ColumnDefinition>
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Column="0">Item name</Label>
-                                            <Label Grid.Column="1">Character</Label>
-                                            <Label Grid.Column="2">Level</Label>
-                                            <Label Grid.Column="3">Core stats</Label>
-                                            <Label Grid.Column="4">Bag</Label>
-                                            <Label Grid.Column="5">Also exists on</Label>
+                                            <Label Grid.Column="0" FontWeight="Bold" Padding="0,5,0,5">Item name</Label>
+                                            <Label Grid.Column="1" FontWeight="Bold" Padding="0,5,0,5">Character</Label>
+                                            <Label Grid.Column="2" FontWeight="Bold" Padding="0,5,0,5">Level</Label>
+                                            <Label Grid.Column="3" FontWeight="Bold" Padding="0,5,0,5">Core stats</Label>
+                                            <Label Grid.Column="4" FontWeight="Bold" Padding="0,5,0,5">Bag</Label>
+                                            <Label Grid.Column="5" FontWeight="Bold" Padding="0,5,0,5">Also exists on</Label>
                                         </Grid>
                                         <ItemsPresenter></ItemsPresenter>
                                     </DockPanel>
@@ -176,24 +140,16 @@
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="Red" CornerRadius="4" Padding="4">
-                                        <TextBlock Text="{Binding Name}"/>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="250"></ColumnDefinition>
                                             <ColumnDefinition Width="200"></ColumnDefinition>
-                                            <ColumnDefinition Width="150"></ColumnDefinition>
                                             <ColumnDefinition Width="50"></ColumnDefinition>
-                                            <ColumnDefinition Width="400"></ColumnDefinition>
+                                            <ColumnDefinition Width="*"></ColumnDefinition>
                                             <ColumnDefinition Width="100"></ColumnDefinition>
                                             <ColumnDefinition Width="200"></ColumnDefinition>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Name}" Grid.Column="0" Foreground="{Binding ItemColor}" FontWeight="DemiBold"></TextBlock>
+                                        <TextBlock Text="{Binding Name}" Grid.Column="0" Foreground="{Binding ItemColor}"></TextBlock>
                                         <TextBlock Text="{Binding Owner}" Grid.Column="1"></TextBlock>
                                         <TextBlock Text="{Binding LevelRequirement}" Grid.Column="2"></TextBlock>
                                         <TextBlock Text="{Binding CoreStats}" Grid.Column="3"></TextBlock>
@@ -202,13 +158,18 @@
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
+                            <!--<i:Interaction.Behaviors>
+                                <ia:EventTriggerBehavior EventName="DoubleTapped" SourceObject="ResultsListView">
+                                    <ia:InvokeCommandAction Command="{Binding OpenGDTools}" />
+                                </ia:EventTriggerBehavior>
+                            </i:Interaction.Behaviors>-->
                         </ListBox>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Settings" Name="SettingsTab">
                 <StackPanel Margin="24,19,24,19">
-                    <TextBlock HorizontalAlignment="Left" Margin="0,0,0,0" TextWrapping="Wrap" Text="This little app lets you search for items across your Grim Dawn characters! Wow! Before you start, you need to configure the paths to Grim Dawn itself, and your saves." VerticalAlignment="Top"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="0,0,0,0" TextWrapping="Wrap" Text="Grim Search lets you search for items across your Grim Dawn characters! Before you start, you need to configure the paths to Grim Dawn itself, and your saves." VerticalAlignment="Top"/>
                     <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="If you use Steam, and you haven't changed any of the defaults, you can use the following values:" VerticalAlignment="Top"/>
                     <TextBlock HorizontalAlignment="Left" Margin="24,8,0,0" TextWrapping="Wrap" Text="Grim Dawn directory: &lt;Path to Steam folder&gt;\SteamApps\common\Grim Dawn" VerticalAlignment="Top"/>
                     <TextBlock HorizontalAlignment="Left" Margin="24,0,0,0" TextWrapping="Wrap" Text="Saves directory: &lt;Path to Steam folder&gt;\userdata\&lt;some arbitrary numbers&gt;\219990\remote\save" VerticalAlignment="Top"/>
@@ -228,17 +189,17 @@
                         <TextBox Name="GDSavesTextBox" Text="{Binding GrimDawnSavesDirectory}" Grid.Column="1" Grid.Row="1" Height="20"/>
                     </Grid>
                     <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save will load all items from the Grim Dawn data files, if not previously loaded. This WILL take some time!" VerticalAlignment="Top"/>
-                    <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="250" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />
+                    <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="350" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Save" Name="SaveSettingsButton" Width="50" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding SaveSettingsCommand}" />
-                        <Button Content="Clear items cache" Name="RemoveItemCacheButton" Width="100" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding ClearCacheCommand}" />
+                        <Button Content="Clear items cache" Name="RemoveItemCacheButton" Width="150" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding ClearCacheCommand}" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="About">
                 <StackPanel Margin="24,19,24,19">
                     <TextBlock FontWeight="Bold">Disclaimer &amp; License</TextBlock>
-                    <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <!-- <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink> -->. For simplicity, the license is provided below as well.</TextBlock>
+                    <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     <!-- <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink> -->. For simplicity, the license is provided below as well.</TextBlock>
 
                     <StackPanel Margin="16,10,16,0">
                         <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</TextBlock>

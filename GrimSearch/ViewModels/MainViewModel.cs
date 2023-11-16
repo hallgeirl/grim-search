@@ -536,11 +536,21 @@ namespace GrimSearch.ViewModels
         }
 
 
+        bool _searchQueued = false;
+        bool _searchInProgress = false;
         private async Task SearchAsync()
         {
             if (!_initialized)
                 return;
 
+            // If there's a search in progress already, just make sure that there will be a new search after the current one is completed.
+            if (_searchInProgress)
+            {
+                _searchQueued = true;
+                return;
+            }
+
+            _searchInProgress = true;
             var filter = CreateIndexFilter();
             SetStatusbarText("Searching for " + SearchString);
 
@@ -563,6 +573,13 @@ namespace GrimSearch.ViewModels
             });
 
             ResetStatusBarText();
+
+            _searchInProgress = false;
+            if (_searchQueued)
+            {
+                _searchQueued = false;
+                await SearchAsync();
+            }
         }
 
         private IndexFilter CreateIndexFilter()

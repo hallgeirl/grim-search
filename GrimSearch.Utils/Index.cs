@@ -95,7 +95,7 @@ namespace GrimSearch.Utils
             var characterItems = _index.Where(x => x.Owner.ToLower().Contains(search.ToLower()) && FilterMatch(x, filter));
 
             // Otherwise, match the full character name
-            if (characterItems.Select(x=>x.Owner.ToLower()).Distinct().Count() > 1)
+            if (characterItems.Select(x => x.Owner.ToLower()).Distinct().Count() > 1)
                 characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
 
             search = characterItems.FirstOrDefault()?.Owner ?? search;
@@ -159,7 +159,7 @@ namespace GrimSearch.Utils
             if (!Directory.Exists(charactersDirectory))
                 throw new InvalidOperationException("Saves directory not found: " + charactersDirectory);
 
-            var directories = Directory.EnumerateDirectories(charactersDirectory, "*", SearchOption.TopDirectoryOnly);
+            var directories = Directory.EnumerateDirectories(charactersDirectory, "*", SearchOption.TopDirectoryOnly).OrderBy(x => x);
 
             foreach (var d in directories)
             {
@@ -351,7 +351,7 @@ namespace GrimSearch.Utils
             indexItem.ItemType = ItemHelper.GetItemType(itemStatDef);
             indexItem.Source = itemDef;
             indexItem.SourceInstance = item;
-            indexItem.ItemStats = ItemHelper.GetStats(item, itemStatDef).Select(x=>x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList();
+            indexItem.ItemStats = ItemHelper.GetStats(item, itemStatDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList();
             indexItem.Searchable = BuildSearchableString(character, item, itemDef, indexItem.ItemStats);
 
             return indexItem;

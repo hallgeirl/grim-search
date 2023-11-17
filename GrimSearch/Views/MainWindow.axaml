@@ -5,7 +5,7 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -37,16 +37,22 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
-                            <TextBox Name="SearchTextBox" Grid.Column="1" Height="20" Text="{Binding SearchString}" IsVisible="{Binding FreeTextSearchVisibility}" />
-                            <ComboBox Name="CharacterSelectionComboBox" Grid.Column="1" Height="20" SelectedValue="{Binding SearchString}" ItemsSource="{Binding AllCharacters}" IsVisible="{Binding CharacterBasedSearchVisibility}" Width="300">
+                            <TextBox Name="SearchTextBox" Grid.Column="1" Text="{Binding SearchString}" IsVisible="{Binding FreeTextSearchVisibility}" />
+                            <ComboBox Name="CharacterSelectionComboBox" HorizontalAlignment="Left" Grid.Column="1" SelectedValue="{Binding SearchString}" ItemsSource="{Binding AllCharacters}" IsVisible="{Binding CharacterBasedSearchVisibility}" Width="300">
                                 <!-- Text="Select character..."-->
                             </ComboBox>
                             <Label Name="FiltersLabel" Grid.Column="0" Grid.Row="1" Content="Filters" Margin="0,0,0,0" FontWeight="Bold" />
 
-                            <Grid Grid.Row="1" Grid.Column="1">
+                            <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+                                <Grid.Styles>
+                                    <Style Selector="Label,CheckBox,StackPanel,ComboBox" >
+                                        <Setter Property="Margin" Value="5,5,5,5" />
+                                        <Setter Property="VerticalAlignment" Value="Top" />
+                                    </Style>
+                                </Grid.Styles>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="130" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="200" />
                                     <ColumnDefinition Width="130" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
@@ -56,38 +62,23 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
-                                <Label Content="Include equipped" VerticalAlignment="Top" />
-                                <CheckBox Margin="0,6,0,0" Name="IncludeEquippedCheckBox" VerticalAlignment="Top" Grid.Column="1" IsChecked="{Binding ShowEquipped}">
-                                </CheckBox>
+                                <Label Content="Include equipped" />
+                                <CheckBox Name="IncludeEquippedCheckBox" Grid.Column="1" IsChecked="{Binding ShowEquipped}" />
 
-                                <Label Content="Level range" Grid.Row="1" VerticalAlignment="Top"/>
-                                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" VerticalAlignment="Top">
-                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel}" Width="30" Height="20" />
+                                <Label Content="Level range" Grid.Row="1" />
+                                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel}" Width="30" />
                                     <TextBlock Text="-" />
-                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel}" Width="30" Height="20" />
+                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel}" Width="30" />
                                 </StackPanel>
 
-                                <Label Content="Search mode" Grid.Row="2"></Label>
-                                <ComboBox x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes, Mode=TwoWay}" SelectedItem="{Binding SearchMode}" Height="25" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="1,0,129,0">
+                                <Label Content="Search mode" Grid.Row="2" />
+                                <ComboBox x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes, Mode=TwoWay}" SelectedItem="{Binding SearchMode}" Grid.ColumnSpan="2" Margin="5,0,129,0" />
                                     <!-- Text="Search mode" -->
-                                </ComboBox>
 
-                                <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3">
-                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes, Mode=TwoWay}">
-                                        
-                                        <!--                                  <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="SelectionChanged">
-                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers> -->
-                                    </c:MultiselectComboControl>
-                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities, Mode=TwoWay}" Grid.Row="1">
-                                        <!--                         <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="SelectionChanged">
-                                                <i:InvokeCommandAction Command="{Binding SearchCommand}" />
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers> -->
-                                    </c:MultiselectComboControl>
+                                <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3" VerticalAlignment="Top">
+                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes, Mode=TwoWay}" Command="{Binding SearchCommand}" />
+                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities, Mode=TwoWay}" Grid.Row="1" Command="{Binding SearchCommand}" />
                                 </StackPanel>
                             </Grid>
                             <StackPanel Orientation="Horizontal" Grid.Row="2" VerticalAlignment="Center">
@@ -185,8 +176,8 @@
                         </Grid.RowDefinitions>
                         <Label Name="GDDirLabel" Grid.Column="0" Content="Grim Dawn directory" Margin="0,0,0,0" />
                         <Label Name="GDSavesDirLabel" Grid.Column="0" Grid.Row="1" Content="Saves directory" Margin="0,0,0,0" />
-                        <TextBox Name="GDDirTextBox" Text="{Binding GrimDawnDirectory}" Grid.Column="1" Height="20"/>
-                        <TextBox Name="GDSavesTextBox" Text="{Binding GrimDawnSavesDirectory}" Grid.Column="1" Grid.Row="1" Height="20"/>
+                        <TextBox Name="GDDirTextBox" Text="{Binding GrimDawnDirectory}" Grid.Column="1" />
+                        <TextBox Name="GDSavesTextBox" Text="{Binding GrimDawnSavesDirectory}" Grid.Column="1" Grid.Row="1" />
                     </Grid>
                     <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save will load all items from the Grim Dawn data files, if not previously loaded. This WILL take some time!" VerticalAlignment="Top"/>
                     <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="350" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />

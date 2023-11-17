@@ -18,6 +18,11 @@
                     <Button Name="DeselectAllItemTypes" Click="DeselectAllItemTypes_Click" Padding="5,2,5,2" Margin="5,0,0,0">Deselect all</Button>
                 </StackPanel>
                 <ListBox Name="SelectorListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding ItemsSource, ElementName=MultiSelectComboControl}">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0,0,10,0"/>
+                        </Style>
+                    </ListBox.Styles>
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel />

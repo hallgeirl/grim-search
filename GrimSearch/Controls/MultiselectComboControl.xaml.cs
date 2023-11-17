@@ -45,6 +45,8 @@ namespace GrimSearch.Controls
             }
 
             SelectionChanged?.Invoke(this, new EventArgs());
+            if (Command != null)
+                Command.Execute(null);
         }
 
         private void SelectAllItemTypes_Click(object sender, RoutedEventArgs e)
@@ -66,6 +68,8 @@ namespace GrimSearch.Controls
             }
 
             SelectionChanged?.Invoke(this, new EventArgs());
+            if (Command != null)
+                Command.Execute(null);
         }
 
         ObservableCollection<MultiselectComboItem> _itemsSource;
@@ -80,8 +84,6 @@ namespace GrimSearch.Controls
             set
             {
                 SetAndRaise(ItemsSourceProperty, ref _itemsSource, value);
-                //TODO: Fix - avalonia rewrite
-                //SelectorListView.ItemsSource = value;
             }
         }
 
@@ -89,15 +91,6 @@ namespace GrimSearch.Controls
 
         public static readonly DirectProperty<MultiselectComboControl, ObservableCollection<MultiselectComboItem>> ItemsSourceProperty
          = AvaloniaProperty.RegisterDirect<MultiselectComboControl, ObservableCollection<MultiselectComboItem>>(nameof(ItemsSource), o => o.ItemsSource, (o, v) => o.ItemsSource = v);
-        /*public static StyledProperty ItemsSourceProperty = StyledProperty.Register("ItemsSource", typeof(ObservableCollection<MultiselectComboItem>), typeof(MultiselectComboControl),
-        //TODO: Fix - avalonia rewrite
-            new FrameworkPropertyMetadata
-            {
-                DefaultValue = new ObservableCollection<MultiselectComboItem>(),
-                DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged
-            });*/
-
-
 
         string _header;
         public string Header
@@ -126,12 +119,18 @@ namespace GrimSearch.Controls
                 SetAndRaise(CommandProperty, ref _command, value);
             }
         }
+
         public static readonly DirectProperty<MultiselectComboControl, ICommand> CommandProperty = AvaloniaProperty.RegisterDirect<MultiselectComboControl, ICommand>(nameof(Command), o => o.Command, (o, v) => o.Command = v);
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (_fireCheckboxEvents)
             {
+                // The model binding updates after the Checked event is fired. Therefore, we need to update the model with the actual checked value before executing the command.
+                var checkBox = sender as CheckBox;
+                var vm = checkBox.DataContext as MultiselectComboItem;
+                vm.Selected = checkBox.IsChecked.Value;
+
                 SelectionChanged?.Invoke(this, new EventArgs());
                 if (Command != null)
                     Command.Execute(null);

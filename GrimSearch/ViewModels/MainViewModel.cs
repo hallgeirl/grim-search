@@ -1,7 +1,6 @@
 ﻿using GrimSearch.Common;
 using GrimSearch.Utils;
 using GrimSearch.Utils.DBFiles;
-using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,11 +13,9 @@ using System.Windows.Input;
 using Avalonia.Threading;
 using Index = GrimSearch.Utils.Index;
 using ReactiveUI;
-using GrimSearch.Views;
 using static GrimSearch.Views.MessageBox;
 using GrimSearch.Utils.Steam;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace GrimSearch.ViewModels
 {

@@ -1,10 +1,5 @@
 ﻿using GrimSearch.Utils;
 using GrimSearch.Utils.DBFiles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GrimSearch.ViewModels
 {
@@ -19,7 +14,7 @@ namespace GrimSearch.ViewModels
 
         public string ItemColor
         {
-            get;set;
+            get; set;
         }
         public static ItemViewModel FromModel(IndexItem item)
         {
@@ -50,7 +45,7 @@ namespace GrimSearch.ViewModels
                 CoreStats = string.Join(", ", item.ItemStats),
                 ItemColor = itemColor,
                 Bag = item.Bag,
-                DuplicatesOn = (item.DuplicatesOnCharacters != null ? string.Join(", ", item.DuplicatesOnCharacters) : "")
+                DuplicatesOn = item.DuplicatesOnCharacters != null ? string.Join(", ", item.DuplicatesOnCharacters) : ""
             };
         }
     }

@@ -29,6 +29,7 @@
 
     <Compile Remove="MainWindow.xaml.cs" />
     <None Remove="MainWindow.xaml" />
+    <AvaloniaResource Include="Controls/MultiselectComboControl.xaml" />
   </ItemGroup>
 
   <ItemGroup>

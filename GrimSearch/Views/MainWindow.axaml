@@ -73,7 +73,7 @@
                                 </ComboBox>
 
                                 <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3">
-                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes}" Command="{Binding SearchCommand}">
+                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes, Mode=TwoWay}">
                                         
                                         <!--                                  <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="SelectionChanged">
@@ -81,7 +81,7 @@
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers> -->
                                     </c:MultiselectComboControl>
-                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities}" Grid.Row="1" Command="{Binding SearchCommand}">
+                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities, Mode=TwoWay}" Grid.Row="1">
                                         <!--                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="SelectionChanged">
                                                 <i:InvokeCommandAction Command="{Binding SearchCommand}" />

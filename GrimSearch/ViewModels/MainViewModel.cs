@@ -70,7 +70,9 @@ namespace GrimSearch.ViewModels
                 "MinimumLevel",
                 "MaximumLevel",
                 "ShowEquipped",
-                "SearchString"
+                "SearchString",
+                "ItemTypes",
+                "ItemQualities"
             };
             if (searchableProperties.Contains(e.PropertyName))
             {

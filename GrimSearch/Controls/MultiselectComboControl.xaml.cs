@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
 using GrimSearch.ViewModels;
 using System;
 using System.Collections.ObjectModel;
@@ -19,11 +20,10 @@ namespace GrimSearch.Controls
 
         public MultiselectComboControl()
         {
-            //TODO: Fix - avalonia rewrite
-            //InitializeComponent();
+            AvaloniaXamlLoader.Load(this);
 
             //TODO: Fix - avalonia rewrite
-            //var vm = LayoutRoot.DataContext;
+            //var vm = Parent.DataContext;
         }
 
         private void DeselectAllItemTypes_Click(object sender, RoutedEventArgs e)
@@ -136,10 +136,6 @@ namespace GrimSearch.Controls
                 if (Command != null)
                     Command.Execute(null);
             }
-
-
-
-
         }
     }
 }

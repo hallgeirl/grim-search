@@ -1,9 +1,14 @@
-﻿<UserControl x:Class="GrimSearch.Controls.MultiselectComboControl"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<!--
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:viewModels="clr-namespace:BasicMvvmSample.ViewModels" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="AvTest.Controls.SectionHeader">
+
+
+-->
+<UserControl x:Class="GrimSearch.Controls.MultiselectComboControl"
+    xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:GrimSearch.Controls"
+    xmlns:local="clr-namespace:GrimSearch.Controls" x:DataType="vm:MultiselectComboControlViewModel"
     xmlns:vm="clr-namespace:GrimSearch.ViewModels" mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" x:Name="MultiSelectComboControl">
     <Grid Name="LayoutRoot">
         <Expander IsExpanded="False" Header="{Binding Header, ElementName=MultiSelectComboControl}">
@@ -12,20 +17,20 @@
                     <Button Name="SelectAllItemTypes" Click="SelectAllItemTypes_Click" Padding="5,2,5,2">Select all</Button>
                     <Button Name="DeselectAllItemTypes" Click="DeselectAllItemTypes_Click" Padding="5,2,5,2" Margin="5,0,0,0">Deselect all</Button>
                 </StackPanel>
-                <ListView Name="SelectorListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding ItemsSource, ElementName=MultiSelectComboControl}">
-                    <ListView.ItemsPanel>
+                <ListBox Name="SelectorListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding ItemsSource, ElementName=MultiSelectComboControl}">
+                    <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel IsItemsHost="True" />
+                            <WrapPanel />
                         </ItemsPanelTemplate>
-                    </ListView.ItemsPanel>
-                    <ListView.ItemTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding Selected}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked">
                                 <TextBlock Text="{Binding DisplayText}" />
                             </CheckBox>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
         </Expander>
     </Grid>

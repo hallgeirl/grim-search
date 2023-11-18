@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Grim Search
+StartupWMClass=grimsearch
+Comment=Search tool for items stored on characters in Grim Dawn.
+Exec=/usr/share/grimsearch/GrimSearch
+Icon=grimsearch
+Type=Application
+Categories=Utility
+Path=/usr/share/grimsearch

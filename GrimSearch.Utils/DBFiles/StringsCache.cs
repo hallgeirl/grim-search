@@ -17,7 +17,7 @@ namespace GrimSearch.Utils.DBFiles
 
         private StringsCache()
         {
-            CacheFilename = "TagsCache.json";
+            CacheFilename = ConfigFileHelper.GetConfigFile("TagsCache.json");
         }
 
         public string GetString(string tagName)

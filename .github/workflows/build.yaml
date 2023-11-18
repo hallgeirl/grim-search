@@ -32,13 +32,16 @@ jobs:
         with:
           dotnet-version: 8.0
 
-      - run: dotnet restore && dotnet build
-      - run: dotnet test
+      - run: dotnet restore && dotnet build --no-restore
+      - run: dotnet test --no-restore --no-build
       - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r linux-x64
       - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64
-      - run: |
-          zip -r grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip GrimSearch/bin/Release/net8.0/win-x64/publish
-          zip -r grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip GrimSearch/bin/Release/net8.0/linux-x64/publish
+      - name: create zip files
+        run: |
+          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net8.0/win-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip .
+          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net8.0/linux-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip .
+        env:
+          WORKSPACE_DIR: ${{ github.workspace }}
 
       - name: create release
         uses: softprops/action-gh-release@v1

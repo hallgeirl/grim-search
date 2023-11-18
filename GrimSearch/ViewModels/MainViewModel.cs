@@ -64,7 +64,7 @@ namespace GrimSearch.ViewModels
 
         }
 
-        private async void SearchablePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private async void SearchablePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var searchableProperties = new string[]{
                 "SearchMode",

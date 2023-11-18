@@ -24,9 +24,6 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
 
-    outputs:
-      version: ${{ gitversion.SemVer }}
-
   build:
     needs: [create-release]
     runs-on: ubuntu-latest

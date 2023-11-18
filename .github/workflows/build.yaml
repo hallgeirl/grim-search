@@ -1,10 +1,10 @@
 name: build GDSearch
 
 on:
-  push:
+  pull_request:
     branches:
       - master
-      - linux-support
+  workflow_dispatch:
 
 jobs:
   create-release:
@@ -21,7 +21,11 @@ jobs:
           fetch-depth: 0
 
       - name: Determine Version
+        id: gitversion
         uses: gittools/actions/gitversion/execute@v0
+
+    outputs:
+      version: ${{ gitversion.SemVer }}
 
   build:
     needs: [create-release]

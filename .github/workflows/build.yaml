@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        runtime: ["linux-x64", "windows-x64"]
+        runtime: ["linux-x64", "win-x64"]
 
     steps:
       - uses: actions/checkout@v4

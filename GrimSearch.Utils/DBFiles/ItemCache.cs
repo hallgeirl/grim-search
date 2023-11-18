@@ -18,7 +18,7 @@ namespace GrimSearch.Utils.DBFiles
 
         private ItemCache()
         {
-            CacheFilename = "ItemsCache.json";
+            CacheFilename = ConfigFileHelper.GetConfigFile("ItemsCache.json");
         }
 
         public ItemRaw GetItem(string path)

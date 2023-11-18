@@ -92,7 +92,7 @@ namespace GrimSearch.ViewModels
 
         bool _initialized = false;
         private Index _index = new Index();
-        const string settingsFile = "GDItemSearchSettings.json";
+        string settingsFile = ConfigFileHelper.GetConfigFile("GDItemSearchSettings.json");
         StoredSettings _loadedSettings = new StoredSettings();
 
         #region Events
@@ -120,6 +120,14 @@ namespace GrimSearch.ViewModels
             {
                 _statusBarText = value;
                 this.RaisePropertyChanged("StatusBarText");
+            }
+        }
+
+        public string ConfigFolder
+        {
+            get
+            {
+                return ConfigFileHelper.GetConfigFolder();
             }
         }
 

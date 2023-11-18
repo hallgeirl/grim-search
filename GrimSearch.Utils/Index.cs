@@ -145,7 +145,7 @@ namespace GrimSearch.Utils
 
             var summary = BuildIndex(stateChangeCallback);
 
-            MD5Store.Instance.Save("DatabaseHashes.json");
+            MD5Store.Instance.Save(ConfigFileHelper.GetConfigFile("DatabaseHashes.json"));
 
             return summary;
         }

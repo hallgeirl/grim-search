@@ -8,13 +8,10 @@ on:
   push:
     branches:
       - master
-      - linux-support
 
 jobs:
-  create-release:
+  build-and-publish:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    environment: github
     steps:
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0
@@ -30,53 +27,25 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      - name: Setup dotnet 8.0
+        uses: actions/setup-dotnet@v3
         with:
-          tag_name: ${{ github.ref }}
-          release_name: v${{ steps.gitversion.outputs.semVer }}
+          dotnet-version: 8.0
+
+      - run: dotnet restore && dotnet build
+      - run: dotnet test
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r linux-x64
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64
+      - run: |
+          zip -r grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip GrimSearch/bin/Release/net8.0/win-x64/publish
+          zip -r grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip GrimSearch/bin/Release/net8.0/linux-x64/publish
+
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
           draft: true
-          prerelease: false
-
-    outputs:
-      version: steps.gitversion.outputs.semVer
-
-  publish:
-    needs: [create-release]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup dotnet 8.0
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0
-
-      - run: dotnet --version
-      - run: dotnet restore
-      - run: dotnet build
-      - run: dotnet test
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r linux-x64
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64
-
-  validate:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup dotnet 8.0
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0
-
-      - run: dotnet --version
-      - run: dotnet restore
-      - run: dotnet build
-      - run: dotnet test
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r linux-x64
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64
+          files: |
+            grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip
+            grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip
+            LICENSE

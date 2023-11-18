@@ -7,7 +7,24 @@ on:
       - linux-support
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0
+        with:
+          versionSpec: "5.x"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0
+
   build:
+    needs: [create-release]
     runs-on: ubuntu-latest
     strategy:
       matrix:

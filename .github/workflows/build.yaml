@@ -1,0 +1,25 @@
+name: build GDSearch
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runtimes: ["linux-x64", "windows-x64"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet 8.0${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      # You can test your matrix by printing the current dotnet version
+      - name: Display dotnet version
+        run: dotnet --version
+
+      - run: dotnet restore
+      - run: dotnet build
+      - run: dotnet test

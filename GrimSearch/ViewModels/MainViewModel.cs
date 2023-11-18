@@ -16,14 +16,18 @@ using ReactiveUI;
 using static GrimSearch.Views.MessageBox;
 using GrimSearch.Utils.Steam;
 using System.ComponentModel;
+using GrimSearch.Views;
+using Avalonia.Controls;
 
 namespace GrimSearch.ViewModels
 {
     class MainViewModel : ViewModelBase
     {
-        public MainViewModel(Dispatcher dispatcher) : this()
+        private readonly Window _window;
+        public MainViewModel(Dispatcher dispatcher, Window window) : this()
         {
             Dispatcher = dispatcher;
+            _window = window;
         }
 
         public MainViewModel()
@@ -495,10 +499,9 @@ namespace GrimSearch.ViewModels
             {
                 await Dispatcher.Invoke(async () =>
                 {
-                    //TODO
-                    //var answer = MessageBox.Show(this, "The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButtons.YesNo);
-                    //if (answer == MessageBoxResult.Yes)
-                    //    await SaveSettingsAsync();
+                    var answer = await MessageBox.Show(_window, "The Grim Dawn directories have been successfully detected. Do you want to save and start loading items and characters?", "Success", MessageBoxButtons.YesNo);
+                    if (answer == MessageBoxResult.Yes)
+                        await SaveSettingsAsync();
                 });
             }
         }
@@ -604,9 +607,21 @@ namespace GrimSearch.ViewModels
         private async void Refresh()
         {
             SetStatusbarText("Refreshing...");
-            await BuildIndexAsync(true).ConfigureAwait(false);
-            await SearchAsync().ConfigureAwait(false);
-            ResetStatusBarText();
+            try
+            {
+
+                await BuildIndexAsync(true).ConfigureAwait(false);
+                await SearchAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                FireErrorOccured("An error occured when refreshing: " + ex.Message, ex);
+            }
+            finally
+            {
+                ResetStatusBarText();
+            }
+
         }
 
         private void UpdateSearchBoxVisibility()

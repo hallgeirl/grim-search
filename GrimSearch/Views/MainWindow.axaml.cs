@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using GrimSearch.Common;
 using GrimSearch.ViewModels;
 using static GrimSearch.Views.MessageBox;
@@ -59,7 +60,8 @@ public partial class MainWindow : Window
             exText = ex.ToString();
         }
 
-        MessageBox.Show(this, errorMessage + " Details: " + exText, "Error", MessageBoxButtons.Ok);
+        Dispatcher.UIThread.Invoke(() => MessageBox.Show(this, errorMessage + " Details: " + exText, "Error", MessageBoxButtons.Ok));
+
     }
 
     private void ResultsListView_MouseDoubleClick(object sender, TappedEventArgs e)

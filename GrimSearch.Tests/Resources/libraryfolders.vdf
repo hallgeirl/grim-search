@@ -1,0 +1,38 @@
+"libraryfolders"
+{
+	"0"
+	{
+		"path"		"/home/hallgeir/.steam/debian-installation"
+		"label"		""
+		"contentid"		"230356311569052536"
+		"totalsize"		"0"
+		"update_clean_bytes_tally"		"3534091994"
+		"time_last_update_corruption"		"0"
+		"apps"
+		{
+			"228980"		"251612441"
+			"1493710"		"1234949917"
+			"1628350"		"704024220"
+		}
+	}
+	"1"
+	{
+		"path"		"/mnt/app-drive/SteamLibraryLinux"
+		"label"		""
+		"contentid"		"8289395921232740153"
+		"totalsize"		"1974166614016"
+		"update_clean_bytes_tally"		"14786196170"
+		"time_last_update_corruption"		"0"
+		"apps"
+		{
+			"219990"		"10178744323"
+			"427520"		"1907198209"
+			"493520"		"14359023830"
+			"548430"		"3309452137"
+			"1391110"		"644137223"
+			"1887720"		"1098535663"
+			"2218750"		"958990160"
+			"2348590"		"1222652790"
+		}
+	}
+}

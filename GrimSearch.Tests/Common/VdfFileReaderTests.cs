@@ -1,12 +1,7 @@
-﻿using GrimSearch.Common;
+﻿using GrimSearch.Utils.Steam;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GrimSearch.Tests.Common
 {
@@ -16,7 +11,7 @@ namespace GrimSearch.Tests.Common
         [TestMethod]
         public void TestConvertVdfToJson()
         {
-            var fileContent = File.ReadAllText("Resources\\config.vdf");
+            var fileContent = File.ReadAllText("Resources/config.vdf");
             var jsonContent = VdfFileReader.ToJson(fileContent);
 
             var jsonObject = JsonConvert.DeserializeObject(jsonContent);

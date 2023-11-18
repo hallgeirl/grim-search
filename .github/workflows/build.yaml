@@ -1,0 +1,72 @@
+name: build GDSearch
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0
+        with:
+          versionSpec: "5.x"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0
+    outputs:
+      version: steps.gitversion.outputs.semVer
+
+  publish:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        runtime: ["linux-x64", "win-x64"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet 8.0
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0
+
+      - run: dotnet --version
+      - run: dotnet restore
+      - run: dotnet build
+      - run: dotnet test
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r ${{ matrix.runtime }}
+
+  validate:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        runtime: ["linux-x64", "win-x64"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet 8.0
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0
+
+      - run: dotnet --version
+      - run: dotnet restore
+      - run: dotnet build
+      - run: dotnet test
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r ${{ matrix.runtime }}

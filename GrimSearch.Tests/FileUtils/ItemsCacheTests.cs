@@ -12,9 +12,9 @@ namespace GrimSearch.Tests.FileUtils
         [TestMethod]
         public void TestLoadAllItemsFromCache()
         {
-            ItemCache.Instance.CacheFilename = "Resources\\ItemsCache.json";
+            ItemCache.Instance.CacheFilename = "Resources/ItemsCache.json";
 
-            ItemCache.Instance.LoadAllItems(null, false, true, (msg  ) => { });
+            ItemCache.Instance.LoadAllItems(null, false, true, (msg) => { });
 
             var item = ItemCache.Instance.GetItem("records/items/lootsets/itemset_d017.dbr");
             Assert.AreEqual("records/skills/itemskills/legendary/item_ultoswrath.dbr", item.StringParametersRaw["itemSkillName"]);

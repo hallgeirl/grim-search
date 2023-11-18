@@ -1,20 +1,11 @@
-﻿using GrimSearch.ViewModels;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
+using GrimSearch.ViewModels;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GrimSearch.Controls
 {
@@ -29,9 +20,10 @@ namespace GrimSearch.Controls
 
         public MultiselectComboControl()
         {
-            InitializeComponent();
+            AvaloniaXamlLoader.Load(this);
 
-            var vm = LayoutRoot.DataContext;
+            //TODO: Fix - avalonia rewrite
+            //var vm = Parent.DataContext;
         }
 
         private void DeselectAllItemTypes_Click(object sender, RoutedEventArgs e)
@@ -53,6 +45,8 @@ namespace GrimSearch.Controls
             }
 
             SelectionChanged?.Invoke(this, new EventArgs());
+            if (Command != null)
+                Command.Execute(null);
         }
 
         private void SelectAllItemTypes_Click(object sender, RoutedEventArgs e)
@@ -74,73 +68,73 @@ namespace GrimSearch.Controls
             }
 
             SelectionChanged?.Invoke(this, new EventArgs());
+            if (Command != null)
+                Command.Execute(null);
         }
-        
+
+        ObservableCollection<MultiselectComboItem> _itemsSource;
         public ObservableCollection<MultiselectComboItem> ItemsSource
         {
             get
             {
-                
-                return (ObservableCollection<MultiselectComboItem>)GetValue(ItemsSourceProperty);
+
+                return _itemsSource;
 
             }
             set
             {
-                SetValue(ItemsSourceProperty, value);
-                SelectorListView.ItemsSource = value;
+                SetAndRaise(ItemsSourceProperty, ref _itemsSource, value);
             }
         }
 
         public event EventHandler SelectionChanged;
 
-        public static DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(ObservableCollection<MultiselectComboItem>), typeof(MultiselectComboControl),
-            new FrameworkPropertyMetadata
-            {
-                DefaultValue = new ObservableCollection<MultiselectComboItem>(),
-                DefaultUpdateSourceTrigger = System.Windows.Data.UpdateSourceTrigger.PropertyChanged
-            });
+        public static readonly DirectProperty<MultiselectComboControl, ObservableCollection<MultiselectComboItem>> ItemsSourceProperty
+         = AvaloniaProperty.RegisterDirect<MultiselectComboControl, ObservableCollection<MultiselectComboItem>>(nameof(ItemsSource), o => o.ItemsSource, (o, v) => o.ItemsSource = v);
 
-
-
+        string _header;
         public string Header
         {
             get
             {
-                return (string)GetValue(HeaderProperty);
+                return _header;
             }
             set
             {
-                SetValue(HeaderProperty, value);
+                SetAndRaise(HeaderProperty, ref _header, value);
             }
         }
-        public static DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(string), typeof(MultiselectComboControl));
+        public static readonly DirectProperty<MultiselectComboControl, string> HeaderProperty = AvaloniaProperty.RegisterDirect<MultiselectComboControl, string>(nameof(Header), o => o.Header, (o, s) => o.Header = s);
 
 
+        ICommand _command;
         public ICommand Command
         {
             get
             {
-                return (ICommand)GetValue(CommandProperty);
+                return _command;
             }
             set
             {
-                SetValue(CommandProperty, value);
+                SetAndRaise(CommandProperty, ref _command, value);
             }
         }
-        public static DependencyProperty CommandProperty = DependencyProperty.Register("Command", typeof(ICommand), typeof(MultiselectComboControl));
+
+        public static readonly DirectProperty<MultiselectComboControl, ICommand> CommandProperty = AvaloniaProperty.RegisterDirect<MultiselectComboControl, ICommand>(nameof(Command), o => o.Command, (o, v) => o.Command = v);
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (_fireCheckboxEvents)
             {
+                // The model binding updates after the Checked event is fired. Therefore, we need to update the model with the actual checked value before executing the command.
+                var checkBox = sender as CheckBox;
+                var vm = checkBox.DataContext as MultiselectComboItem;
+                vm.Selected = checkBox.IsChecked.Value;
+
                 SelectionChanged?.Invoke(this, new EventArgs());
                 if (Command != null)
                     Command.Execute(null);
             }
-                
-
-            
-
         }
     }
 }

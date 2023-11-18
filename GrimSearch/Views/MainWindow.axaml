@@ -1,0 +1,210 @@
+<Window xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:GrimSearch.ViewModels"
+    xmlns:c="using:GrimSearch.Controls"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel/>
+    </Design.DataContext>
+
+    <DockPanel>
+        <DockPanel Dock="Bottom">
+            <TextBlock Text="{Binding StatusBarText}" Margin="5,5,5,5" />
+        </DockPanel>
+
+        <TabControl Name="MainTabControl" SelectedItem="">
+            <TabItem Header="Search" Name="SearchTab">
+                <ScrollViewer>
+                    <StackPanel Margin="24,19,24,19">
+                        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="This little app lets you search for items across all your Grim Dawn characters! Wow!" VerticalAlignment="Top"/>
+                        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Just type in something to search for (e.g. an item name, or parts of it), select some filters (if you want), and go nuts!" VerticalAlignment="Top"/>
+
+                        <Grid Margin="0,20,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="200" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Name="SearchLabel" Grid.Column="0" Content="Search text" Margin="0,0,0,0" FontWeight="Bold" />
+                            <TextBox Name="SearchTextBox" Grid.Column="1" Text="{Binding SearchString}" IsVisible="{Binding FreeTextSearchVisibility}" />
+                            <ComboBox Name="CharacterSelectionComboBox" HorizontalAlignment="Left" Grid.Column="1" SelectedValue="{Binding SearchString}" ItemsSource="{Binding AllCharacters}" IsVisible="{Binding CharacterBasedSearchVisibility}" Width="300">
+                                <!-- Text="Select character..."-->
+                            </ComboBox>
+                            <Label Name="FiltersLabel" Grid.Column="0" Grid.Row="1" Content="Filters" Margin="0,0,0,0" FontWeight="Bold" />
+
+                            <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+                                <Grid.Styles>
+                                    <Style Selector="Label,CheckBox,StackPanel,ComboBox" >
+                                        <Setter Property="Margin" Value="5,5,5,5" />
+                                        <Setter Property="VerticalAlignment" Value="Top" />
+                                    </Style>
+                                </Grid.Styles>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130" />
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="130" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Label Content="Include equipped" />
+                                <CheckBox Name="IncludeEquippedCheckBox" Grid.Column="1" IsChecked="{Binding ShowEquipped}" />
+
+                                <Label Content="Level range" Grid.Row="1" />
+                                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                                    <TextBox Name="MinimumLevelTextBox" Text="{Binding MinimumLevel}" Width="30" />
+                                    <TextBlock Text="-" />
+                                    <TextBox Name="MaximumLevelTextBox" Text="{Binding MaximumLevel}" Width="30" />
+                                </StackPanel>
+
+                                <Label Content="Search mode" Grid.Row="2" />
+                                <ComboBox x:Name="SearchModeSelector" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SearchModes, Mode=TwoWay}" SelectedItem="{Binding SearchMode}" Grid.ColumnSpan="2" Margin="5,0,129,0" />
+                                    <!-- Text="Search mode" -->
+
+                                <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3" VerticalAlignment="Top">
+                                    <c:MultiselectComboControl Header="Item type" x:Name="ItemTypesSelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemTypes, Mode=TwoWay}" Command="{Binding SearchCommand}" />
+                                    <c:MultiselectComboControl Header="Item quality" x:Name="RaritySelector" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding ItemQualities, Mode=TwoWay}" Grid.Row="1" Command="{Binding SearchCommand}" />
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Grid.Row="2" VerticalAlignment="Center">
+                                <Label Content="Results" FontWeight="Bold" />
+                                <TextBlock Text="{Binding SearchResultText}" FontWeight="Bold" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
+                                <Button Margin="0,0,0,0" Command="{Binding RefreshCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="/Assets/arrow_refresh.png"></Image>
+                                        <TextBlock Text="Refresh" />
+                                    </StackPanel>
+                                </Button>
+                                <CheckBox Margin="10,5,0,0" IsChecked="{Binding AutoRefresh, Mode=TwoWay}">Auto refresh</CheckBox>
+                            </StackPanel>
+                        </Grid>
+
+
+                        <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
+
+                        <ListBox MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}" DoubleTapped="ResultsListView_MouseDoubleClick" SelectionMode="Multiple" KeyUp="ResultsListView_KeyUp">
+                            <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="0,5,0,5"/>
+                            </Style>
+                            </ListBox.Styles>
+                            <ListBox.Template>
+                                <ControlTemplate>
+                                    <DockPanel LastChildFill="True">
+                                        <Grid DockPanel.Dock="Top">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="250"></ColumnDefinition>
+                                                <ColumnDefinition Width="200"></ColumnDefinition>
+                                                <ColumnDefinition Width="50"></ColumnDefinition>
+                                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                                <ColumnDefinition Width="100"></ColumnDefinition>
+                                                <ColumnDefinition Width="200"></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" FontWeight="Bold" Padding="0,5,0,5">Item name</Label>
+                                            <Label Grid.Column="1" FontWeight="Bold" Padding="0,5,0,5">Character</Label>
+                                            <Label Grid.Column="2" FontWeight="Bold" Padding="0,5,0,5">Level</Label>
+                                            <Label Grid.Column="3" FontWeight="Bold" Padding="0,5,0,5">Core stats</Label>
+                                            <Label Grid.Column="4" FontWeight="Bold" Padding="0,5,0,5">Bag</Label>
+                                            <Label Grid.Column="5" FontWeight="Bold" Padding="0,5,0,5">Also exists on</Label>
+                                        </Grid>
+                                        <ItemsPresenter></ItemsPresenter>
+                                    </DockPanel>
+                                </ControlTemplate>
+                            </ListBox.Template>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="250"></ColumnDefinition>
+                                            <ColumnDefinition Width="200"></ColumnDefinition>
+                                            <ColumnDefinition Width="50"></ColumnDefinition>
+                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                            <ColumnDefinition Width="100"></ColumnDefinition>
+                                            <ColumnDefinition Width="200"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" Grid.Column="0" Foreground="{Binding ItemColor}"></TextBlock>
+                                        <TextBlock Text="{Binding Owner}" Grid.Column="1"></TextBlock>
+                                        <TextBlock Text="{Binding LevelRequirement}" Grid.Column="2"></TextBlock>
+                                        <TextBlock Text="{Binding CoreStats}" Grid.Column="3"></TextBlock>
+                                        <TextBlock Text="{Binding Bag}" Grid.Column="4"></TextBlock>
+                                        <TextBlock Text="{Binding DuplicatesOn}" Grid.Column="5"></TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <!--<i:Interaction.Behaviors>
+                                <ia:EventTriggerBehavior EventName="DoubleTapped" SourceObject="ResultsListView">
+                                    <ia:InvokeCommandAction Command="{Binding OpenGDTools}" />
+                                </ia:EventTriggerBehavior>
+                            </i:Interaction.Behaviors>-->
+                        </ListBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Settings" Name="SettingsTab">
+                <StackPanel Margin="24,19,24,19">
+                    <TextBlock HorizontalAlignment="Left" Margin="0,0,0,0" TextWrapping="Wrap" Text="Grim Search lets you search for items across your Grim Dawn characters! Before you start, you need to configure the paths to Grim Dawn itself, and your saves." VerticalAlignment="Top"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="If you use Steam, and you haven't changed any of the defaults, you can use the following values:" VerticalAlignment="Top"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="24,8,0,0" TextWrapping="Wrap" Text="Grim Dawn directory: &lt;Path to Steam folder&gt;\SteamApps\common\Grim Dawn" VerticalAlignment="Top"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="24,0,0,0" TextWrapping="Wrap" Text="Saves directory: &lt;Path to Steam folder&gt;\userdata\&lt;some arbitrary numbers&gt;\219990\remote\save" VerticalAlignment="Top"/>
+
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Label Name="GDDirLabel" Grid.Column="0" Content="Grim Dawn directory" Margin="0,0,0,0" />
+                        <Label Name="GDSavesDirLabel" Grid.Column="0" Grid.Row="1" Content="Saves directory" Margin="0,0,0,0" />
+                        <TextBox Name="GDDirTextBox" Text="{Binding GrimDawnDirectory}" Grid.Column="1" />
+                        <TextBox Name="GDSavesTextBox" Text="{Binding GrimDawnSavesDirectory}" Grid.Column="1" Grid.Row="1" />
+                    </Grid>
+                    <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save will load all items from the Grim Dawn data files, if not previously loaded. This WILL take some time!" VerticalAlignment="Top"/>
+                    <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="350" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Save" Name="SaveSettingsButton" Width="50" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding SaveSettingsCommand}" />
+                        <Button Content="Clear items cache" Name="RemoveItemCacheButton" Width="150" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding ClearCacheCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="About">
+                <StackPanel Margin="24,19,24,19">
+                    <TextBlock FontWeight="Bold">Disclaimer &amp; License</TextBlock>
+                    <TextBlock TextWrapping="Wrap">This tool is written by Hallgeir Lien. Feel free to use it as you want - at your own risk! This is a project done on my spare time and is licenced under the MIT license. For the latest version of this license, please see:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     <!-- <Hyperlink NavigateUri="https://opensource.org/licenses/MIT">https://opensource.org/licenses/MIT</Hyperlink> -->. For simplicity, the license is provided below as well.</TextBlock>
+
+                    <StackPanel Margin="16,10,16,0">
+                        <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</TextBlock>
+
+
+                        <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</TextBlock>
+
+                        <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" FontStyle="Italic">THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</TextBlock>
+                    </StackPanel>
+                    <TextBlock Margin="0,10,0,0" FontWeight="Bold">Attributions</TextBlock>
+                    <TextBlock TextWrapping="Wrap">Icons within this application (except the application's icon) is from the Silk Icons pack from http://www.famfamfam.com/. The icons are licensed under the Creative Commons 3.0 license found at https://creativecommons.org/licenses/by/3.0/.</TextBlock>
+                    <TextBlock TextWrapping="Wrap">The code used to parse the .arc and .arz files from Grim Dawn is loosely translated from grimarc/grimarz made by github user atom0s [atom0s@live.com]. Their work is found at https://github.com/atom0s/grimarz and https://github.com/atom0s/grimarc, and is licensed under GPL v3, found at http://www.gnu.org/licenses/.</TextBlock>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

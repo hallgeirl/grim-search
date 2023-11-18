@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace GrimSearch.Common
+namespace GrimSearch.Utils.Steam
 {
     //Reader for the Valve config file format
     public static class VdfFileReader

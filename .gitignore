@@ -2,19 +2,11 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/GrimSearch/bin
-/GrimSearch/obj
-/GrimSearchTest/bin
-/GrimSearchTest/obj
-/GrimSearchUtil/bin
-/GrimSearchUtil/obj
-/.vs/GrimSearch/v15
-/GrimSearch.FileUtils/obj
-/GrimSearch.FileUtils/bin
+**/bin
+**/obj
+**/.vs
 /packages
-/.vs/config
-/GrimSearch.Tests/bin
-/GrimSearch.Tests/obj
-/.vs/GrimSearch/DesignTimeBuild/.dtbcache
-/.vs/GrimSearch/v16
-/.vs
+GrimSearch/GDItemSearchSettings.json
+GrimSearch/DatabaseHashes.json
+GrimSearch/ItemsCache.json
+GrimSearch/TagsCache.json

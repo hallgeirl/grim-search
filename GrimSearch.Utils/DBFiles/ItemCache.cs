@@ -38,7 +38,7 @@ namespace GrimSearch.Utils.DBFiles
                 _cache = JsonConvert.DeserializeObject<ItemCacheContainer>(File.ReadAllText(CacheFilename));
                 LogHelper.GetLog().Debug("Items loaded from cache");
             }
-        
+
             if (!skipVersionCheck)
             {
                 string gdLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
@@ -95,7 +95,10 @@ namespace GrimSearch.Utils.DBFiles
         private void ReadItemsFromFiles(string grimDawnDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
         {
             string[] dbFiles = GetDBFilesWithFullPaths(grimDawnDirectory);
-
+            if (dbFiles.Length == 0)
+            {
+                throw new InvalidOperationException($"Invalid Grim Dawn directory {grimDawnDirectory}: No data files found.");
+            }
             int i = 0;
             foreach (var file in dbFiles)
             {
@@ -106,7 +109,7 @@ namespace GrimSearch.Utils.DBFiles
 
                 var extractPath = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath", Path.GetFileNameWithoutExtension(file) + "_" + Guid.NewGuid().ToString());
 
-                ArzExtractor.Extract(file, grimDawnDirectory, extractPath);
+                ArzExtractor.ExtractArz(file, grimDawnDirectory, extractPath);
 
                 stateChangeCallback("Reading items (file " + i + " of " + dbFiles.Length + ")");
                 PopulateAllItems(extractPath, stateChangeCallback);
@@ -121,9 +124,9 @@ namespace GrimSearch.Utils.DBFiles
         private static string[] GetDBFilesWithFullPaths(string grimDawnDirectory)
         {
             string[] dbFiles = {
-                "database\\database.arz",
-                "gdx1\\database\\GDX1.arz",
-                "gdx2\\database\\GDX2.arz"
+                "database/database.arz",
+                "gdx1/database/GDX1.arz",
+                "gdx2/database/GDX2.arz"
             };
 
             List<string> dbFilesThatExist = new List<string>();

@@ -95,7 +95,10 @@ namespace GrimSearch.Utils.DBFiles
         private void ReadItemsFromFiles(string grimDawnDirectory, bool keepExtractedFiles, Action<string> stateChangeCallback)
         {
             string[] dbFiles = GetDBFilesWithFullPaths(grimDawnDirectory);
-
+            if (dbFiles.Length == 0)
+            {
+                throw new InvalidOperationException($"Invalid Grim Dawn directory {grimDawnDirectory}: No data files found.");
+            }
             int i = 0;
             foreach (var file in dbFiles)
             {

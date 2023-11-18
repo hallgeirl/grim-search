@@ -61,7 +61,6 @@ public partial class MainWindow : Window
         }
 
         Dispatcher.UIThread.Invoke(() => MessageBox.Show(this, errorMessage + " Details: " + exText, "Error", MessageBoxButtons.Ok));
-
     }
 
     private void ResultsListView_MouseDoubleClick(object sender, TappedEventArgs e)

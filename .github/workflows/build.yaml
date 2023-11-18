@@ -8,11 +8,13 @@ on:
   push:
     branches:
       - master
+      - linux-support
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+    environment: github
     steps:
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0
@@ -27,6 +29,18 @@ jobs:
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: v${{ steps.gitversion.outputs.semVer }}
+          draft: true
+          prerelease: false
+
     outputs:
       version: steps.gitversion.outputs.semVer
 
@@ -34,9 +48,6 @@ jobs:
     needs: [create-release]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-    strategy:
-      matrix:
-        runtime: ["linux-x64", "win-x64"]
 
     steps:
       - uses: actions/checkout@v4
@@ -49,14 +60,12 @@ jobs:
       - run: dotnet restore
       - run: dotnet build
       - run: dotnet test
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r ${{ matrix.runtime }}
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r linux-x64
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64
 
   validate:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    strategy:
-      matrix:
-        runtime: ["linux-x64", "win-x64"]
 
     steps:
       - uses: actions/checkout@v4
@@ -69,4 +78,5 @@ jobs:
       - run: dotnet restore
       - run: dotnet build
       - run: dotnet test
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r ${{ matrix.runtime }}
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r linux-x64
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64

@@ -10,9 +10,8 @@ on:
       - master
 
 jobs:
-  create-release:
+  build-and-publish:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     steps:
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0
@@ -27,46 +26,29 @@ jobs:
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
-    outputs:
-      version: steps.gitversion.outputs.semVer
 
-  publish:
-    needs: [create-release]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    strategy:
-      matrix:
-        runtime: ["linux-x64", "win-x64"]
-
-    steps:
-      - uses: actions/checkout@v4
       - name: Setup dotnet 8.0
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0
 
-      - run: dotnet --version
-      - run: dotnet restore
-      - run: dotnet build
-      - run: dotnet test
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r ${{ matrix.runtime }}
+      - run: dotnet restore && dotnet build --no-restore
+      - run: dotnet test --no-restore --no-build
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r linux-x64
+      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64
+      - name: create zip files
+        run: |
+          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net8.0/win-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip .
+          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net8.0/linux-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip .
+        env:
+          WORKSPACE_DIR: ${{ github.workspace }}
 
-  validate:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    strategy:
-      matrix:
-        runtime: ["linux-x64", "win-x64"]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup dotnet 8.0
-        uses: actions/setup-dotnet@v3
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          dotnet-version: 8.0
-
-      - run: dotnet --version
-      - run: dotnet restore
-      - run: dotnet build
-      - run: dotnet test
-      - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r ${{ matrix.runtime }}
+          draft: true
+          files: |
+            grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip
+            grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip
+            LICENSE

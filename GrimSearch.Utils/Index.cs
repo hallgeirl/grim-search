@@ -341,6 +341,12 @@ namespace GrimSearch.Utils
             if (itemStatDef == null)
                 itemStatDef = itemDef;
 
+            ItemRaw petStatItemDef = null;
+            if (itemStatDef.StringParametersRaw.ContainsKey("petBonusName"))
+            {
+                petStatItemDef = _itemCache.GetItem(itemStatDef.StringParametersRaw["petBonusName"]);
+            }
+
             var indexItem = new IndexItem();
             indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);
             indexItem.Owner = character.Header.Name;
@@ -351,7 +357,10 @@ namespace GrimSearch.Utils
             indexItem.ItemType = ItemHelper.GetItemType(itemStatDef);
             indexItem.Source = itemDef;
             indexItem.SourceInstance = item;
-            indexItem.ItemStats = ItemHelper.GetStats(item, itemStatDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList();
+            var itemStats = ItemHelper.GetStats(item, itemStatDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList(); ;
+            var itemPetStats = petStatItemDef != null ? ItemHelper.GetStats(null, petStatItemDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList() : new List<string>();
+            indexItem.ItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
+
             indexItem.Searchable = BuildSearchableString(character, item, itemDef, indexItem.ItemStats);
 
             return indexItem;
@@ -365,7 +374,7 @@ namespace GrimSearch.Utils
             if (filter.MinLevel != null && item.LevelRequirement < filter.MinLevel)
                 return false;
 
-            if (filter.IncludeEquipped != null && (!filter.IncludeEquipped.Value && item.IsEquipped))
+            if (filter.IncludeEquipped != null && !filter.IncludeEquipped.Value && item.IsEquipped)
                 return false;
 
             if (filter.ItemQualities != null && !filter.ItemQualities.Contains(item.Rarity))

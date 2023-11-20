@@ -26,8 +26,8 @@ namespace GrimSearch.Utils.CharacterFiles
 
         public void EndRead()
         {
-            if (file.BaseStream.Position != end)
-                throw new Exception();
+            //if (file.BaseStream.Position != end)
+            //        throw new Exception();
         }
 
 

@@ -13,17 +13,6 @@ namespace GrimSearch.Utils.CharacterFiles
         public CharacterBio Bio = new CharacterBio();
         public Inventory Inventory { get; set; }
         public CharacterStash Stash = new CharacterStash();
-        private RespawnList respawns = new RespawnList();
-        private TeleportList teleports = new TeleportList();
-        private MarkerList markers = new MarkerList();
-        private ShrineList shrines = new ShrineList();
-        private CharacterSkills skills = new CharacterSkills();
-        private LoreNotes notes = new LoreNotes();
-        private FactionPack factions = new FactionPack();
-        private UISettings ui = new UISettings();
-        private TutorialPages tutorials = new TutorialPages();
-        private PlayStats stats = new PlayStats();
-        private TriggerTokens tokens = new TriggerTokens();
 
         public CharacterFile()
         {
@@ -56,24 +45,8 @@ namespace GrimSearch.Utils.CharacterFiles
             Bio.Read(file);
             Inventory.Read(file);
             Stash.Read(file);
-            respawns.Read(file);
-            teleports.Read(file);
-            markers.Read(file);
-            shrines.Read(file);
-            skills.Read(file);
-            notes.Read(file);
-            factions.Read(file);
-            ui.Read(file);
-            tutorials.Read(file);
-            stats.Read(file);
 
-            if (fileVersion >= 7)
-                tokens.Read(file);
-
-
-            file.EndRead();
+            // There's more in the character file, but we don't really care about it.
         }
-
-        
     }
 }

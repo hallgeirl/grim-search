@@ -24,13 +24,6 @@ namespace GrimSearch.Utils.CharacterFiles
             ReadKey();
         }
 
-        public void EndRead()
-        {
-            if (file.BaseStream.Position != end)
-                throw new Exception();
-        }
-
-
         BinaryReader file;
 
         void ReadKey()

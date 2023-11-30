@@ -1,6 +1,7 @@
 ﻿using GrimSearch.Utils.CharacterFiles;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -75,7 +76,7 @@ namespace GrimSearch.Utils.DBFiles
 
         public static string GetItemTypeDisplayName(string itemType)
         {
-            switch(itemType)
+            switch (itemType)
             {
                 case "ArmorProtective_Head":
                     return "Helm";
@@ -165,12 +166,12 @@ namespace GrimSearch.Utils.DBFiles
             foreach (var s in itemDef.NumericalParametersRaw)
                 combinedStats.Add(s.Key, new List<float>() { s.Value });
 
-            if (!string.IsNullOrEmpty(item.prefixName))
+            if (!string.IsNullOrEmpty(item?.prefixName))
             {
                 AddNumericalStatsFromItemOrSuffix(item.prefixName, combinedStats);
             }
 
-            if (!string.IsNullOrEmpty(item.suffixName))
+            if (!string.IsNullOrEmpty(item?.suffixName))
             {
                 AddNumericalStatsFromItemOrSuffix(item.suffixName, combinedStats);
             }
@@ -190,12 +191,12 @@ namespace GrimSearch.Utils.DBFiles
             foreach (var s in itemDef.StringParametersRaw)
                 combinedStats.Add(s.Key, new List<string>() { s.Value });
 
-            if (!string.IsNullOrEmpty(item.prefixName))
+            if (!string.IsNullOrEmpty(item?.prefixName))
             {
                 AddStringStatsFromItemOrSuffix(item.prefixName, combinedStats);
             }
 
-            if (!string.IsNullOrEmpty(item.suffixName))
+            if (!string.IsNullOrEmpty(item?.suffixName))
             {
                 AddStringStatsFromItemOrSuffix(item.suffixName, combinedStats);
             }
@@ -234,7 +235,6 @@ namespace GrimSearch.Utils.DBFiles
         /// <returns></returns>
         private static List<string> GetStatsCore(Dictionary<string, List<float>> itemNumericalParameters, Dictionary<string, List<string>> itemStringParameters)
         {
-            //Dictionary<string, string> damageTypesMapping = new Dictionary<string, string>();
             var offensiveStats = new HashSet<KeyValuePair<string, List<float>>>(itemNumericalParameters.Where(x => x.Key.StartsWith("offensive")));
             List<string> modifiers = new List<string>();
 
@@ -323,7 +323,10 @@ namespace GrimSearch.Utils.DBFiles
 
                 var s = StringsCache.Instance.GetString(tagName);
                 if (s != null)
-                    modifiers.Add(s);
+                {
+                    var statWithStringAndNumber = s.Replace("{%t0}", $"{stat.Value.Sum()}");
+                    modifiers.Add(statWithStringAndNumber);
+                }
             }
         }
 
@@ -346,7 +349,10 @@ namespace GrimSearch.Utils.DBFiles
 
                 var s = StringsCache.Instance.GetString(tagName);
                 if (s != null)
-                    modifiers.Add(s);
+                {
+                    var statWithStringAndNumber = s.Replace("{%t0}", $"{stat.Value.Sum()}");
+                    modifiers.Add(statWithStringAndNumber);
+                }
             }
         }
 
@@ -373,7 +379,10 @@ namespace GrimSearch.Utils.DBFiles
 
                 var s = StringsCache.Instance.GetString(tagName);
                 if (s != null)
-                    modifiers.Add(s);
+                {
+                    var statWithStringAndNumber = s.Replace("{%+.0f0}", $"+{stat.Value.Sum()}");
+                    modifiers.Add(statWithStringAndNumber);
+                }
             }
         }
 
@@ -395,8 +404,15 @@ namespace GrimSearch.Utils.DBFiles
                 }
 
                 var s = StringsCache.Instance.GetString(tagName);
+                if (s == null)
+                {
+                    s = StringsCache.Instance.GetString($"tag{tagName}");
+                }
                 if (s != null)
-                    modifiers.Add(s);
+                {
+                    var statWithStringAndNumber = s.Replace("{%+.0f0}", $"+{stat.Value.Sum()}");
+                    modifiers.Add(statWithStringAndNumber);
+                }
             }
         }
 
@@ -414,7 +430,7 @@ namespace GrimSearch.Utils.DBFiles
         {
             if (itemDef.StringParametersRaw.ContainsKey("itemNameTag"))
                 return StringsCache.Instance.GetString(itemDef.StringParametersRaw["itemNameTag"]);
-            
+
             if (itemDef.StringParametersRaw["Class"] != "ItemRelic" && itemDef.StringParametersRaw.ContainsKey("FileDescription"))
                 return itemDef.StringParametersRaw["FileDescription"];
 

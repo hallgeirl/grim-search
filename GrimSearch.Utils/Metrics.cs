@@ -7,6 +7,7 @@ public static class Metrics
     {
         IndexBuildTime = _meter.CreateHistogram<double>("indexBuildTime", "ms");
         SearchTime = _meter.CreateHistogram<double>("searchTime", "ms");
+
     }
     public static Meter GetMeter()
     {

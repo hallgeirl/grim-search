@@ -2,12 +2,13 @@
 using GrimSearch.Utils.DBFiles;
 
 using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Codecs;
 using Lucene.Net.Documents;
+using Lucene.Net.Documents.Extensions;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,18 +22,19 @@ using System.Threading.Tasks;
 
 namespace GrimSearch.Utils
 {
-    public class Index : IIndex
+    public class LuceneIndex : IIndex, IDisposable
     {
-        Lucene.Net.Store.Directory _indexRamDir = new RAMDirectory();
-        Lucene.Net.Analysis.Analyzer _analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
+        Lucene.Net.Store.Directory _indexRamDir;
+        IndexReader _indexReader;
+
         string formulasFilename = "formulas.gst";
 
-        public Index(string formulasFilename = "formulas.gst")
+        public LuceneIndex(string formulasFilename = "formulas.gst")
         {
             this.formulasFilename = formulasFilename;
         }
 
-        public Index(ItemCache itemCache, StringsCache stringsCache, string formulasFilename = "formulas.gst") : this(formulasFilename)
+        public LuceneIndex(ItemCache itemCache, StringsCache stringsCache, string formulasFilename = "formulas.gst") : this(formulasFilename)
         {
             _itemCache = itemCache;
             _stringsCache = stringsCache;
@@ -41,7 +43,6 @@ namespace GrimSearch.Utils
         ItemCache _itemCache = ItemCache.Instance;
         StringsCache _stringsCache = StringsCache.Instance;
         List<CharacterFile> _characters = new List<CharacterFile>();
-        List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
         public async Task<SearchResult> FindAsync(string search, IndexFilter filter)
         {
@@ -50,18 +51,47 @@ namespace GrimSearch.Utils
 
         private SearchResult Find(string search, IndexFilter filter)
         {
+            //for reference: https://zetcode.com/csharp/lucene/
             var sw = new Stopwatch();
             sw.Start();
             try
             {
                 search = search ?? "";
 
-                var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
 
-                if (filter.PageSize != null)
-                    return new SearchResult(result.Take(filter.PageSize.Value).ToList(), result.Count());
+                var searcher = new IndexSearcher(_indexReader);
+                var searchTerms = search.Split(" ").Where(x => !string.IsNullOrWhiteSpace(x));
 
-                return new SearchResult(result.ToList());
+                var fullQuery = new BooleanQuery();
+
+                //var query = new PhraseQuery();
+                var query = new FuzzyQuery(new Term("searchable", search));
+                fullQuery.Add(query, Occur.MUST);
+                AddFilterQueries(fullQuery, filter);
+                /*foreach (var searchTerm in searchTerms)
+                {
+                    query.Add(new Term("searchable", searchTerm));
+                }*/
+
+                TopDocs topDocs = searcher.Search(fullQuery, n: 1000);
+
+                List<IndexItem> results = new List<IndexItem>();
+
+                foreach (var sdoc in topDocs.ScoreDocs)
+                {
+                    Document doc = searcher.Doc(sdoc.Doc);
+                    results.Add(DocumentToIndexItem(doc));
+                }
+
+
+                return new SearchResult(results, topDocs.TotalHits);
+
+                //                var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
+
+                /* if (filter.PageSize != null)
+                     return new SearchResult(result.Take(filter.PageSize.Value).ToList(), result.Count());
+
+                 return new SearchResult(result.ToList());*/
             }
             finally
             {
@@ -78,7 +108,8 @@ namespace GrimSearch.Utils
 
         private SearchResult FindDuplicates(string search, IndexFilter filter)
         {
-            var sw = new Stopwatch();
+            return new SearchResult();
+            /*var sw = new Stopwatch();
             sw.Start();
             try
             {
@@ -112,7 +143,7 @@ namespace GrimSearch.Utils
             {
                 sw.Stop();
                 Metrics.SearchTime.Record(sw.ElapsedMilliseconds);
-            }
+            }*/
         }
 
 
@@ -123,7 +154,8 @@ namespace GrimSearch.Utils
 
         private SearchResult FindUnique(string search, IndexFilter filter)
         {
-            var sw = new Stopwatch();
+            return new SearchResult();
+            /*var sw = new Stopwatch();
             sw.Start();
             try
             {
@@ -157,7 +189,7 @@ namespace GrimSearch.Utils
             {
                 sw.Stop();
                 Metrics.SearchTime.Record(sw.ElapsedMilliseconds);
-            }
+            }*/
         }
 
 
@@ -177,10 +209,40 @@ namespace GrimSearch.Utils
             return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback)).ConfigureAwait(false);
         }
 
+        private IndexItem DocumentToIndexItem(Document doc)
+        {
+            var indexItem = new IndexItem();
+            indexItem.ItemName = doc.GetField("itemName").GetStringValue();
+            indexItem.Owner = doc.GetField("owner").GetStringValue();
+            indexItem.Rarity = doc.GetField("rarity")?.GetStringValue();
+            var levelRequirement = doc.GetField("levelRequirement")?.GetInt32Value();
+            if (levelRequirement != null)
+                indexItem.LevelRequirement = levelRequirement.Value;
+
+            indexItem.ItemType = doc.GetField("itemType").GetStringValue();
+            indexItem.ItemType = doc.GetField("itemType").GetStringValue();
+            indexItem.Searchable = doc.GetField("searchable").GetStringValue();
+            indexItem.ItemStats = new List<string>();
+            return indexItem;
+            /*
+            //indexItem.Source = itemDef;
+            //indexItem.SourceInstance = item;
+            var itemStats = ItemHelper.GetStats(item, itemStatDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList(); ;
+            var itemPetStats = petStatItemDef != null ? ItemHelper.GetStats(null, petStatItemDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList() : new List<string>();
+            //indexItem.ItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
+            var allItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
+            indexItem.AddTextField("searchable", BuildSearchableString(character, item, itemDef, allItemStats), Field.Store.YES);
+
+            UpdateSummary(rarity, itemType, character.Header.Name, summary);
+*/
+
+        }
+
         private IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
         {
             var sw = new Stopwatch();
             sw.Start();
+
             try
             {
                 LoadAllCharacters(grimDawnSavesDirectory, stateChangeCallback);
@@ -274,98 +336,105 @@ namespace GrimSearch.Utils
 
         private IndexSummary BuildIndex(Action<string> stateChangeCallback)
         {
-            _index.Clear();
+            _indexRamDir?.Dispose();
+            _indexReader?.Dispose();
+
+            _indexRamDir = new RAMDirectory();
+            using var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
+
+            var idxCfg = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer);
+            idxCfg.OpenMode = OpenMode.CREATE;
+
+            using var writer = new IndexWriter(_indexRamDir, idxCfg);
+
+
             var summary = new IndexSummary();
 
             foreach (var c in _characters)
             {
                 stateChangeCallback("Indexing " + c.Header.Name);
-                BuildEquippedIndexItems(c, c.Inventory.Equipment, summary);
-                BuildEquippedIndexItems(c, c.Inventory.Weapon1, summary);
-                BuildEquippedIndexItems(c, c.Inventory.Weapon2, summary);
+                BuildEquippedIndexItems(writer, c, c.Inventory.Equipment, summary);
+                BuildEquippedIndexItems(writer, c, c.Inventory.Weapon1, summary);
+                BuildEquippedIndexItems(writer, c, c.Inventory.Weapon2, summary);
 
                 int bagIndex = 1;
                 foreach (var e in c.Inventory.Sacks)
                 {
-                    BuildUnequippedIndexItems(c, e.Items.ToArray(), summary, "Bag " + (bagIndex++));
+                    BuildUnequippedIndexItems(writer, c, e.Items.ToArray(), summary, "Bag " + (bagIndex++));
                 }
 
                 bagIndex = 1;
                 foreach (var e in c.Stash.stashPages)
                 {
-                    BuildUnequippedIndexItems(c, e.items.ToArray(), summary, "Stash " + (bagIndex++));
+                    BuildUnequippedIndexItems(writer, c, e.items.ToArray(), summary, "Stash " + (bagIndex++));
                 }
             }
+            writer.Commit();
+            _indexReader = writer.GetReader(true);
 
             return summary;
         }
 
-        private void BuildEquippedIndexItems(CharacterFile c, Item[] equipment, IndexSummary summary)
+        private void BuildEquippedIndexItems(IndexWriter writer, CharacterFile c, Item[] equipment, IndexSummary summary)
         {
             foreach (var e in equipment)
             {
                 if (e == null)
                     continue;
 
-                var item = BuildIndexItem(e, c);
+                var item = BuildIndexItem(e, c, summary);
                 if (item != null)
                 {
-                    item.Bag = "Equipped";
-                    item.IsEquipped = true;
+                    item.AddStringField("bag", "Equipped", Field.Store.YES);
+                    item.AddInt32Field("isEquipped", 1, Field.Store.YES);
+                    writer.AddDocument(item);
                 }
-
-                AddIndexItem(item, summary);
             }
         }
 
-        private void BuildUnequippedIndexItems(CharacterFile c, Item[] items, IndexSummary summary, string bagName)
+        private void BuildUnequippedIndexItems(IndexWriter writer, CharacterFile c, Item[] items, IndexSummary summary, string bagName)
         {
             foreach (var e in items)
             {
                 if (e == null)
                     continue;
 
-                var item = BuildIndexItem(e, c);
+                var item = BuildIndexItem(e, c, summary);
+
                 if (item != null)
-                    item.Bag = bagName;
-
-                AddIndexItem(item, summary);
+                {
+                    item.AddStringField("bag", bagName, Field.Store.YES);
+                    item.AddInt32Field("isEquipped", 0, Field.Store.YES);
+                    writer.AddDocument(item);
+                }
             }
         }
 
-        private void AddIndexItem(IndexItem item, IndexSummary summary)
+        private void UpdateSummary(string rarity, string itemType, string owner, IndexSummary summary)
         {
-            if (item != null)
-            {
-                var itemType = ItemHelper.GetItemType(item.Source);
-                if (new string[] {
-                    "OneShot_PotionMana",
-                    "OneShot_PotionHealth",
-                    "OneShot_Scroll",
-                    "ItemEnchantment",
-                    "QuestItem",
-                    "ItemTransmuter",
-                    "ItemNote"
-                }.Contains(itemType))
-                    return;
+            summary.Entries++;
 
-                summary.Entries++;
+            if (rarity != null)
+                summary.ItemRarities.Add(rarity);
 
-                var rarity = item.Rarity;
-                if (rarity != null)
-                    summary.ItemRarities.Add(rarity);
+            if (itemType != null)
+                summary.ItemTypes.Add(itemType);
 
-                if (itemType != null)
-                    summary.ItemTypes.Add(itemType);
-
-                if (item.Owner != null)
-                    summary.Characters.Add(item.Owner);
-
-                _index.Add(item);
-            }
+            if (owner != null)
+                summary.Characters.Add(owner);
         }
 
-        private IndexItem BuildIndexItem(Item item, CharacterFile character)
+        SortedSet<string> _unwantedItemTypes = new SortedSet<string>() {
+            "OneShot_PotionMana",
+            "OneShot_PotionHealth",
+            "OneShot_Scroll",
+            "ItemEnchantment",
+            "QuestItem",
+            "ItemTransmuter",
+            "ItemNote"
+        };
+
+        private Document BuildIndexItem(Item item, CharacterFile character, IndexSummary summary)
         {
             if (string.IsNullOrEmpty(item.baseName))
                 return null;
@@ -373,6 +442,13 @@ namespace GrimSearch.Utils
             var itemDef = _itemCache.GetItem(item.baseName);
             if (itemDef == null)
                 return null;
+
+            // Filter out unwanted item types
+            var itemType = ItemHelper.GetItemType(itemDef);
+            if (_unwantedItemTypes.Contains(itemType))
+            {
+                return null;
+            }
 
             //itemStatDef is the item definition that is used for stats (relevant in case of blueprints, where the item itself doesn't have stats, but the crafted item does)
             var itemStatDefIdentifier = ItemHelper.GetItemStatSource(itemDef);
@@ -401,43 +477,63 @@ namespace GrimSearch.Utils
                 petStatItemDef = _itemCache.GetItem(itemStatDef.StringParametersRaw["petBonusName"]);
             }
 
-            var indexItem = new IndexItem();
-            indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);
-            indexItem.Owner = character.Header.Name;
-            if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
-                indexItem.LevelRequirement = (int)itemStatDef.NumericalParametersRaw["levelRequirement"];
+            var rarity = ItemHelper.GetItemRarity(itemDef);
 
-            indexItem.Rarity = ItemHelper.GetItemRarity(itemDef);
-            indexItem.ItemType = ItemHelper.GetItemType(itemStatDef);
-            indexItem.Source = itemDef;
-            indexItem.SourceInstance = item;
+            var indexItem = new Document();
+            indexItem.AddTextField("itemName", ItemHelper.GetFullItemName(item, itemDef), Field.Store.YES);
+            indexItem.AddTextField("owner", character.Header.Name, Field.Store.YES);
+            if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
+                indexItem.Add(new Int32Field("levelRequirement", (int)itemStatDef.NumericalParametersRaw["levelRequirement"], Field.Store.YES));
+
+            if (rarity != null)
+                indexItem.AddStringField("rarity", rarity, Field.Store.YES);
+
+            indexItem.AddStringField("itemType", ItemHelper.GetItemType(itemStatDef), Field.Store.YES);
+            //indexItem.Source = itemDef;
+            //indexItem.SourceInstance = item;
             var itemStats = ItemHelper.GetStats(item, itemStatDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList(); ;
             var itemPetStats = petStatItemDef != null ? ItemHelper.GetStats(null, petStatItemDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList() : new List<string>();
-            indexItem.ItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
+            //indexItem.ItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
+            var allItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
+            indexItem.AddTextField("searchable", BuildSearchableString(character, item, itemDef, allItemStats), Field.Store.YES);
 
-            indexItem.Searchable = BuildSearchableString(character, item, itemDef, indexItem.ItemStats);
+            UpdateSummary(rarity, itemType, character.Header.Name, summary);
 
             return indexItem;
         }
 
-        private bool FilterMatch(IndexItem item, IndexFilter filter)
+        private void AddFilterQueries(BooleanQuery fullQuery, IndexFilter filter)
         {
-            if (filter.MaxLevel != null && item.LevelRequirement > filter.MaxLevel)
-                return false;
+            if (filter.MaxLevel != null)
+                fullQuery.Add(NumericRangeQuery.NewInt32Range("levelRequirement", null, filter.MaxLevel, true, true), Occur.MUST);
 
-            if (filter.MinLevel != null && item.LevelRequirement < filter.MinLevel)
-                return false;
+            if (filter.MinLevel != null)
+                fullQuery.Add(NumericRangeQuery.NewInt32Range("levelRequirement", filter.MinLevel, null, true, true), Occur.MUST);
 
-            if (filter.IncludeEquipped != null && !filter.IncludeEquipped.Value && item.IsEquipped)
-                return false;
+            if (filter.IncludeEquipped != null && filter.IncludeEquipped.Value)
+                fullQuery.Add(NumericRangeQuery.NewInt32Range("isEquipped", 0, 1, true, true), Occur.MUST);
+            else
+                fullQuery.Add(NumericRangeQuery.NewInt32Range("isEquipped", 0, 0, true, true), Occur.MUST);
 
-            if (filter.ItemQualities != null && !filter.ItemQualities.Contains(item.Rarity))
-                return false;
+            if (filter.ItemQualities != null)
+            {
+                var qualitiesQuery = new BooleanQuery();
+                foreach (var itemQuality in filter.ItemQualities)
+                {
+                    qualitiesQuery.Add(new TermQuery(new Term("rarity", itemQuality)), Occur.SHOULD);
+                }
+                fullQuery.Add(qualitiesQuery, Occur.MUST);
+            }
 
-            if (filter.ItemTypes != null && !filter.ItemTypes.Contains(item.ItemType))
-                return false;
-
-            return true;
+            if (filter.ItemTypes != null)
+            {
+                var itemTypesQuery = new BooleanQuery();
+                foreach (var itemType in filter.ItemTypes)
+                {
+                    itemTypesQuery.Add(new TermQuery(new Term("itemType", itemType)), Occur.SHOULD);
+                }
+                fullQuery.Add(itemTypesQuery, Occur.MUST);
+            }
         }
 
         private string BuildSearchableString(CharacterFile character, Item item, ItemRaw itemDef, List<string> itemStats)
@@ -449,6 +545,12 @@ namespace GrimSearch.Utils
             searchableStrings.Add(character.Header.Name);
 
             return string.Join(" ", searchableStrings).ToLower();
+        }
+
+        public void Dispose()
+        {
+            _indexRamDir?.Dispose();
+            _indexReader?.Dispose();
         }
     }
 }

@@ -11,6 +11,7 @@ namespace GrimSearch.Utils
     {
         public SearchResult()
         {
+            Results = new List<IndexItem>();
         }
 
         public SearchResult(List<IndexItem> results)

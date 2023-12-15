@@ -39,7 +39,7 @@ namespace GrimSearch.ViewModels
             }
             return new ItemViewModel()
             {
-                Name = ItemHelper.GetFullItemName(item.SourceInstance, item.Source),
+                Name = item.ItemName,
                 LevelRequirement = item.LevelRequirement,
                 Owner = item.Owner,
                 CoreStats = string.Join(", ", item.ItemStats),

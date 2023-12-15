@@ -40,6 +40,9 @@ namespace GrimSearch.Utils
             _stringsCache = stringsCache;
         }
 
+        string[] _reservedCharacters = new string[]{
+            "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "'"
+        };
         ItemCache _itemCache = ItemCache.Instance;
         StringsCache _stringsCache = StringsCache.Instance;
         List<CharacterFile> _characters = new List<CharacterFile>();
@@ -56,7 +59,7 @@ namespace GrimSearch.Utils
             try
             {
                 search = search ?? "";
-
+                search = SanitizeSearchString(search);
 
                 var searcher = new IndexSearcher(_indexReader);
                 var searchTerms = search.Split(" ").Where(x => !string.IsNullOrWhiteSpace(x));
@@ -65,12 +68,11 @@ namespace GrimSearch.Utils
 
                 foreach (var searchTerm in searchTerms)
                 {
-                    var query = new WildcardQuery(new Term("searchable", "*" + searchTerm + "*"));
+                    var query = new WildcardQuery(new Term("searchable", "*" + searchTerm.ToLowerInvariant() + "*"));
                     fullQuery.Add(query, Occur.MUST);
                 }
 
                 AddFilterQueries(fullQuery, filter);
-
 
                 TopDocs topDocs = searcher.Search(fullQuery, n: 100);
 
@@ -89,6 +91,15 @@ namespace GrimSearch.Utils
                 sw.Stop();
                 Metrics.SearchTime.Record(sw.ElapsedMilliseconds);
             }
+        }
+
+        private string SanitizeSearchString(string searchString)
+        {
+            foreach (var c in _reservedCharacters)
+            {
+                searchString = searchString.Replace(c, "");
+            }
+            return searchString;
         }
 
         public async Task<SearchResult> FindDuplicatesAsync(string search, IndexFilter filter)
@@ -182,7 +193,6 @@ namespace GrimSearch.Utils
                 Metrics.SearchTime.Record(sw.ElapsedMilliseconds);
             }*/
         }
-
 
         public void ClearCache()
         {
@@ -331,7 +341,7 @@ namespace GrimSearch.Utils
             _indexReader?.Dispose();
 
             _indexRamDir = new RAMDirectory();
-            using var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
+            using var analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48, new Lucene.Net.Analysis.Util.CharArraySet(LuceneVersion.LUCENE_48, 0, true));
 
             var idxCfg = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer);
             idxCfg.OpenMode = OpenMode.CREATE;
@@ -546,9 +556,9 @@ namespace GrimSearch.Utils
         {
             List<string> searchableStrings = new List<string>();
 
-            searchableStrings.AddRange(ItemHelper.GetFullItemName(item, itemDef).Split(" "));
-            searchableStrings.AddRange(itemStats);
-            searchableStrings.Add(character.Header.Name);
+            searchableStrings.AddRange(SanitizeSearchString(ItemHelper.GetFullItemName(item, itemDef)).Split(" "));
+            searchableStrings.AddRange(itemStats.Select(x => SanitizeSearchString(x)));
+            searchableStrings.Add(SanitizeSearchString(character.Header.Name));
 
             return searchableStrings;
         }

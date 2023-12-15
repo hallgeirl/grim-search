@@ -51,7 +51,6 @@ namespace GrimSearch.Utils
 
         private SearchResult Find(string search, IndexFilter filter)
         {
-            //for reference: https://zetcode.com/csharp/lucene/
             var sw = new Stopwatch();
             sw.Start();
             try
@@ -64,16 +63,16 @@ namespace GrimSearch.Utils
 
                 var fullQuery = new BooleanQuery();
 
-                //var query = new PhraseQuery();
-                var query = new FuzzyQuery(new Term("searchable", search));
-                fullQuery.Add(query, Occur.MUST);
-                AddFilterQueries(fullQuery, filter);
-                /*foreach (var searchTerm in searchTerms)
+                foreach (var searchTerm in searchTerms)
                 {
-                    query.Add(new Term("searchable", searchTerm));
-                }*/
+                    var query = new WildcardQuery(new Term("searchable", "*" + searchTerm + "*"));
+                    fullQuery.Add(query, Occur.MUST);
+                }
 
-                TopDocs topDocs = searcher.Search(fullQuery, n: 1000);
+                AddFilterQueries(fullQuery, filter);
+
+
+                TopDocs topDocs = searcher.Search(fullQuery, n: 100);
 
                 List<IndexItem> results = new List<IndexItem>();
 
@@ -83,15 +82,7 @@ namespace GrimSearch.Utils
                     results.Add(DocumentToIndexItem(doc));
                 }
 
-
                 return new SearchResult(results, topDocs.TotalHits);
-
-                //                var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
-
-                /* if (filter.PageSize != null)
-                     return new SearchResult(result.Take(filter.PageSize.Value).ToList(), result.Count());
-
-                 return new SearchResult(result.ToList());*/
             }
             finally
             {
@@ -495,7 +486,11 @@ namespace GrimSearch.Utils
             var itemPetStats = petStatItemDef != null ? ItemHelper.GetStats(null, petStatItemDef).Select(x => x.Replace("{^E}", "").Replace("{%+.0f0}", "").Replace("{%t0}", "").Trim()).ToList() : new List<string>();
             //indexItem.ItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
             var allItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
-            indexItem.AddTextField("searchable", BuildSearchableString(character, item, itemDef, allItemStats), Field.Store.YES);
+            //indexItem.AddTextField("searchable", BuildSearchableString(character, item, itemDef, allItemStats), Field.Store.YES);
+            foreach (var i in GetSearchableStrings(character, item, itemDef, allItemStats))
+            {
+                indexItem.AddTextField("searchable", i, Field.Store.YES);
+            }
 
             UpdateSummary(rarity, itemType, character.Header.Name, summary);
 
@@ -545,6 +540,17 @@ namespace GrimSearch.Utils
             searchableStrings.Add(character.Header.Name);
 
             return string.Join(" ", searchableStrings).ToLower();
+        }
+
+        private List<string> GetSearchableStrings(CharacterFile character, Item item, ItemRaw itemDef, List<string> itemStats)
+        {
+            List<string> searchableStrings = new List<string>();
+
+            searchableStrings.AddRange(ItemHelper.GetFullItemName(item, itemDef).Split(" "));
+            searchableStrings.AddRange(itemStats);
+            searchableStrings.Add(character.Header.Name);
+
+            return searchableStrings;
         }
 
         public void Dispose()

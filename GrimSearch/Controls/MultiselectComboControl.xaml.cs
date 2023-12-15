@@ -129,7 +129,8 @@ namespace GrimSearch.Controls
                 // The model binding updates after the Checked event is fired. Therefore, we need to update the model with the actual checked value before executing the command.
                 var checkBox = sender as CheckBox;
                 var vm = checkBox.DataContext as MultiselectComboItem;
-                vm.Selected = checkBox.IsChecked.Value;
+                if (vm != null)
+                    vm.Selected = checkBox.IsChecked.Value;
 
                 SelectionChanged?.Invoke(this, new EventArgs());
                 if (Command != null)

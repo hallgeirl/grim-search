@@ -15,6 +15,7 @@ namespace GrimSearch
 
         public string GrimDawnDirectory { get; set; }
         public string SavesDirectory { get; set; }
+        public string SearchEngine { get; set; }
         public bool AutoRefresh { get; set; }
 
         public string LastSearchMode { get; set; }

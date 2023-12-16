@@ -61,7 +61,6 @@ namespace GrimSearch.ViewModels
                 UpdateSearchBoxVisibility();
             });
             this.PropertyChanged += SearchablePropertyChanged;
-
         }
 
         private async void SearchablePropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -91,7 +90,7 @@ namespace GrimSearch.ViewModels
         }
 
         bool _initialized = false;
-        private Index _index = new Index();
+        private IIndex _index = new Index();
         string settingsFile = ConfigFileHelper.GetConfigFile("GDItemSearchSettings.json");
         StoredSettings _loadedSettings = new StoredSettings();
 
@@ -309,6 +308,23 @@ namespace GrimSearch.ViewModels
             }
         }
 
+        public string SearchEngine
+        {
+            get => _loadedSettings.SearchEngine;
+            set
+            {
+                _loadedSettings.SearchEngine = value;
+                this.RaisePropertyChanged("SearchEngine");
+            }
+        }
+
+        private ObservableCollection<string> _searchEngines = new ObservableCollection<string> { "Lucene", "Classic" };
+        public ObservableCollection<string> SearchEngines
+        {
+            get { return _searchEngines; }
+            set { _searchEngines = value; this.RaisePropertyChanged("SearchEngines"); }
+        }
+
         private void WatchDirectory(string value)
         {
             if (_savesWatcher != null)
@@ -381,12 +397,16 @@ namespace GrimSearch.ViewModels
                 AutoRefresh = AutoRefresh,
                 LastSearchMode = SearchMode,
                 LastSearchText = SearchString,
-                KeepExtractedDBFiles = _loadedSettings.KeepExtractedDBFiles
+                KeepExtractedDBFiles = _loadedSettings.KeepExtractedDBFiles,
+                SearchEngine = SearchEngine
             };
             try
             {
                 StatusBarText = "Saving settings...";
                 EnableInput = false;
+                ItemCache.Instance.IsDirty = true;
+                StringsCache.Instance.IsDirty = true;
+
                 File.WriteAllText(settingsFile, JsonConvert.SerializeObject(storedSettings));
 
                 if (!skipIndexBuild)
@@ -418,6 +438,8 @@ namespace GrimSearch.ViewModels
                     AutoRefresh = _loadedSettings.AutoRefresh;
                     SearchMode = _loadedSettings.LastSearchMode;
                     SearchString = _loadedSettings.LastSearchText;
+                    SearchEngine = _loadedSettings.SearchEngine ?? "Classic";
+
 
                     await BuildIndexAsync();
 
@@ -459,7 +481,8 @@ namespace GrimSearch.ViewModels
         private void ClearCache()
         {
             SetStatusbarText("Clearing cache...");
-            _index.ClearCache();
+            StringsCache.Instance.ClearCache();
+            ItemCache.Instance.ClearCache();
             ResetStatusBarText();
         }
 
@@ -523,7 +546,7 @@ namespace GrimSearch.ViewModels
             SetStatusbarText("Loading characters and items...");
             IndexSummary result;
 
-            var newIndex = new Index();
+            IIndex newIndex = SearchEngine == "Lucene" ? new LuceneIndex() : new Index();
             result = await newIndex.BuildAsync(GrimDawnDirectory, GrimDawnSavesDirectory, _loadedSettings.KeepExtractedDBFiles, false, (msg) => SetStatusbarText(msg)).ConfigureAwait(false);
             _index = newIndex;
 
@@ -536,11 +559,11 @@ namespace GrimSearch.ViewModels
                     ItemQualities = itemQualities;
 
                     ItemTypes.Clear();
-                    ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+                    ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }).OrderBy(x => x.DisplayText));
 
                     AllCharacters.Clear();
                     AllCharacters.Add("(select character)");
-                    AllCharacters.AddRange(result.Characters);
+                    AllCharacters.AddRange(result.Characters.OrderBy(x => x));
                 }));
             }
         }

@@ -13,6 +13,7 @@ namespace GrimSearch.Utils.DBFiles
     {
         Dictionary<string, string> AllStrings = new Dictionary<string, string>();
         public string CacheFilename { get; set; }
+        public bool IsDirty { get; set; } = true;
         bool initialized = false;
 
         private StringsCache()
@@ -42,10 +43,12 @@ namespace GrimSearch.Utils.DBFiles
             }
 
             initialized = true;
+            IsDirty = false;
         }
 
         public void ClearCache()
         {
+            IsDirty = true;
             if (File.Exists(CacheFilename))
             {
                 File.Delete(CacheFilename);

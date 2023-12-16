@@ -11,6 +11,7 @@ namespace GrimSearch.Utils
     public class IndexItem
     {
         public string ItemName { get; set; }
+        public string ItemBaseName { get; set; }
         public bool IsEquipped { get; set; }
 
         public int LevelRequirement { get; set; }
@@ -18,7 +19,7 @@ namespace GrimSearch.Utils
         public string Owner { get; set; }
 
         public string Searchable { get; set; }
-        
+
         public string ItemType { get; set; }
 
         public string Rarity { get; set; }

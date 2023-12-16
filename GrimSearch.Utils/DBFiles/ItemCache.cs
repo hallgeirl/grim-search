@@ -11,10 +11,11 @@ namespace GrimSearch.Utils.DBFiles
 {
     public class ItemCache
     {
-        const string CurrentVersion = "1.1";
+        const string CurrentVersion = "1.2";
         ItemCacheContainer _cache = new ItemCacheContainer();
 
         public string CacheFilename { get; set; }
+        public bool IsDirty { get; set; } = true;
 
         private ItemCache()
         {
@@ -61,10 +62,12 @@ namespace GrimSearch.Utils.DBFiles
                 _cache.Version = CurrentVersion;
                 File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(_cache, Formatting.Indented));
             }
+            IsDirty = false;
         }
 
         public void ClearCache()
         {
+            IsDirty = true;
             if (File.Exists(CacheFilename))
             {
                 File.Delete(CacheFilename);

@@ -1,21 +1,30 @@
 ﻿using GrimSearch.Utils.CharacterFiles;
 using GrimSearch.Utils.DBFiles;
+
+using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Lucene.Net.Search;
+using Lucene.Net.Store;
+using Lucene.Net.Util;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+
 
 namespace GrimSearch.Utils
 {
-    public class Index
+    public class Index : IndexBase
     {
-        string formulasFilename = "formulas.gst";
-        public Index(string formulasFilename = "formulas.gst")
+        public Index(string formulasFilename = "formulas.gst") : base(formulasFilename)
         {
-            this.formulasFilename = formulasFilename;
         }
 
         public Index(ItemCache itemCache, StringsCache stringsCache, string formulasFilename = "formulas.gst") : this(formulasFilename)
@@ -24,206 +33,115 @@ namespace GrimSearch.Utils
             _stringsCache = stringsCache;
         }
 
-
-        ItemCache _itemCache = ItemCache.Instance;
-        StringsCache _stringsCache = StringsCache.Instance;
-        List<CharacterFile> _characters = new List<CharacterFile>();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
-        public async Task<SearchResult> FindAsync(string search, IndexFilter filter)
+        #region Protected methods
+        protected override SearchResult Find(string search, IndexFilter filter)
         {
-            return await Task.Run(() => Find(search, filter)).ConfigureAwait(false);
-        }
-
-        private SearchResult Find(string search, IndexFilter filter)
-        {
-            search = search ?? "";
-
-            var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
-
-            if (filter.PageSize != null)
-                return new SearchResult(result.Take(filter.PageSize.Value).ToList(), result.Count());
-
-            return new SearchResult(result.ToList());
-        }
-
-        public async Task<SearchResult> FindDuplicatesAsync(string search, IndexFilter filter)
-        {
-            return await Task.Run(() => FindDuplicates(search, filter)).ConfigureAwait(false);
-        }
-
-        private SearchResult FindDuplicates(string search, IndexFilter filter)
-        {
-            search = search ?? "";
-
-            // Try searching for partial string first -- if this gives an unique result, go with it
-            var characterItems = _index.Where(x => x.Owner.ToLower().Contains(search.ToLower()) && FilterMatch(x, filter));
-
-            // Otherwise, match the full character name
-            if (characterItems.Select(x => x.Owner.ToLower()).Distinct().Count() > 1)
-                characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
-
-            search = characterItems.FirstOrDefault()?.Owner ?? search;
-
-            List<IndexItem> results = new List<IndexItem>();
-
-            foreach (var item in characterItems)
+            var sw = new Stopwatch();
+            sw.Start();
+            try
             {
-                var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
-                var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
+                search = search ?? "";
 
-                if (dupe.Count() > 0)
-                {
-                    results.Add(item);
-                    item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
-                }
+                var result = _index.Where(x => x.Searchable.Contains(search.ToLower()) && FilterMatch(x, filter));
+
+                if (filter.PageSize != null)
+                    return new SearchResult(result.Take(filter.PageSize.Value).ToList(), result.Count());
+
+                return new SearchResult(result.ToList());
             }
-            return new SearchResult(results.OrderBy(x => x.Bag).ToList());
-        }
-
-
-        public async Task<SearchResult> FindUniqueAsync(string search, IndexFilter filter)
-        {
-            return await Task.Run(() => FindUnique(search, filter)).ConfigureAwait(false);
-        }
-
-        private SearchResult FindUnique(string search, IndexFilter filter)
-        {
-            search = search ?? "";
-
-            // Try searching for partial string first -- if this gives an unique result, go with it
-            var characterItems = _index.Where(x => x.Owner.ToLower().Contains(search.ToLower()) && FilterMatch(x, filter));
-
-            // Otherwise, match the full character name
-            if (characterItems.Select(x => x.Owner.ToLower()).Distinct().Count() > 1)
-                characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
-
-            search = characterItems.FirstOrDefault()?.Owner ?? search;
-
-            List<IndexItem> results = new List<IndexItem>();
-
-            foreach (var item in characterItems)
+            finally
             {
-                var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
-                var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
-
-                if (dupe.Count() == 0)
-                {
-                    results.Add(item);
-                    item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
-                }
+                sw.Stop();
+                Metrics.SearchTime.Record(sw.ElapsedMilliseconds);
             }
-            return new SearchResult(results.OrderBy(x => x.Bag).ToList());
         }
 
-
-        public void ClearCache()
+        protected override SearchResult FindDuplicates(string search, IndexFilter filter)
         {
-            _itemCache.ClearCache();
-            _stringsCache.ClearCache();
-        }
-
-        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck)
-        {
-            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, (msg) => { })).ConfigureAwait(false);
-        }
-
-        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
-        {
-            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback)).ConfigureAwait(false);
-        }
-
-        private IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
-        {
-            LoadAllCharacters(grimDawnSavesDirectory, stateChangeCallback);
-
-            stateChangeCallback("Loading tags/strings");
-            _stringsCache.LoadAllStrings(grimDawnDirectory);
-
-            stateChangeCallback("Loading items");
-            _itemCache.LoadAllItems(grimDawnDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback);
-
-            var summary = BuildIndex(stateChangeCallback);
-
-            MD5Store.Instance.Save(ConfigFileHelper.GetConfigFile("DatabaseHashes.json"));
-
-            return summary;
-        }
-
-        private void LoadAllCharacters(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
-        {
-            stateChangeCallback("Clearing index");
-            _characters.Clear();
-
-            var charactersDirectory = Path.Combine(grimDawnSavesDirectory, "main");
-            if (!Directory.Exists(charactersDirectory))
-                throw new InvalidOperationException("Saves directory not found: " + charactersDirectory);
-
-            var directories = Directory.EnumerateDirectories(charactersDirectory, "*", SearchOption.TopDirectoryOnly).OrderBy(x => x);
-
-            foreach (var d in directories)
+            var sw = new Stopwatch();
+            sw.Start();
+            try
             {
-                //Skip backup characters
-                if (Path.GetFileName(d).StartsWith("__"))
-                    continue;
+                search = search ?? "";
 
-                var characterFile = Path.Combine(d, "player.gdc");
-                if (!File.Exists(characterFile))
-                    continue;
+                // Try searching for partial string first -- if this gives an unique result, go with it
+                var characterItems = _index.Where(x => x.Owner.ToLower().Contains(search.ToLower()) && FilterMatch(x, filter));
 
-                stateChangeCallback("Loading " + characterFile);
+                // Otherwise, match the full character name
+                if (characterItems.Select(x => x.Owner.ToLower()).Distinct().Count() > 1)
+                    characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
 
-                var character = new CharacterFile();
-                try
+                search = characterItems.FirstOrDefault()?.Owner ?? search;
+
+                List<IndexItem> results = new List<IndexItem>();
+
+                foreach (var item in characterItems)
                 {
-                    using (var s = File.OpenRead(characterFile))
+                    var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
+                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
+
+                    if (dupe.Count() > 0)
                     {
-                        character.Read(s);
+                        results.Add(item);
+                        item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
                     }
-                    _characters.Add(character);
                 }
-                catch (Exception ex)
+                return new SearchResult(results.OrderBy(x => x.Bag).ToList());
+            }
+            finally
+            {
+                sw.Stop();
+                Metrics.SearchTime.Record(sw.ElapsedMilliseconds);
+            }
+        }
+
+        protected override SearchResult FindUnique(string search, IndexFilter filter)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            try
+            {
+                search = search ?? "";
+
+                // Try searching for partial string first -- if this gives an unique result, go with it
+                var characterItems = _index.Where(x => x.Owner.ToLower().Contains(search.ToLower()) && FilterMatch(x, filter));
+
+                // Otherwise, match the full character name
+                if (characterItems.Select(x => x.Owner.ToLower()).Distinct().Count() > 1)
+                    characterItems = _index.Where(x => x.Owner.ToLower() == search.ToLower() && FilterMatch(x, filter));
+
+                search = characterItems.FirstOrDefault()?.Owner ?? search;
+
+                List<IndexItem> results = new List<IndexItem>();
+
+                foreach (var item in characterItems)
                 {
-                    Trace.TraceError(ex.ToString());
+                    var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
+                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
+
+                    if (dupe.Count() == 0)
+                    {
+                        results.Add(item);
+                        item.DuplicatesOnCharacters = dupe.Select(x => x.Owner).ToList();
+                    }
                 }
+                return new SearchResult(results.OrderBy(x => x.Bag).ToList());
             }
-
-            LoadTransferStashAsCharacter(grimDawnSavesDirectory, stateChangeCallback);
-            LoadBlueprintsAsCharacter(grimDawnSavesDirectory, stateChangeCallback);
-        }
-
-        private void LoadTransferStashAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
-        {
-            var transferStashFile = Path.Combine(grimDawnSavesDirectory, "transfer.gst");
-            stateChangeCallback("Loading " + transferStashFile);
-            var transferStash = new TransferStashFile();
-            using (var s = File.OpenRead(transferStashFile))
+            finally
             {
-                transferStash.Read(s);
+                sw.Stop();
+                Metrics.SearchTime.Record(sw.ElapsedMilliseconds);
             }
-
-            _characters.Add(transferStash.ToCharacterFile());
         }
 
-        private void LoadBlueprintsAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
-        {
-            var recipesFilePath = Path.Combine(grimDawnSavesDirectory, formulasFilename);
-            stateChangeCallback("Loading " + recipesFilePath);
-            var recipes = new BlueprintFile();
-            using (var s = File.OpenRead(recipesFilePath))
-            {
-                recipes.Read(s);
-            }
-
-            _characters.Add(recipes.ToCharacterFile());
-        }
-
-        private IndexSummary BuildIndex(Action<string> stateChangeCallback)
+        protected override IndexSummary BuildIndex(List<CharacterFile> characters, Action<string> stateChangeCallback)
         {
             _index.Clear();
             var summary = new IndexSummary();
 
-            foreach (var c in _characters)
+            foreach (var c in characters)
             {
                 stateChangeCallback("Indexing " + c.Header.Name);
                 BuildEquippedIndexItems(c, c.Inventory.Equipment, summary);
@@ -245,7 +163,9 @@ namespace GrimSearch.Utils
 
             return summary;
         }
+        #endregion
 
+        #region Private methods
         private void BuildEquippedIndexItems(CharacterFile c, Item[] equipment, IndexSummary summary)
         {
             foreach (var e in equipment)
@@ -396,5 +316,6 @@ namespace GrimSearch.Utils
 
             return string.Join(" ", searchableStrings).ToLower();
         }
+        #endregion
     }
 }

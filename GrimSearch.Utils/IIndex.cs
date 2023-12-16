@@ -21,7 +21,6 @@ namespace GrimSearch.Utils
         Task<SearchResult> FindAsync(string search, IndexFilter filter);
         Task<SearchResult> FindDuplicatesAsync(string search, IndexFilter filter);
         Task<SearchResult> FindUniqueAsync(string search, IndexFilter filter);
-        void ClearCache();
         Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck);
         Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback);
     }

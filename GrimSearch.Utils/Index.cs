@@ -21,15 +21,10 @@ using System.Threading.Tasks;
 
 namespace GrimSearch.Utils
 {
-    public class Index : IIndex
+    public class Index : IndexBase
     {
-        Lucene.Net.Store.Directory _indexRamDir = new RAMDirectory();
-        Lucene.Net.Analysis.Analyzer _analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
-        string formulasFilename = "formulas.gst";
-
-        public Index(string formulasFilename = "formulas.gst")
+        public Index(string formulasFilename = "formulas.gst") : base(formulasFilename)
         {
-            this.formulasFilename = formulasFilename;
         }
 
         public Index(ItemCache itemCache, StringsCache stringsCache, string formulasFilename = "formulas.gst") : this(formulasFilename)
@@ -38,17 +33,10 @@ namespace GrimSearch.Utils
             _stringsCache = stringsCache;
         }
 
-        ItemCache _itemCache = ItemCache.Instance;
-        StringsCache _stringsCache = StringsCache.Instance;
-        List<CharacterFile> _characters = new List<CharacterFile>();
         List<IndexItem> _index = new List<IndexItem>(); //Not really an index though.. for now ;)
 
-        public async Task<SearchResult> FindAsync(string search, IndexFilter filter)
-        {
-            return await Task.Run(() => Find(search, filter)).ConfigureAwait(false);
-        }
-
-        private SearchResult Find(string search, IndexFilter filter)
+        #region Protected methods
+        protected override SearchResult Find(string search, IndexFilter filter)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -70,13 +58,7 @@ namespace GrimSearch.Utils
             }
         }
 
-        public async Task<SearchResult> FindDuplicatesAsync(string search, IndexFilter filter)
-        {
-            return await Task.Run(() => FindDuplicates(search, filter)).ConfigureAwait(false);
-        }
-
-
-        private SearchResult FindDuplicates(string search, IndexFilter filter)
+        protected override SearchResult FindDuplicates(string search, IndexFilter filter)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -115,13 +97,7 @@ namespace GrimSearch.Utils
             }
         }
 
-
-        public async Task<SearchResult> FindUniqueAsync(string search, IndexFilter filter)
-        {
-            return await Task.Run(() => FindUnique(search, filter)).ConfigureAwait(false);
-        }
-
-        private SearchResult FindUnique(string search, IndexFilter filter)
+        protected override SearchResult FindUnique(string search, IndexFilter filter)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -160,124 +136,12 @@ namespace GrimSearch.Utils
             }
         }
 
-
-        public void ClearCache()
-        {
-            _itemCache.ClearCache();
-            _stringsCache.ClearCache();
-        }
-
-        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck)
-        {
-            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, (msg) => { })).ConfigureAwait(false);
-        }
-
-        public async Task<IndexSummary> BuildAsync(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
-        {
-            return await Task.Run(() => Build(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback)).ConfigureAwait(false);
-        }
-
-        private IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
-        {
-            var sw = new Stopwatch();
-            sw.Start();
-            try
-            {
-                LoadAllCharacters(grimDawnSavesDirectory, stateChangeCallback);
-
-                stateChangeCallback("Loading tags/strings");
-                _stringsCache.LoadAllStrings(grimDawnDirectory);
-
-                stateChangeCallback("Loading items");
-                _itemCache.LoadAllItems(grimDawnDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback);
-
-                var summary = BuildIndex(stateChangeCallback);
-
-                MD5Store.Instance.Save(ConfigFileHelper.GetConfigFile("DatabaseHashes.json"));
-
-                return summary;
-            }
-            finally
-            {
-                sw.Stop();
-                Metrics.IndexBuildTime.Record(sw.ElapsedMilliseconds);
-            }
-        }
-
-        private void LoadAllCharacters(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
-        {
-            stateChangeCallback("Clearing index");
-            _characters.Clear();
-
-            var charactersDirectory = Path.Combine(grimDawnSavesDirectory, "main");
-            if (!System.IO.Directory.Exists(charactersDirectory))
-                throw new InvalidOperationException("Saves directory not found: " + charactersDirectory);
-
-            var directories = System.IO.Directory.EnumerateDirectories(charactersDirectory, "*", SearchOption.TopDirectoryOnly).OrderBy(x => x);
-
-            foreach (var d in directories)
-            {
-                //Skip backup characters
-                if (Path.GetFileName(d).StartsWith("__"))
-                    continue;
-
-                var characterFile = Path.Combine(d, "player.gdc");
-                if (!File.Exists(characterFile))
-                    continue;
-
-                stateChangeCallback("Loading " + characterFile);
-
-                var character = new CharacterFile();
-                try
-                {
-                    using (var s = File.OpenRead(characterFile))
-                    {
-                        character.Read(s);
-                    }
-                    _characters.Add(character);
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError(ex.ToString());
-                }
-            }
-
-            LoadTransferStashAsCharacter(grimDawnSavesDirectory, stateChangeCallback);
-            LoadBlueprintsAsCharacter(grimDawnSavesDirectory, stateChangeCallback);
-        }
-
-        private void LoadTransferStashAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
-        {
-            var transferStashFile = Path.Combine(grimDawnSavesDirectory, "transfer.gst");
-            stateChangeCallback("Loading " + transferStashFile);
-            var transferStash = new TransferStashFile();
-            using (var s = File.OpenRead(transferStashFile))
-            {
-                transferStash.Read(s);
-            }
-
-            _characters.Add(transferStash.ToCharacterFile());
-        }
-
-        private void LoadBlueprintsAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback)
-        {
-            var recipesFilePath = Path.Combine(grimDawnSavesDirectory, formulasFilename);
-            stateChangeCallback("Loading " + recipesFilePath);
-            var recipes = new BlueprintFile();
-            using (var s = File.OpenRead(recipesFilePath))
-            {
-                recipes.Read(s);
-            }
-
-            _characters.Add(recipes.ToCharacterFile());
-        }
-
-        private IndexSummary BuildIndex(Action<string> stateChangeCallback)
+        protected override IndexSummary BuildIndex(List<CharacterFile> characters, Action<string> stateChangeCallback)
         {
             _index.Clear();
             var summary = new IndexSummary();
 
-            foreach (var c in _characters)
+            foreach (var c in characters)
             {
                 stateChangeCallback("Indexing " + c.Header.Name);
                 BuildEquippedIndexItems(c, c.Inventory.Equipment, summary);
@@ -299,7 +163,9 @@ namespace GrimSearch.Utils
 
             return summary;
         }
+        #endregion
 
+        #region Private methods
         private void BuildEquippedIndexItems(CharacterFile c, Item[] equipment, IndexSummary summary)
         {
             foreach (var e in equipment)
@@ -450,5 +316,6 @@ namespace GrimSearch.Utils
 
             return string.Join(" ", searchableStrings).ToLower();
         }
+        #endregion
     }
 }

@@ -404,6 +404,9 @@ namespace GrimSearch.ViewModels
             {
                 StatusBarText = "Saving settings...";
                 EnableInput = false;
+                ItemCache.Instance.IsDirty = true;
+                StringsCache.Instance.IsDirty = true;
+
                 File.WriteAllText(settingsFile, JsonConvert.SerializeObject(storedSettings));
 
                 if (!skipIndexBuild)
@@ -478,7 +481,8 @@ namespace GrimSearch.ViewModels
         private void ClearCache()
         {
             SetStatusbarText("Clearing cache...");
-            _index.ClearCache();
+            StringsCache.Instance.ClearCache();
+            ItemCache.Instance.ClearCache();
             ResetStatusBarText();
         }
 
@@ -555,11 +559,11 @@ namespace GrimSearch.ViewModels
                     ItemQualities = itemQualities;
 
                     ItemTypes.Clear();
-                    ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }));
+                    ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }).OrderBy(x => x.DisplayText));
 
                     AllCharacters.Clear();
                     AllCharacters.Add("(select character)");
-                    AllCharacters.AddRange(result.Characters);
+                    AllCharacters.AddRange(result.Characters.OrderBy(x => x));
                 }));
             }
         }

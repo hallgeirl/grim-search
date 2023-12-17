@@ -1,8 +1,11 @@
 using System;
 using System.Diagnostics;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -19,11 +22,29 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
+        InitializeInfiniteScrolling();
         this.Opened += Window_Initialized;
         this.Closing += Window_Closing;
+
     }
 
+    private void InitializeInfiniteScrolling()
+    {
+        var scrollViewer = this.FindControl<ScrollViewer>("MainScrollViewer");
+        scrollViewer.ScrollChanged += ScrollChanged;
+    }
+    private void ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        var scrollViewer = sender as ScrollViewer;
+
+        if (scrollViewer == null)
+            return;
+
+        if (scrollViewer.Offset.Y + e.OffsetDelta.Y >= scrollViewer.ScrollBarMaximum.Y - 10)
+        {
+            _viewModel.LoadMoreItems();
+        }
+    }
     private async void Window_Initialized(object sender, EventArgs e)
     {
         _viewModel = DataContext as MainViewModel;

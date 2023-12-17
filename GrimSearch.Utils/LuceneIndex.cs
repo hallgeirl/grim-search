@@ -168,7 +168,7 @@ namespace GrimSearch.Utils
 
         private SearchResult SearchAndGetTopResults(BooleanQuery fullQuery)
         {
-            TopDocs topDocs = _searcher.Search(fullQuery, n: 100);
+            TopDocs topDocs = _searcher.Search(fullQuery, n: 1000000);
 
             List<IndexItem> results = new List<IndexItem>();
 
@@ -366,6 +366,8 @@ namespace GrimSearch.Utils
             indexItem.AddTextField("owner", itemWrapper.CharacterName, Field.Store.YES);
             if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
                 indexItem.Add(new Int32Field("levelRequirement", (int)itemStatDef.NumericalParametersRaw["levelRequirement"], Field.Store.YES));
+            else
+                indexItem.Add(new Int32Field("levelRequirement", 0, Field.Store.YES));
 
             if (rarity != null)
                 indexItem.AddStringField("rarity", rarity, Field.Store.YES);

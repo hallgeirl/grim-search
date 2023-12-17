@@ -571,6 +571,9 @@ namespace GrimSearch.ViewModels
 
         bool _searchQueued = false;
         bool _searchInProgress = false;
+        int _numberOfItemsShown = 0;
+        const int _batchLoadSize = 100;
+        IEnumerable<ItemViewModel> _currentSearchResult;
         private async Task SearchAsync()
         {
             if (!_initialized)
@@ -596,13 +599,13 @@ namespace GrimSearch.ViewModels
             else
                 items = await _index.FindAsync(SearchString, filter).ConfigureAwait(false);
 
+            _currentSearchResult = items.Results.Select(x => ItemViewModel.FromModel(x));
+            _numberOfItemsShown = 0;
 
             Dispatcher.Invoke(() =>
             {
                 SearchResults.Clear();
-                SearchResults.AddRange(items.Results.Select(x => ItemViewModel.FromModel(x)));
-
-                SearchResultText = "(showing " + items.Results.Count + " of " + items.TotalCount + ")";
+                LoadMoreItems();
             });
 
             ResetStatusBarText();
@@ -613,6 +616,27 @@ namespace GrimSearch.ViewModels
                 _searchQueued = false;
                 await SearchAsync();
             }
+        }
+
+        internal void LoadMoreItems()
+        {
+            // This method may be called by the scroll viewer ScrollChanged event before the viewmodel is initialized. If so, just return.
+            if (Dispatcher == null)
+                return;
+
+            // Return if no search has yet been performed
+            if (_currentSearchResult == null)
+                return;
+
+            Dispatcher.Invoke(() =>
+            {
+                if (_currentSearchResult.Count() > _numberOfItemsShown)
+                {
+                    SearchResults.AddRange(_currentSearchResult.Skip(_numberOfItemsShown).Take(_batchLoadSize));
+                    _numberOfItemsShown += _batchLoadSize;
+                }
+                SearchResultText = "(showing " + Math.Min(_currentSearchResult.Count(), _numberOfItemsShown) + " of " + _currentSearchResult.Count() + ")";
+            });
         }
 
         private IndexFilter CreateIndexFilter()
@@ -631,7 +655,6 @@ namespace GrimSearch.ViewModels
             if (itemTypes != null)
                 filter.ItemTypes = itemTypes.Where(x => x.Selected).Select(x => x.Value).ToArray();
 
-            filter.PageSize = 50;
             return filter;
         }
 

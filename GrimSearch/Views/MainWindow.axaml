@@ -20,7 +20,7 @@
 
         <TabControl Name="MainTabControl" SelectedItem="">
             <TabItem Header="Search" Name="SearchTab">
-                <ScrollViewer>
+                <ScrollViewer Name="MainScrollViewer">
                     <StackPanel Margin="24,19,24,19">
                         <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="This little app lets you search for items across all your Grim Dawn characters! Wow!" VerticalAlignment="Top"/>
                         <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Just type in something to search for (e.g. an item name, or parts of it), select some filters (if you want), and go nuts!" VerticalAlignment="Top"/>
@@ -97,7 +97,7 @@
                         </Grid>
 
 
-                        <TextBlock Text="Double-click a row in the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
+                        <TextBlock Text="Double-click a row insvItems the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
 
                         <ListBox MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}" DoubleTapped="ResultsListView_MouseDoubleClick" SelectionMode="Multiple" KeyUp="ResultsListView_KeyUp">
                             <ListBox.Styles>

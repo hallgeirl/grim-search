@@ -16,7 +16,7 @@ namespace GrimSearch.Utils.DBFiles
 {
     public static unsafe class ArzExtractor
     {
-
+        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         private static string GetNullTerminatedString(byte[] buffer, int index)
         {
             string result = "";
@@ -111,6 +111,7 @@ namespace GrimSearch.Utils.DBFiles
 
         public static void ExtractArz(string arzPath, string grimDawnDirectory, string targetPath)
         {
+            _logger.Info("Extracting " + arzPath + " to " + targetPath);
             // Load archive into memory.
             var buffer = File.ReadAllBytes(arzPath);
             using var stream = new MemoryStream(buffer);
@@ -130,11 +131,10 @@ namespace GrimSearch.Utils.DBFiles
             }
             var stringTable = ReadStringTable(buffer, stringTableStart, stringTableSize);
 
-            //var recordStart = recordTableStart;
             stream.Seek(recordTableStart, SeekOrigin.Begin);
             for (int i = 0; i < recordTableEntries; i++)
             {
-
+                _logger.Debug($"Loading record table entry {i} of {recordTableEntries}");
                 var recordFileIndex = reader.ReadInt32();
                 var recordFile = stringTable[recordFileIndex];
                 var fullOutputPath = Path.Combine(targetPath, recordFile);
@@ -190,65 +190,14 @@ namespace GrimSearch.Utils.DBFiles
                     }
                     outputWriter.WriteLine();
                     currentPosition += 2 + dataCount;
-
                 }
-                //File.WriteAllBytes(fullOutputPath, target);
             }
-
-            /*
-
-                        // Set the floating point percision..
-                        ofs << std::fixed << std::setprecision(6);
-
-                        
-                            ofs << g_StringTable[dataString]->GetString() << ",";
-
-                            for (auto y = 0; y < dataCount; y++)
-                            {
-                                switch (dataType)
-                                {
-                                case 0:
-                                case 3:
-                                default:
-                                    ofs << *(unsigned int*)((data_ptr + 8) + (y * 4)) << ",";
-                                    break;
-                                case 1:
-                                    ofs << *(float*)((data_ptr + 8) + (y * 4)) << ",";
-                                    break;
-                                case 2:
-                                    ofs << g_StringTable[*(unsigned int*)((data_ptr + 8) + (y * 4))]->GetString() << ",";
-                                    break;
-                                }
-                            }
-
-                            ofs << std::endl;
-
-                            // Adjust the positions..
-                            data_ptr += 8 + (dataCount * 4);
-                            current += (2 + dataCount);
-                        }
-                    }
-
-                    return true;
-                }();
-
-                // Cleanup the file buffer..
-                printf_s("Finished processing file, status: %s\n", dump_file == true ? "success!" : "failed!");
-                delete[] buffer;
-
-                // Cleanup global string table..
-                std::for_each(g_StringTable.begin(), g_StringTable.end(), [&](ARZString* str) { delete str; });
-                g_StringTable.clear();
-
-                return 0;
-
-
-
-            */
+            _logger.Info("Extraction complete");
         }
 
         static IList<string> ReadStringTable(byte[] buffer, uint offset, uint size)
         {
+            _logger.Debug($"Loading string table from offset {offset}, length {size}");
             using var stream = new MemoryStream(buffer);
             using BinaryReader reader = new BinaryReader(stream);
 
@@ -260,88 +209,18 @@ namespace GrimSearch.Utils.DBFiles
             while (stream.Position < end)
             {
                 var count = reader.ReadUInt32();
+                _logger.Debug($"Loading {count} strings - current position: {stream.Position} of: {end}");
 
                 for (var i = 0; i < count; i++)
                 {
                     var length = reader.ReadInt32();
                     var stringBytes = reader.ReadBytes(length);
-                    stringTable.Add(Encoding.ASCII.GetString(stringBytes));
+                    var theString = Encoding.ASCII.GetString(stringBytes);
+                    stringTable.Add(theString);
+                    _logger.Debug("Loaded string: " + theString);
                 }
             }
             return stringTable;
-        }
-        /*
-        bool ReadStringTable(unsigned char* buffer, int offset, int size)
-        {
-            if (buffer == nullptr || size == 0)
-                return false;
-
-            auto ptr = &buffer[offset];
-            auto end = ptr + size;
-
-            while (ptr < end)
-            {
-                auto count = *(DWORD*)ptr;
-                ptr += 4;
-
-                for (auto x = 0; x < count; x++)
-                {
-                    auto length = *(DWORD*)ptr;
-                    ptr += 4;
-
-                    auto str = new ARZString(ptr, length);
-                    g_StringTable.push_back(str);
-
-                    ptr += length;
-                }
-            }
-
-            return true;
-        }
-        */
-        private static string Extract(string arzPath, string grimDawnDirectory, string targetPath)
-        {
-            var archiveTool = Path.Combine(grimDawnDirectory, "ArchiveTool.exe");
-            if (!File.Exists(archiveTool))
-            {
-                LogHelper.GetLog().Error("ArchiveTool.exe not found in directory: " + grimDawnDirectory + ". Check that you have configured the correct Grim Dawn directory.");
-                throw new InvalidOperationException("ArchiveTool.exe not found in directory: " + grimDawnDirectory + ". Check that you have configured the correct Grim Dawn directory.");
-            }
-            LogHelper.GetLog().Debug("Found ArchiveTool.exe in " + grimDawnDirectory);
-
-            if (Directory.Exists(targetPath))
-                Directory.Delete(targetPath, true);
-
-            Directory.CreateDirectory(targetPath);
-            LogHelper.GetLog().Debug("Created temp dir at: " + targetPath);
-
-            var extractCommand = "-database";
-
-            if (Path.GetExtension(arzPath).ToLower() == ".arc")
-                extractCommand = "-extract";
-
-            var arguments = "\"" + arzPath + "\" " + extractCommand + " \"" + targetPath + "\"";
-
-            LogHelper.GetLog().Debug("Executing: " + archiveTool + " " + arguments);
-            var process = new Process();
-            process.StartInfo = new ProcessStartInfo()
-            {
-                Arguments = arguments,
-                FileName = archiveTool
-            };
-
-            process.Start();
-
-            process.WaitForExit();
-
-            LogHelper.GetLog().Debug("Execution finished.");
-
-            if (process.ExitCode != 0)
-                throw new Exception("ArchiveTool.exe exited with exit code " + process.ExitCode);
-
-            LogHelper.GetLog().Debug(arzPath + " was successfully extracted to " + targetPath);
-
-            return targetPath;
         }
     }
 }

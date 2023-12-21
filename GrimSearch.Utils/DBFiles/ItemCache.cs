@@ -11,6 +11,7 @@ namespace GrimSearch.Utils.DBFiles
 {
     public class ItemCache
     {
+        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         const string CurrentVersion = "1.2";
         ItemCacheContainer _cache = new ItemCacheContainer();
 
@@ -35,9 +36,10 @@ namespace GrimSearch.Utils.DBFiles
             if (File.Exists(CacheFilename))
             {
                 stateChangeCallback("Loading items from cache (" + CacheFilename + ")");
-                LogHelper.GetLog().Debug("Found cache version: " + _cache.GrimDawnLastUpdated);
+
+                _logger.Info("Found cache version: " + _cache.GrimDawnLastUpdated);
                 _cache = JsonConvert.DeserializeObject<ItemCacheContainer>(File.ReadAllText(CacheFilename));
-                LogHelper.GetLog().Debug("Items loaded from cache");
+                _logger.Info($"{_cache.Items.Count} items loaded from cache");
             }
 
             if (!skipVersionCheck)
@@ -45,7 +47,7 @@ namespace GrimSearch.Utils.DBFiles
                 string gdLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
                 if (_cache.GrimDawnLastUpdated != gdLastUpdated || _cache.Version != CurrentVersion)
                 {
-                    LogHelper.GetLog().Debug("Either Grim Dawn has been updated, or the Grim Search cache format has been changed. Clearing cache.");
+                    _logger.Info("Either Grim Dawn has been updated, or the Grim Search cache format has been changed. Clearing cache.");
                     ClearCache();
                     _cache = null;
                 }
@@ -56,7 +58,7 @@ namespace GrimSearch.Utils.DBFiles
                 stateChangeCallback("Loading items Grim Dawn database");
 
                 _cache = new ItemCacheContainer();
-                LogHelper.GetLog().Debug("Item cache not found - reading from " + grimDawnDirectory);
+                _logger.Info("Item cache not found - reading from " + grimDawnDirectory);
                 ReadItemsFromFiles(grimDawnDirectory, keepExtractedFiles, stateChangeCallback);
                 _cache.GrimDawnLastUpdated = GetGrimDawnLastUpdated(grimDawnDirectory);
                 _cache.Version = CurrentVersion;
@@ -108,7 +110,7 @@ namespace GrimSearch.Utils.DBFiles
                 i++;
 
                 stateChangeCallback("Extracting DB file " + file + " (" + i + " of " + dbFiles.Length + ")");
-                LogHelper.GetLog().Debug("Processing: " + file);
+                _logger.Info("Processing: " + file);
 
                 var extractPath = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath", Path.GetFileNameWithoutExtension(file) + "_" + Guid.NewGuid().ToString());
 

@@ -335,7 +335,7 @@ namespace GrimSearch.ViewModels
             if (!Directory.Exists(value))
                 return;
 
-            _logger.Info($"Watching direcctory {value}");
+            _logger.Info($"Watching directory {value}");
 
             _savesWatcher = new FileSystemWatcher(value);
             _savesWatcher.IncludeSubdirectories = true;

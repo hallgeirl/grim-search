@@ -11,6 +11,7 @@ namespace GrimSearch.Utils.DBFiles
 {
     public class StringsCache
     {
+        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         Dictionary<string, string> AllStrings = new Dictionary<string, string>();
         public string CacheFilename { get; set; }
         public bool IsDirty { get; set; } = true;
@@ -79,7 +80,7 @@ namespace GrimSearch.Utils.DBFiles
         {
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             var targetFile = Path.Combine(tempDir, Path.GetFileName(tagFilePath));
-            LogHelper.GetLog().Debug("Copying " + tagFilePath + " to " + targetFile);
+            _logger.Info("Copying " + tagFilePath + " to " + targetFile);
             Directory.CreateDirectory(tempDir);
             File.Copy(tagFilePath, targetFile);
 
@@ -120,18 +121,13 @@ namespace GrimSearch.Utils.DBFiles
                 }
                 finally
                 {
-                    var cleanupSetting = ConfigurationManager.AppSettings["cleanupArchiveFiles"];
-                    var cleanup = string.IsNullOrEmpty(cleanupSetting) || cleanupSetting.ToLowerInvariant() == "true";
 
-                    if (cleanup)
-                    {
-                        if (extractedPath != null && Directory.Exists(extractedPath))
-                            Directory.Delete(extractedPath, true);
+                    if (extractedPath != null && Directory.Exists(extractedPath))
+                        Directory.Delete(extractedPath, true);
 
-                        var tempArcDir = Path.GetDirectoryName(tempArcFile);
-                        if (Directory.Exists(tempArcDir))
-                            Directory.Delete(tempArcDir, true);
-                    }
+                    var tempArcDir = Path.GetDirectoryName(tempArcFile);
+                    if (Directory.Exists(tempArcDir))
+                        Directory.Delete(tempArcDir, true);
                 }
 
 

@@ -117,11 +117,11 @@
                                                 <ColumnDefinition Width="100"></ColumnDefinition>
                                                 <ColumnDefinition Width="200"></ColumnDefinition>
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Column="0" FontWeight="Bold" Padding="0,5,0,5">Item name</Label>
-                                            <Label Grid.Column="1" FontWeight="Bold" Padding="0,5,0,5">Character</Label>
-                                            <Label Grid.Column="2" FontWeight="Bold" Padding="0,5,0,5">Level</Label>
-                                            <Label Grid.Column="3" FontWeight="Bold" Padding="0,5,0,5">Core stats</Label>
-                                            <Label Grid.Column="4" FontWeight="Bold" Padding="0,5,0,5">Bag</Label>
+                                            <Label Grid.Column="0" FontWeight="Bold" Padding="0,5,5,5">Item name</Label>
+                                            <Label Grid.Column="1" FontWeight="Bold" Padding="0,5,5,5">Character</Label>
+                                            <Label Grid.Column="2" FontWeight="Bold" Padding="0,5,5,5">Level</Label>
+                                            <Label Grid.Column="3" FontWeight="Bold" Padding="0,5,5,5">Core stats</Label>
+                                            <Label Grid.Column="4" FontWeight="Bold" Padding="0,5,5,5">Bag</Label>
                                             <Label Grid.Column="5" FontWeight="Bold" Padding="0,5,0,5">Also exists on</Label>
                                         </Grid>
                                         <ItemsPresenter></ItemsPresenter>
@@ -149,11 +149,6 @@
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
-                            <!--<i:Interaction.Behaviors>
-                                <ia:EventTriggerBehavior EventName="DoubleTapped" SourceObject="ResultsListView">
-                                    <ia:InvokeCommandAction Command="{Binding OpenGDTools}" />
-                                </ia:EventTriggerBehavior>
-                            </i:Interaction.Behaviors>-->
                         </ListBox>
                     </StackPanel>
                 </ScrollViewer>
@@ -180,7 +175,7 @@
                         <Label Name="GDSavesDirLabel" Grid.Column="0" Grid.Row="1" Content="Saves directory" Margin="0,0,0,0" />
                         <TextBox Name="GDDirTextBox" Text="{Binding GrimDawnDirectory}" Grid.Column="1" />
                         <TextBox Name="GDSavesTextBox" Text="{Binding GrimDawnSavesDirectory}" Grid.Column="1" Grid.Row="1" />
-                        <Label Name="ConfigFolderLabel" Grid.Column="0" Grid.Row="2" Content="Config directory" Margin="0,0,0,0" />
+                        <Label Name="ConfigFolderLabel" Grid.Column="0" Grid.Row="2" Content="Config and log directory" Margin="0,0,0,0" />
                         <SelectableTextBlock Name="ConfigFolderTextBlock" Text="{Binding ConfigFolder}" Grid.Column="1" Grid.Row="2" />
                         <Label Name="SearchEngineLabel" Grid.Column="0" Grid.Row="3" Content="Search engine" Margin="0,0,0,0" />
                         <ComboBox Name="SearchEngineComboBox" SelectedValue="{Binding SearchEngine}" ItemsSource="{Binding SearchEngines}" Grid.Column="1" Grid.Row="3" />

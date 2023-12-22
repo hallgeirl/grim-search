@@ -17,6 +17,7 @@ namespace GrimSearch.Views;
 
 public partial class MainWindow : Window
 {
+    private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     MainViewModel _viewModel = new MainViewModel();
 
     public MainWindow()
@@ -70,16 +71,14 @@ public partial class MainWindow : Window
 
     private void DisplayError(string errorMessage, Exception ex)
     {
-        //TODO var debugMode = ConfigurationManager.AppSettings["debugMode"];
-
         var debugModeEnabled = false;
-        //TODO bool.TryParse(debugMode, out debugModeEnabled);
 
         string exText = ex.Message;
         if (debugModeEnabled)
         {
             exText = ex.ToString();
         }
+        _logger.Error(ex, errorMessage);
 
         Dispatcher.UIThread.Invoke(() => MessageBox.Show(this, errorMessage + " Details: " + exText, "Error", MessageBoxButtons.Ok));
     }

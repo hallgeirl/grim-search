@@ -9,9 +9,7 @@
     <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="CommonServiceLocator" Version="2.0.7" />
 
     <PackageReference Include="Avalonia" Version="11.0.5" />
     <PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
@@ -23,11 +21,13 @@
     <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.0.5" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.5" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.2" />
+    <PackageReference Include="NLog" Version="5.2.7" />
 
   </ItemGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets/**" />
+    <Content Include="nlog.config" CopyToOutputDirectory="PreserveNewest" />
 
     <Compile Remove="MainWindow.xaml.cs" />
     <None Remove="MainWindow.xaml" />

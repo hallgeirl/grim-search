@@ -23,6 +23,7 @@ namespace GrimSearch.ViewModels
 {
     class MainViewModel : ViewModelBase
     {
+        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly Window _window;
         public MainViewModel(Dispatcher dispatcher, Window window) : this()
         {
@@ -118,6 +119,7 @@ namespace GrimSearch.ViewModels
             set
             {
                 _statusBarText = value;
+                _logger.Info(_statusBarText);
                 this.RaisePropertyChanged("StatusBarText");
             }
         }
@@ -332,6 +334,8 @@ namespace GrimSearch.ViewModels
 
             if (!Directory.Exists(value))
                 return;
+
+            _logger.Info($"Watching directory {value}");
 
             _savesWatcher = new FileSystemWatcher(value);
             _savesWatcher.IncludeSubdirectories = true;

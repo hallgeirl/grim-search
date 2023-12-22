@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets/**" />
-    <Content Include="NLog.config" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="nlog.config" CopyToOutputDirectory="PreserveNewest" />
 
     <Compile Remove="MainWindow.xaml.cs" />
     <None Remove="MainWindow.xaml" />

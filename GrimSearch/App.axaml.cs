@@ -17,7 +17,6 @@ public partial class App : Application
     {
         NLog.LogManager.Setup();
         string assemblyFolder = Path.GetDirectoryName(System.AppContext.BaseDirectory);
-        //NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(assemblyFolder + "/NLog.config");
         LogManager.Configuration.Variables["logdirectory"] = ConfigFileHelper.GetConfigFolder();
 
         AvaloniaXamlLoader.Load(this);

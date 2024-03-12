@@ -21,7 +21,7 @@
     <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.0.10" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.5" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.2" />
-    <PackageReference Include="NLog" Version="5.2.7" />
+    <PackageReference Include="NLog" Version="5.2.8" />
 
   </ItemGroup>
 

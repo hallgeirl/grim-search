@@ -20,8 +20,8 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
     <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.0.10" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.10.4" />
-    <PackageReference Include="NLog" Version="5.2.8" />
+    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.10.9" />
+    <PackageReference Include="NLog" Version="5.3.1" />
 
   </ItemGroup>
 

@@ -61,6 +61,18 @@ public static class CharacterLoader
             transferStash.Read(s);
         }
 
+        var reagentStashFile = Path.Combine(grimDawnSavesDirectory, "reagents.gst");
+        if (File.Exists(reagentStashFile))
+        {
+            stateChangeCallback("Loading " + reagentStashFile);
+            var reagentStash = new ReagentStashFile();
+            using (var s = File.OpenRead(reagentStashFile))
+            {
+                reagentStash.Read(s);
+            }
+            transferStash.sacks.Add(reagentStash.ToStashPage());
+        }
+
         characters.Add(transferStash.ToCharacterFile());
     }
 

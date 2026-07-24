@@ -9,46 +9,49 @@ namespace GrimSearch.Utils.CharacterFiles
 {
     public class TransferStashFile : ICharacterFile
     {
+        private static readonly UInt32[] SupportedVersions = { 4, 5, 8, 9, 11 };
+
         public List<StashPage> sacks = new List<StashPage>();
 
         public void Read(Stream s)
         {
             string mod;
+            sacks.Clear();
 
             var file = new GDFileReader(s);
             file.BeginRead();
 
             if (file.ReadInt() != 2)
-                throw new IOException();
+                throw new InvalidDataException("Invalid transfer stash file header.");
 
             Block b = new Block();
             var bstart = file.ReadBlockStart(b);
             if (bstart != 18)
             {
-                throw new Exception("An error occured while reading transfer stash. Expected: 18, was " + bstart);
+                throw new InvalidDataException("Invalid transfer stash block type. Expected: 18, was " + bstart);
             }
 
             var version = file.ReadInt();
-            if (version < 4)
-                throw new Exception("Transfer stash error: Invalid version: " + version);
+            if (!SupportedVersions.Contains(version))
+                throw new InvalidDataException("Unsupported transfer stash version: " + version);
 
             var unknown = file.ReadInt(false);
             if (unknown != 0)
             {
-                throw new Exception("An error occured while reading transfer stash. Expected: 0, was something else.");
+                throw new InvalidDataException("Invalid transfer stash header value: " + unknown);
             }
             
             mod = GDString.Read(file);
-            if (version == 5)
-            {
-                var isExp = file.ReadByte();
-            }
+            if (version >= 5)
+                file.ReadByte(); // Expansion bitmask.
 
             uint numberOfSacks = file.ReadInt();
+            if (numberOfSacks > 100)
+                throw new InvalidDataException("Invalid number of transfer stash pages: " + numberOfSacks);
 
             for (int i = 0; i < numberOfSacks; i++)
             {
-                var stashPage = new StashPage();
+                var stashPage = new StashPage(version);
                 stashPage.Read(file);
 
                 sacks.Add(stashPage);

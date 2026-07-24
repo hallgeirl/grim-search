@@ -7,8 +7,19 @@ namespace GrimSearch.Utils.CharacterFiles
 {
     public class InventorySack
     {
+        private readonly UInt32 formatVersion;
+
         public List<InventoryItem> Items = new List<InventoryItem>();
         byte tempBool;
+
+        public InventorySack() : this(5)
+        {
+        }
+
+        public InventorySack(UInt32 formatVersion)
+        {
+            this.formatVersion = formatVersion;
+        }
 
         public void Read(GDFileReader file)
         {
@@ -18,7 +29,14 @@ namespace GrimSearch.Utils.CharacterFiles
                 throw new Exception();
 
             tempBool = file.ReadByte();
-            Items = GDArray<InventoryItem>.Read(file);
+            var numberOfItems = file.ReadInt();
+            Items = new List<InventoryItem>();
+            for (var i = 0; i < numberOfItems; i++)
+            {
+                var item = new InventoryItem(formatVersion);
+                item.Read(file);
+                Items.Add(item);
+            }
 
             file.ReadBlockEnd(b);
         }

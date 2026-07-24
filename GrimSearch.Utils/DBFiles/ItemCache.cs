@@ -131,7 +131,8 @@ namespace GrimSearch.Utils.DBFiles
             string[] dbFiles = {
                 "database/database.arz",
                 "gdx1/database/GDX1.arz",
-                "gdx2/database/GDX2.arz"
+                "gdx2/database/GDX2.arz",
+                "gdx3/database/GDX3.arz"
             };
 
             List<string> dbFilesThatExist = new List<string>();

@@ -9,6 +9,14 @@ namespace GrimSearch.Utils.CharacterFiles
     {
         public byte attached;
 
+        public InventoryEquipment()
+        {
+        }
+
+        public InventoryEquipment(UInt32 formatVersion) : base(formatVersion)
+        {
+        }
+
         public override void Read(GDFileReader file)
         {
             base.Read(file);

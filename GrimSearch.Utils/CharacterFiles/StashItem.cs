@@ -10,6 +10,14 @@ namespace GrimSearch.Utils.CharacterFiles
         public float x;
         public float y;
 
+        public StashItem()
+        {
+        }
+
+        public StashItem(UInt32 formatVersion) : base(formatVersion)
+        {
+        }
+
         public override void Read(GDFileReader file)
         {
             base.Read(file);

@@ -38,6 +38,15 @@
     <Content Include="Resources\Saves\transfer.gst">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Saves\1.3.0\transfer.gst">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Saves\1.3.0\reagents.gst">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Saves\1.3.0\main\_Acidopholus\player.gdc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Saves\transmutes.gst">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

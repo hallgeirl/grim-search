@@ -25,8 +25,9 @@ namespace GrimSearch.Utils.CharacterFiles
             if (file.ReadBlockStart(b) != 3)
                 throw new Exception();
 
-            if (file.ReadInt() != 4) // version
-                throw new Exception();
+            var version = file.ReadInt();
+            if (version != 4 && version != 11)
+                throw new InvalidDataException("Invalid inventory version: " + version);
 
             if ((flag = file.ReadByte()) != 0)
             {
@@ -34,9 +35,9 @@ namespace GrimSearch.Utils.CharacterFiles
                 focused = file.ReadInt();
 		        selected = file.ReadInt();
 
-		        for (UInt32 i = 0; i<n; i++)
+                for (UInt32 i = 0; i<n; i++)
 		        {
-                    var invSack = new InventorySack();
+                    var invSack = new InventorySack(version);
                     invSack.Read(file);
                     Sacks.Add(invSack);
                 }
@@ -45,7 +46,7 @@ namespace GrimSearch.Utils.CharacterFiles
 
 		        for (var i = 0; i < 12; i++)
 		        {
-                    Equipment[i] = new InventoryEquipment();
+                    Equipment[i] = new InventoryEquipment(version);
                     Equipment[i].Read(file);
                 }
 
@@ -53,7 +54,7 @@ namespace GrimSearch.Utils.CharacterFiles
 
 		        for (var i = 0; i< 2; i++)
 		        {
-                    Weapon1[i] = new InventoryEquipment();
+                    Weapon1[i] = new InventoryEquipment(version);
                     Weapon1[i].Read(file);
 		        }
 
@@ -61,7 +62,7 @@ namespace GrimSearch.Utils.CharacterFiles
 
 		        for (var i = 0; i< 2; i++)
 		        {
-                    Weapon2[i] = new InventoryEquipment();
+                    Weapon2[i] = new InventoryEquipment(version);
                     Weapon2[i].Read(file);
 		        }
 	        }

@@ -19,7 +19,11 @@ namespace GrimSearch.Utils.CharacterFiles
                 throw new Exception();
 
             var version = file.ReadInt();
-            if (version == 6) // version
+            if (version == 11)
+            {
+                stashPages = ReadStashPages(file, version);
+            }
+            else if (version == 6)
                 stashPages = GDArray<StashPage>.Read(file);
             else if (version == 5)
             {
@@ -30,9 +34,22 @@ namespace GrimSearch.Utils.CharacterFiles
                 stashPages.Add(new StashPage() { width = width, height = height, items = items });
             }
             else
-                throw new Exception("Invalid stash version.");
+                throw new InvalidDataException("Invalid stash version: " + version);
 
             file.ReadBlockEnd(b);
+        }
+
+        private static List<StashPage> ReadStashPages(GDFileReader file, UInt32 version)
+        {
+            var numberOfPages = file.ReadInt();
+            var pages = new List<StashPage>();
+            for (var i = 0; i < numberOfPages; i++)
+            {
+                var page = new StashPage(version);
+                page.Read(file);
+                pages.Add(page);
+            }
+            return pages;
         }
     }
 }

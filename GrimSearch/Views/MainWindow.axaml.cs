@@ -74,10 +74,6 @@ public partial class MainWindow : Window
         var debugModeEnabled = false;
 
         string exText = ex.Message;
-        if (debugModeEnabled)
-        {
-            exText = ex.ToString();
-        }
         _logger.Error(ex, errorMessage);
 
         Dispatcher.UIThread.Invoke(() => MessageBox.Show(this, errorMessage + " Details: " + exText, "Error", MessageBoxButtons.Ok));

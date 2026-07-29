@@ -418,7 +418,7 @@ namespace GrimSearch.Utils.DBFiles
 
         private static string GetAffixName(ItemRaw itemDef)
         {
-            if (!itemDef.StringParametersRaw.ContainsKey("lootRandomizerName"))
+            if (itemDef == null || !itemDef.StringParametersRaw.ContainsKey("lootRandomizerName"))
                 return null;
 
             var tagName = itemDef.StringParametersRaw["lootRandomizerName"];

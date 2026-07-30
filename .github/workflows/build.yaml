@@ -40,8 +40,8 @@ jobs:
       - run: dotnet publish GrimSearch/GrimSearch.csproj --self-contained -r win-x64
       - name: create zip files
         run: |
-          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net8.0/win-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip .
-          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net8.0/linux-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip .
+          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net10.0/win-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip .
+          cd $WORKSPACE_DIR/GrimSearch/bin/Release/net10.0/linux-x64/publish && zip -r $WORKSPACE_DIR/grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip .
         env:
           WORKSPACE_DIR: ${{ github.workspace }}
 

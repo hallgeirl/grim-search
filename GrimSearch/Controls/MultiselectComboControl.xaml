@@ -30,7 +30,7 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding Selected}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked">
+                            <CheckBox IsChecked="{Binding Selected}" IsCheckedChanged="CheckBox_Checked">
                                 <TextBlock Text="{Binding DisplayText}" />
                             </CheckBox>
                         </DataTemplate>

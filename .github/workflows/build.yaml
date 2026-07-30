@@ -29,10 +29,10 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
 
-      - name: Setup dotnet 8.0
+      - name: Setup dotnet 10.0
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 8.0
+          dotnet-version: 10.0
 
       - run: dotnet restore && dotnet build --no-restore
       - run: dotnet test --no-restore --no-build

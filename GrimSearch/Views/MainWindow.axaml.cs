@@ -72,8 +72,6 @@ public partial class MainWindow : Window
 
     private void DisplayError(string errorMessage, Exception ex)
     {
-        var debugModeEnabled = false;
-
         string exText = ex.Message;
         _logger.Error(ex, errorMessage);
 

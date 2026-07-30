@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using GrimSearch.Common;
@@ -71,8 +72,6 @@ public partial class MainWindow : Window
 
     private void DisplayError(string errorMessage, Exception ex)
     {
-        var debugModeEnabled = false;
-
         string exText = ex.Message;
         _logger.Error(ex, errorMessage);
 

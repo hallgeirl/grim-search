@@ -75,7 +75,7 @@ namespace GrimSearch.Utils
 
                 AddFilterQueries(fullQuery, filter);
 
-                return SearchAndGetTopResults(fullQuery);
+                return SearchAndGetTopResults(fullQuery, filter);
             }
             finally
             {
@@ -94,10 +94,10 @@ namespace GrimSearch.Utils
 
                 var fullQuery = new BooleanQuery();
                 fullQuery.Add(new TermQuery(new Term("owner", search.ToLowerInvariant())), Occur.MUST);
-                fullQuery.Add(new TermQuery(new Term("duplicatesOn", "")), Occur.MUST_NOT);
+                fullQuery.Add(new TermQuery(new Term(GetDuplicatesField(filter), "")), Occur.MUST_NOT);
                 AddFilterQueries(fullQuery, filter);
 
-                return SearchAndGetTopResults(fullQuery);
+                return SearchAndGetTopResults(fullQuery, filter);
             }
             finally
             {
@@ -116,10 +116,10 @@ namespace GrimSearch.Utils
 
                 var fullQuery = new BooleanQuery();
                 fullQuery.Add(new TermQuery(new Term("owner", search.ToLowerInvariant())), Occur.MUST);
-                fullQuery.Add(new TermQuery(new Term("duplicatesOn", "")), Occur.MUST);
+                fullQuery.Add(new TermQuery(new Term(GetDuplicatesField(filter), "")), Occur.MUST);
                 AddFilterQueries(fullQuery, filter);
 
-                return SearchAndGetTopResults(fullQuery);
+                return SearchAndGetTopResults(fullQuery, filter);
             }
             finally
             {
@@ -166,7 +166,7 @@ namespace GrimSearch.Utils
 
         #region Private methods
 
-        private SearchResult SearchAndGetTopResults(BooleanQuery fullQuery)
+        private SearchResult SearchAndGetTopResults(BooleanQuery fullQuery, IndexFilter filter)
         {
             TopDocs topDocs = _searcher.Search(fullQuery, n: 1000000);
 
@@ -175,7 +175,7 @@ namespace GrimSearch.Utils
             foreach (var sdoc in topDocs.ScoreDocs)
             {
                 Document doc = _searcher.Doc(sdoc.Doc);
-                results.Add(DocumentToIndexItem(doc));
+                results.Add(DocumentToIndexItem(doc, filter));
             }
 
             return new SearchResult(results, topDocs.TotalHits);
@@ -191,7 +191,7 @@ namespace GrimSearch.Utils
             return searchString;
         }
 
-        private IndexItem DocumentToIndexItem(Document doc)
+        private IndexItem DocumentToIndexItem(Document doc, IndexFilter filter)
         {
             var indexItem = new IndexItem();
             indexItem.ItemName = doc.GetField("itemName").GetStringValue();
@@ -203,7 +203,7 @@ namespace GrimSearch.Utils
 
             indexItem.ItemType = doc.GetField("itemType").GetStringValue();
             indexItem.ItemStats = new List<string>();
-            indexItem.DuplicatesOnCharacters = doc.GetField("duplicatesOn").GetStringValue()?.Split(",").ToList();
+            indexItem.DuplicatesOnCharacters = doc.GetField(GetDuplicatesField(filter)).GetStringValue()?.Split(",").Where(x => !string.IsNullOrEmpty(x)).ToList();
             indexItem.Bag = doc.GetField("bag").GetStringValue();
             indexItem.ItemStats = doc.GetField("itemStats").GetStringValue().Split(",").ToList();
 
@@ -218,6 +218,8 @@ namespace GrimSearch.Utils
             public bool IsEquipped;
             public string BagName;
             public string CharacterName;
+            public bool IsHardcore;
+            public bool IsDeadHardcore;
         }
 
         // Group items by name.
@@ -269,7 +271,9 @@ namespace GrimSearch.Utils
                     itemDef = itemDef,
                     IsEquipped = isEquipped,
                     BagName = bagName,
-                    CharacterName = character.Header.Name
+                    CharacterName = character.Header.Name,
+                    IsHardcore = character.IsHardcore,
+                    IsDeadHardcore = character.IsDeadHardcore
                 };
 
                 if (!result.ContainsKey(itemName))
@@ -289,6 +293,8 @@ namespace GrimSearch.Utils
             {
                 item.AddStringField("bag", itemWrapper.BagName, Field.Store.YES);
                 item.AddInt32Field("isEquipped", itemWrapper.IsEquipped ? 1 : 0, Field.Store.YES);
+                item.AddInt32Field("isHardcore", itemWrapper.IsHardcore ? 1 : 0, Field.Store.YES);
+                item.AddInt32Field("isDeadHardcore", itemWrapper.IsDeadHardcore ? 1 : 0, Field.Store.YES);
                 writer.AddDocument(item);
             }
         }
@@ -379,7 +385,9 @@ namespace GrimSearch.Utils
             indexItem.AddStringField("itemStats", string.Join(",", allItemStats), Field.Store.YES);
 
             var duplicates = itemsByName[itemWrapper.ItemName].Where(x => x.CharacterName != itemWrapper.CharacterName);
-            indexItem.AddStringField("duplicatesOn", string.Join(",", duplicates.Select(x => x.CharacterName)), Field.Store.YES);
+            indexItem.AddStringField("duplicatesOnNormal", string.Join(",", duplicates.Where(x => !x.IsHardcore).Select(x => x.CharacterName)), Field.Store.YES);
+            indexItem.AddStringField("duplicatesOnHardcoreLiving", string.Join(",", duplicates.Where(x => x.IsHardcore && !x.IsDeadHardcore).Select(x => x.CharacterName)), Field.Store.YES);
+            indexItem.AddStringField("duplicatesOnHardcoreAll", string.Join(",", duplicates.Where(x => x.IsHardcore).Select(x => x.CharacterName)), Field.Store.YES);
             foreach (var i in GetSearchableStrings(itemWrapper, allItemStats))
             {
                 indexItem.AddTextField("searchable", i, Field.Store.NO);
@@ -400,6 +408,11 @@ namespace GrimSearch.Utils
             else
                 fullQuery.Add(NumericRangeQuery.NewInt32Range("isEquipped", 0, 0, true, true), Occur.MUST);
 
+            fullQuery.Add(NumericRangeQuery.NewInt32Range("isHardcore", filter.HardcoreOnly ? 1 : 0, filter.HardcoreOnly ? 1 : 0, true, true), Occur.MUST);
+
+            if (filter.HardcoreOnly && !filter.IncludeDeadHardcore)
+                fullQuery.Add(NumericRangeQuery.NewInt32Range("isDeadHardcore", 0, 0, true, true), Occur.MUST);
+
             if (filter.ItemQualities != null)
             {
                 var qualitiesQuery = new BooleanQuery();
@@ -419,6 +432,14 @@ namespace GrimSearch.Utils
                 }
                 fullQuery.Add(itemTypesQuery, Occur.MUST);
             }
+        }
+
+        private string GetDuplicatesField(IndexFilter filter)
+        {
+            if (!filter.HardcoreOnly)
+                return "duplicatesOnNormal";
+
+            return filter.IncludeDeadHardcore ? "duplicatesOnHardcoreAll" : "duplicatesOnHardcoreLiving";
         }
 
         private List<string> GetSearchableStrings(ItemWrapper itemWrapper, List<string> itemStats)

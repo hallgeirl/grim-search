@@ -44,6 +44,21 @@ namespace GrimSearch.Utils.CharacterFiles
         public UInt32 uniqueItemsFound;
         public UInt32 randomizedItemsFound;
 
+        public void ReadDeathCount(GDFileReader file)
+        {
+            var block = new Block();
+            if (file.ReadBlockStart(block) != 16)
+                throw new Exception();
+
+            var version = file.ReadInt();
+            if (version < 7)
+                throw new Exception("Unsupported play stats version: " + version);
+
+            playTime = file.ReadInt();
+            deaths = file.ReadInt();
+            file.SkipBlockRemainder(block);
+        }
+
         public void Read(GDFileReader file)
         {
             Block b = new Block();
@@ -53,7 +68,7 @@ namespace GrimSearch.Utils.CharacterFiles
 
             var version = file.ReadInt();
             if (version < 7 || version > 11) // version
-                throw new Exception();
+                throw new Exception("Unsupported play stats version: " + version);
 
             playTime = file.ReadInt();
             deaths = file.ReadInt();

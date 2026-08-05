@@ -60,13 +60,14 @@ namespace GrimSearch.Utils.CharacterFiles
             file.ReadBlockEnd(b);
         }
 
-        public CharacterFile ToCharacterFile()
+        public CharacterFile ToCharacterFile(string name = "Transfer stash", bool isHardcore = false)
         {
             return new CharacterFile()
             {
                 Header = new Header()
                 {
-                    Name = "Transfer stash"
+                    Name = name,
+                    Hardcore = isHardcore ? (byte)1 : (byte)0
                 },
                 Stash = new CharacterStash() { stashPages = sacks, numStashPages = (uint)sacks.Count }
             };

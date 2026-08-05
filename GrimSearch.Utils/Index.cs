@@ -80,7 +80,7 @@ namespace GrimSearch.Utils
                 foreach (var item in characterItems)
                 {
                     var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
-                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
+                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower() && FilterMatch(x, filter));
 
                     if (dupe.Count() > 0)
                     {
@@ -119,7 +119,7 @@ namespace GrimSearch.Utils
                 foreach (var item in characterItems)
                 {
                     var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
-                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower());
+                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower() && FilterMatch(x, filter));
 
                     if (dupe.Count() == 0)
                     {
@@ -270,6 +270,8 @@ namespace GrimSearch.Utils
             var indexItem = new IndexItem();
             indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);
             indexItem.Owner = character.Header.Name;
+            indexItem.IsHardcore = character.IsHardcore;
+            indexItem.IsDeadHardcore = character.IsDeadHardcore;
             if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
                 indexItem.LevelRequirement = (int)itemStatDef.NumericalParametersRaw["levelRequirement"];
 
@@ -295,6 +297,12 @@ namespace GrimSearch.Utils
                 return false;
 
             if (filter.IncludeEquipped != null && !filter.IncludeEquipped.Value && item.IsEquipped)
+                return false;
+
+            if (item.IsHardcore != filter.HardcoreOnly)
+                return false;
+
+            if (filter.HardcoreOnly && !filter.IncludeDeadHardcore && item.IsDeadHardcore)
                 return false;
 
             if (filter.ItemQualities != null && !filter.ItemQualities.Contains(item.Rarity))

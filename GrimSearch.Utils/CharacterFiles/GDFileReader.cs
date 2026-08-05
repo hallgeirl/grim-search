@@ -122,5 +122,45 @@ namespace GrimSearch.Utils.CharacterFiles
             if (NextInt() != 0)
                 throw new Exception();
         }
+
+        public bool TryAdvanceToBlock(UInt32 blockType)
+        {
+            while (file.BaseStream.Position + sizeof(UInt32) <= end)
+            {
+                var position = file.BaseStream.Position;
+                var nextBlockType = NextInt();
+                file.BaseStream.Seek(position, SeekOrigin.Begin);
+
+                if (nextBlockType == blockType)
+                    return true;
+
+                SkipBlock();
+            }
+
+            return false;
+        }
+
+        private void SkipBlock()
+        {
+            var block = new Block();
+            ReadBlockStart(block);
+
+            SkipBlockRemainder(block);
+        }
+
+        public void SkipBlockRemainder(Block block)
+        {
+
+            var bytesToSkip = block.end - file.BaseStream.Position;
+            if (bytesToSkip < 0 || bytesToSkip > int.MaxValue)
+                throw new InvalidDataException("Invalid character file block length.");
+
+            var bytes = file.ReadBytes((int)bytesToSkip);
+            if (bytes.Length != bytesToSkip)
+                throw new EndOfStreamException();
+
+            UpdateKey(bytes, (UInt32)bytes.Length);
+            ReadBlockEnd(block);
+        }
     }
 }

@@ -46,14 +46,18 @@ public static class CharacterLoader
             }
         }
 
-        LoadTransferStashAsCharacter(grimDawnSavesDirectory, stateChangeCallback, characters);
+        LoadTransferStashAsCharacter(grimDawnSavesDirectory, stateChangeCallback, characters, "transfer.gst", "reagents.gst", false);
+        LoadTransferStashAsCharacter(grimDawnSavesDirectory, stateChangeCallback, characters, "transfer.gsh", "reagents.gsh", true);
         LoadBlueprintsAsCharacter(grimDawnSavesDirectory, stateChangeCallback, characters, formulasFilename);
         return characters;
     }
 
-    private static void LoadTransferStashAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback, List<CharacterFile> characters)
+    private static void LoadTransferStashAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback, List<CharacterFile> characters, string transferFilename, string reagentFilename, bool isHardcore)
     {
-        var transferStashFile = Path.Combine(grimDawnSavesDirectory, "transfer.gst");
+        var transferStashFile = Path.Combine(grimDawnSavesDirectory, transferFilename);
+        if (!File.Exists(transferStashFile))
+            return;
+
         stateChangeCallback("Loading " + transferStashFile);
         var transferStash = new TransferStashFile();
         using (var s = File.OpenRead(transferStashFile))
@@ -61,7 +65,7 @@ public static class CharacterLoader
             transferStash.Read(s);
         }
 
-        var reagentStashFile = Path.Combine(grimDawnSavesDirectory, "reagents.gst");
+        var reagentStashFile = Path.Combine(grimDawnSavesDirectory, reagentFilename);
         if (File.Exists(reagentStashFile))
         {
             stateChangeCallback("Loading " + reagentStashFile);
@@ -73,7 +77,7 @@ public static class CharacterLoader
             transferStash.sacks.Add(reagentStash.ToStashPage());
         }
 
-        characters.Add(transferStash.ToCharacterFile());
+        characters.Add(transferStash.ToCharacterFile(isHardcore ? "Hardcore transfer stash" : "Transfer stash", isHardcore));
     }
 
     private static void LoadBlueprintsAsCharacter(string grimDawnSavesDirectory, Action<string> stateChangeCallback, List<CharacterFile> characters, string formulasFilename)

@@ -13,6 +13,8 @@ namespace GrimSearch.Utils
         public string ItemName { get; set; }
         public string ItemBaseName { get; set; }
         public bool IsEquipped { get; set; }
+        public bool IsHardcore { get; set; }
+        public bool IsDeadHardcore { get; set; }
 
         public int LevelRequirement { get; set; }
 

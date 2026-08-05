@@ -13,6 +13,10 @@ namespace GrimSearch.Utils
 
         public bool? IncludeEquipped { get; set; }
 
+        public bool HardcoreOnly { get; set; }
+
+        public bool IncludeDeadHardcore { get; set; }
+
         public int? PageSize { get; set; }
 
         public string[] ItemTypes { get; set; }

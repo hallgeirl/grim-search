@@ -71,6 +71,8 @@ namespace GrimSearch.ViewModels
                 "MinimumLevel",
                 "MaximumLevel",
                 "ShowEquipped",
+                "HardcoreOnly",
+                "IncludeDeadHardcore",
                 "SearchString",
                 "ItemTypes",
                 "ItemQualities"
@@ -253,6 +255,28 @@ namespace GrimSearch.ViewModels
             {
                 _showEquipped = value;
                 this.RaisePropertyChanged("ShowEquipped");
+            }
+        }
+
+        private bool _hardcoreOnly;
+        public bool HardcoreOnly
+        {
+            get { return _hardcoreOnly; }
+            set
+            {
+                _hardcoreOnly = value;
+                this.RaisePropertyChanged("HardcoreOnly");
+            }
+        }
+
+        private bool _includeDeadHardcore;
+        public bool IncludeDeadHardcore
+        {
+            get { return _includeDeadHardcore; }
+            set
+            {
+                _includeDeadHardcore = value;
+                this.RaisePropertyChanged("IncludeDeadHardcore");
             }
         }
 
@@ -650,6 +674,8 @@ namespace GrimSearch.ViewModels
             filter.MaxLevel = MaximumLevel;
 
             filter.IncludeEquipped = ShowEquipped;
+            filter.HardcoreOnly = HardcoreOnly;
+            filter.IncludeDeadHardcore = HardcoreOnly && IncludeDeadHardcore;
 
             var rarityItems = ItemQualities;
             if (rarityItems != null)

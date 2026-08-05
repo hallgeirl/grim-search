@@ -11,6 +11,7 @@ namespace GrimSearch.Utils.CharacterFiles
         public Uid Id = new Uid();
         public CharacterInfo Info = new CharacterInfo();
         public CharacterBio Bio = new CharacterBio();
+        public PlayStats Stats = new PlayStats();
         public Inventory Inventory { get; set; }
         public CharacterStash Stash = new CharacterStash();
 
@@ -46,7 +47,13 @@ namespace GrimSearch.Utils.CharacterFiles
             Inventory.Read(file);
             Stash.Read(file);
 
-            // There's more in the character file, but we don't really care about it.
+            // The intervening blocks are not needed, but play stats contain the
+            // death count used to identify dead hardcore characters.
+            if (file.TryAdvanceToBlock(16))
+                Stats.ReadDeathCount(file);
         }
+
+        public bool IsHardcore => Header.Hardcore != 0;
+        public bool IsDeadHardcore => IsHardcore && Stats.deaths > 0;
     }
 }

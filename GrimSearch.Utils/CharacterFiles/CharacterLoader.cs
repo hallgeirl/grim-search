@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -8,6 +7,8 @@ namespace GrimSearch.Utils.CharacterFiles;
 
 public static class CharacterLoader
 {
+    private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
     public static List<CharacterFile> LoadAllCharacters(string grimDawnSavesDirectory, Action<string> stateChangeCallback, string formulasFilename)
     {
         stateChangeCallback("Clearing index");
@@ -23,11 +24,17 @@ public static class CharacterLoader
         {
             //Skip backup characters
             if (Path.GetFileName(d).StartsWith("__"))
+            {
+                Logger.Info("Skipping backup character: {Path}", d);
                 continue;
+            }
 
             var characterFile = Path.Combine(d, "player.gdc");
             if (!File.Exists(characterFile))
+            {
+                Logger.Info("No character file: {Path}", characterFile);
                 continue;
+            }
 
             stateChangeCallback("Loading " + characterFile);
 
@@ -42,7 +49,7 @@ public static class CharacterLoader
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.ToString());
+                Logger.Warn(ex, "Skipping unreadable character: {Path}", characterFile);
             }
         }
 
@@ -56,7 +63,10 @@ public static class CharacterLoader
     {
         var transferStashFile = Path.Combine(grimDawnSavesDirectory, transferFilename);
         if (!File.Exists(transferStashFile))
+        {
+            Logger.Info("No transfer stash: {Path}", transferStashFile);
             return;
+        }
 
         stateChangeCallback("Loading " + transferStashFile);
         var transferStash = new TransferStashFile();
@@ -75,6 +85,10 @@ public static class CharacterLoader
                 reagentStash.Read(s);
             }
             transferStash.sacks.Add(reagentStash.ToStashPage());
+        }
+        else
+        {
+            Logger.Info("No reagent stash: {Path}", reagentStashFile);
         }
 
         characters.Add(transferStash.ToCharacterFile(isHardcore ? "Hardcore transfer stash" : "Transfer stash", isHardcore));

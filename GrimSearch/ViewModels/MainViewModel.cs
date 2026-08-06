@@ -73,6 +73,7 @@ namespace GrimSearch.ViewModels
                 "ShowEquipped",
                 "HardcoreOnly",
                 "IncludeDeadHardcore",
+                "IncludeBlueprints",
                 "SearchString",
                 "ItemTypes",
                 "ItemQualities"
@@ -280,6 +281,16 @@ namespace GrimSearch.ViewModels
             }
         }
 
+        public bool IncludeBlueprints
+        {
+            get { return _loadedSettings.IncludeBlueprints; }
+            set
+            {
+                _loadedSettings.IncludeBlueprints = value;
+                this.RaisePropertyChanged("IncludeBlueprints");
+            }
+        }
+
         private string _searchString;
         public string SearchString
         {
@@ -423,6 +434,7 @@ namespace GrimSearch.ViewModels
                 GrimDawnDirectory = GrimDawnDirectory,
                 SavesDirectory = GrimDawnSavesDirectory,
                 AutoRefresh = AutoRefresh,
+                IncludeBlueprints = IncludeBlueprints,
                 LastSearchMode = SearchMode,
                 LastSearchText = SearchString,
                 KeepExtractedDBFiles = _loadedSettings.KeepExtractedDBFiles,
@@ -464,6 +476,7 @@ namespace GrimSearch.ViewModels
                     GrimDawnDirectory = _loadedSettings.GrimDawnDirectory;
                     GrimDawnSavesDirectory = _loadedSettings.SavesDirectory;
                     AutoRefresh = _loadedSettings.AutoRefresh;
+                    IncludeBlueprints = _loadedSettings.IncludeBlueprints;
                     SearchMode = _loadedSettings.LastSearchMode;
                     SearchString = _loadedSettings.LastSearchText;
                     SearchEngine = _loadedSettings.SearchEngine ?? "Classic";
@@ -676,6 +689,7 @@ namespace GrimSearch.ViewModels
             filter.IncludeEquipped = ShowEquipped;
             filter.HardcoreOnly = HardcoreOnly;
             filter.IncludeDeadHardcore = HardcoreOnly && IncludeDeadHardcore;
+            filter.IncludeBlueprints = IncludeBlueprints;
 
             var rarityItems = ItemQualities;
             if (rarityItems != null)

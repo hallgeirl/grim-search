@@ -197,6 +197,7 @@ namespace GrimSearch.Utils
             indexItem.ItemName = doc.GetField("itemName").GetStringValue();
             indexItem.Owner = doc.GetField("owner").GetStringValue();
             indexItem.Rarity = doc.GetField("rarity")?.GetStringValue();
+            indexItem.IsFormula = doc.GetField("isFormula")?.GetInt32Value() == 1;
             var levelRequirement = doc.GetField("levelRequirement")?.GetInt32Value();
             if (levelRequirement != null)
                 indexItem.LevelRequirement = levelRequirement.Value;
@@ -370,6 +371,7 @@ namespace GrimSearch.Utils
             var indexItem = new Document();
             indexItem.AddTextField("itemName", itemWrapper.ItemName, Field.Store.YES);
             indexItem.AddTextField("owner", itemWrapper.CharacterName, Field.Store.YES);
+            indexItem.AddInt32Field("isFormula", ItemHelper.IsFormula(itemDef) ? 1 : 0, Field.Store.YES);
             if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
                 indexItem.Add(new Int32Field("levelRequirement", (int)itemStatDef.NumericalParametersRaw["levelRequirement"], Field.Store.YES));
             else
@@ -412,6 +414,9 @@ namespace GrimSearch.Utils
 
             if (filter.HardcoreOnly && !filter.IncludeDeadHardcore)
                 fullQuery.Add(NumericRangeQuery.NewInt32Range("isDeadHardcore", 0, 0, true, true), Occur.MUST);
+
+            if (!filter.IncludeBlueprints)
+                fullQuery.Add(NumericRangeQuery.NewInt32Range("isFormula", 0, 0, true, true), Occur.MUST);
 
             if (filter.ItemQualities != null)
             {

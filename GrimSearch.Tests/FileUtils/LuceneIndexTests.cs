@@ -170,6 +170,18 @@ namespace GrimSearch.Tests.FileUtils
             Assert.IsTrue(results.Results.Count(x => x.ItemName == "Blueprint: Cowl of Mogdrogen") > 0);
         }
 
+        [TestMethod]
+        public async Task TestExcludeBlueprints()
+        {
+            var index = new LuceneIndex();
+            await index.BuildAsync(null, "Resources/Saves", false, true);
+
+            var results = await index.FindAsync("", new IndexFilter() { IncludeEquipped = true, IncludeBlueprints = false, PageSize = 1000 });
+
+            Assert.IsTrue(results.Results.Count > 0);
+            Assert.IsTrue(results.Results.All(x => !x.IsFormula));
+        }
+
 
         [TestMethod]
         public async Task TestFindBlueprint_ExternalSource()

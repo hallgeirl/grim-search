@@ -17,6 +17,7 @@ namespace GrimSearch
         public string SavesDirectory { get; set; }
         public string SearchEngine { get; set; }
         public bool AutoRefresh { get; set; }
+        public bool IncludeBlueprints { get; set; } = true;
 
         public string LastSearchMode { get; set; }
         public string LastSearchText { get; set; }

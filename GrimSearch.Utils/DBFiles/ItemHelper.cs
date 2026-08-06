@@ -32,6 +32,11 @@ namespace GrimSearch.Utils.DBFiles
             return null;
         }
 
+        public static bool IsFormula(ItemRaw itemDef)
+        {
+            return GetItemType(itemDef) == "ItemArtifactFormula";
+        }
+
         public static string GetFullItemName(Item item, ItemRaw itemDef)
         {
             string baseName = GetItemBasename(item, itemDef);
@@ -122,6 +127,8 @@ namespace GrimSearch.Utils.DBFiles
                     return "Two-Handed Axes";
                 case "WeaponMelee_Sword2h":
                     return "Two-Handed Swords";
+                case "WeaponMelee_Spear2h":
+                    return "Two-Handed Spears";
                 case "WeaponHunting_Ranged1h":
                     return "One-Handed Ranged";
                 case "WeaponHunting_Ranged2h":
@@ -450,7 +457,7 @@ namespace GrimSearch.Utils.DBFiles
 
         private static bool IsComponentBlueprint(ItemRaw itemDef)
         {
-            if (GetItemType(itemDef) != "ItemArtifactFormula")
+            if (!IsFormula(itemDef))
                 return false;
 
             var targetItem = ItemCache.Instance.GetItem(itemDef.StringParametersRaw["artifactName"]);

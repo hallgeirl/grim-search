@@ -17,6 +17,8 @@ namespace GrimSearch.Utils
 
         public bool IncludeDeadHardcore { get; set; }
 
+        public bool IncludeBlueprints { get; set; } = true;
+
         public int? PageSize { get; set; }
 
         public string[] ItemTypes { get; set; }

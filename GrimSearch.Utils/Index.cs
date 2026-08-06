@@ -272,6 +272,7 @@ namespace GrimSearch.Utils
             indexItem.Owner = character.Header.Name;
             indexItem.IsHardcore = character.IsHardcore;
             indexItem.IsDeadHardcore = character.IsDeadHardcore;
+            indexItem.IsFormula = ItemHelper.IsFormula(itemDef);
             if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
                 indexItem.LevelRequirement = (int)itemStatDef.NumericalParametersRaw["levelRequirement"];
 
@@ -303,6 +304,9 @@ namespace GrimSearch.Utils
                 return false;
 
             if (filter.HardcoreOnly && !filter.IncludeDeadHardcore && item.IsDeadHardcore)
+                return false;
+
+            if (!filter.IncludeBlueprints && item.IsFormula)
                 return false;
 
             if (filter.ItemQualities != null && !filter.ItemQualities.Contains(item.Rarity))

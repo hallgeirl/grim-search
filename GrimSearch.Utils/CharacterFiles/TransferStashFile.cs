@@ -9,8 +9,10 @@ namespace GrimSearch.Utils.CharacterFiles
 {
     public class TransferStashFile : ICharacterFile
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         private static readonly UInt32[] SupportedVersions = { 4, 5, 8, 9, 11 };
 
+        public UInt32 FormatVersion { get; private set; }
         public List<StashPage> sacks = new List<StashPage>();
 
         public void Read(Stream s)
@@ -31,9 +33,13 @@ namespace GrimSearch.Utils.CharacterFiles
                 throw new InvalidDataException("Invalid transfer stash block type. Expected: 18, was " + bstart);
             }
 
-            var version = file.ReadInt();
-            if (!SupportedVersions.Contains(version))
-                throw new InvalidDataException("Unsupported transfer stash version: " + version);
+            FormatVersion = file.ReadInt();
+            Logger.Info(
+                "Transfer stash {Path}: format version {FormatVersion}",
+                s is FileStream fileStream ? fileStream.Name : "<stream>",
+                FormatVersion);
+            if (!SupportedVersions.Contains(FormatVersion))
+                throw new InvalidDataException("Unsupported transfer stash version: " + FormatVersion);
 
             var unknown = file.ReadInt(false);
             if (unknown != 0)
@@ -42,7 +48,7 @@ namespace GrimSearch.Utils.CharacterFiles
             }
             
             mod = GDString.Read(file);
-            if (version >= 5)
+            if (FormatVersion >= 5)
                 file.ReadByte(); // Expansion bitmask.
 
             uint numberOfSacks = file.ReadInt();
@@ -51,7 +57,7 @@ namespace GrimSearch.Utils.CharacterFiles
 
             for (int i = 0; i < numberOfSacks; i++)
             {
-                var stashPage = new StashPage(version);
+                var stashPage = new StashPage(FormatVersion);
                 stashPage.Read(file);
 
                 sacks.Add(stashPage);

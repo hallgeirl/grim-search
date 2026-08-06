@@ -7,6 +7,7 @@ namespace GrimSearch.Utils.CharacterFiles
 {
     public class Header
     {
+        public UInt32 Version { get; private set; }
         public string Name;
         public string Tag;
         public UInt32 Level;
@@ -15,8 +16,8 @@ namespace GrimSearch.Utils.CharacterFiles
 
         public void Read(GDFileReader file)
         {
-            var headerVersion = file.ReadInt();
-            if (headerVersion != 1 && headerVersion != 2) // Header version. Must be 2.
+            Version = file.ReadInt();
+            if (Version != 1 && Version != 2) // Header version. Must be 2.
                 throw new Exception("Invalid header version.");
 
             Name = GDWString.Read(file);
@@ -24,7 +25,7 @@ namespace GrimSearch.Utils.CharacterFiles
             Tag = GDString.Read(file);
             Level = file.ReadInt();
             Hardcore = file.ReadByte();
-            if (headerVersion == 2)
+            if (Version == 2)
                 file.ReadByte(); //expansion status
         }
     }

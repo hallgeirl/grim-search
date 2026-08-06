@@ -36,6 +36,7 @@ namespace GrimSearch.Tests.FileUtils
             }
 
             Assert.AreEqual(6, stash.sacks.Count);
+            Assert.AreEqual((uint)11, stash.FormatVersion);
             Assert.AreEqual(104, stash.sacks.Sum(x => x.items.Count));
             Assert.AreEqual((uint)19, stash.sacks[0].height);
             Assert.AreEqual("records/items/upgraded/gearweapons/guns1h/c033_gun1h.dbr",

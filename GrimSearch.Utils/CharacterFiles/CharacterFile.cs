@@ -7,6 +7,9 @@ namespace GrimSearch.Utils.CharacterFiles
 {
     public class CharacterFile : ICharacterFile
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+        public UInt32 FormatVersion { get; private set; }
         public Header Header { get; set; }
         public Uid Id = new Uid();
         public CharacterInfo Info = new CharacterInfo();
@@ -36,9 +39,14 @@ namespace GrimSearch.Utils.CharacterFiles
             if (file.NextInt() != 0) //Checksum(?)
                 throw new Exception();
 
-            var fileVersion = file.ReadInt();
-            if (fileVersion < 6 || fileVersion > 8) // version (6, 7 and 8 - only 8 supported here)
-                throw new Exception("Invalid file version: " + fileVersion);
+            FormatVersion = file.ReadInt();
+            Logger.Info(
+                "Character file {Path}: format version {FormatVersion}, header version {HeaderVersion}",
+                f is FileStream fileStream ? fileStream.Name : "<stream>",
+                FormatVersion,
+                Header.Version);
+            if (FormatVersion < 6 || FormatVersion > 8) // version (6, 7 and 8 - only 8 supported here)
+                throw new Exception("Invalid file version: " + FormatVersion);
 
             Id.Read(file);
 

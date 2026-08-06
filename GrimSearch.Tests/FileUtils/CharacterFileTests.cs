@@ -19,6 +19,8 @@ namespace GrimSearch.Tests.FileUtils
             }
 
             Assert.AreEqual("Acidopholus", character.Header.Name);
+            Assert.AreEqual((uint)8, character.FormatVersion);
+            Assert.AreEqual((uint)2, character.Header.Version);
             Assert.AreEqual(70, character.Inventory.Sacks.Sum(x => x.Items.Count));
             Assert.AreEqual(9, character.Stash.stashPages.Sum(x => x.items.Count));
         }

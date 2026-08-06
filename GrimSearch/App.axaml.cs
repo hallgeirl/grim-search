@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -16,8 +17,18 @@ public partial class App : Application
     public override void Initialize()
     {
         NLog.LogManager.Setup();
-        string assemblyFolder = Path.GetDirectoryName(System.AppContext.BaseDirectory);
         LogManager.Configuration.Variables["logdirectory"] = ConfigFileHelper.GetConfigFolder();
+
+        var assembly = Assembly.GetEntryAssembly();
+        var version = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? assembly?.GetName().Version?.ToString()
+            ?? "unknown";
+        LogManager.GetCurrentClassLogger().Info(
+            "Starting GrimSearch {Version} ({Framework}, {OS}, {Architecture})",
+            version,
+            RuntimeInformation.FrameworkDescription,
+            RuntimeInformation.OSDescription,
+            RuntimeInformation.ProcessArchitecture);
 
         AvaloniaXamlLoader.Load(this);
     }
@@ -33,4 +44,3 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 }
-

@@ -5,7 +5,7 @@ Someone that has played Grim Dawn for a while may start losing track of all his 
 There is also a thread on the Grim Dawn forums: https://forums.crateentertainment.com/t/tool-grim-search/45671
 
 ## First time setup
-Go to the Settings tab to configure your save paths and path to Grim Dawn. If you run Grim Dawn on Steam, things are rather simple: Just fire up Steam (it must be running), then just click "Detect settings from running Steam process" to detect the paths automatically. If you are NOT running on Steam, or this fails for some reason (if so: please submit an issue), you will have to enter the paths manually.
+Go to the Settings tab to configure your save path and path to Grim Dawn. Click "Detect Grim Dawn settings" to detect standard Steam or GOG locations automatically. Steam does not need to be running. If detection fails, you can enter the paths manually.
 
 ## Searching for items
 Simply type the item name, or parts of it, in the search box. You can also search by character name or certain stats. Filters are available as well.

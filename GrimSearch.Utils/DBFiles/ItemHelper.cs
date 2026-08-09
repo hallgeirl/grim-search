@@ -32,6 +32,27 @@ namespace GrimSearch.Utils.DBFiles
             return null;
         }
 
+        public static int GetLevelRequirement(Item item, ItemRaw itemDef)
+        {
+            var prefixDef = string.IsNullOrEmpty(item?.prefixName)
+                ? null
+                : ItemCache.Instance.GetItem(item.prefixName);
+            var suffixDef = string.IsNullOrEmpty(item?.suffixName)
+                ? null
+                : ItemCache.Instance.GetItem(item.suffixName);
+
+            return GetLevelRequirement(itemDef, prefixDef, suffixDef);
+        }
+
+        internal static int GetLevelRequirement(ItemRaw itemDef, ItemRaw prefixDef, ItemRaw suffixDef)
+        {
+            return new[] { itemDef, prefixDef, suffixDef }
+                .Where(definition => definition != null && definition.NumericalParametersRaw.ContainsKey("levelRequirement"))
+                .Select(definition => (int)definition.NumericalParametersRaw["levelRequirement"])
+                .DefaultIfEmpty(0)
+                .Max();
+        }
+
         public static bool IsFormula(ItemRaw itemDef)
         {
             return GetItemType(itemDef) == "ItemArtifactFormula";

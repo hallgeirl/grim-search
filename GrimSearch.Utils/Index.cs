@@ -273,8 +273,7 @@ namespace GrimSearch.Utils
             indexItem.IsHardcore = character.IsHardcore;
             indexItem.IsDeadHardcore = character.IsDeadHardcore;
             indexItem.IsFormula = ItemHelper.IsFormula(itemDef);
-            if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
-                indexItem.LevelRequirement = (int)itemStatDef.NumericalParametersRaw["levelRequirement"];
+            indexItem.LevelRequirement = ItemHelper.GetLevelRequirement(item, itemStatDef);
 
             indexItem.Rarity = ItemHelper.GetItemRarity(itemDef);
             indexItem.ItemType = ItemHelper.GetItemType(itemStatDef);

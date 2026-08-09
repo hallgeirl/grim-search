@@ -372,10 +372,10 @@ namespace GrimSearch.Utils
             indexItem.AddTextField("itemName", itemWrapper.ItemName, Field.Store.YES);
             indexItem.AddTextField("owner", itemWrapper.CharacterName, Field.Store.YES);
             indexItem.AddInt32Field("isFormula", ItemHelper.IsFormula(itemDef) ? 1 : 0, Field.Store.YES);
-            if (itemStatDef.NumericalParametersRaw.ContainsKey("levelRequirement"))
-                indexItem.Add(new Int32Field("levelRequirement", (int)itemStatDef.NumericalParametersRaw["levelRequirement"], Field.Store.YES));
-            else
-                indexItem.Add(new Int32Field("levelRequirement", 0, Field.Store.YES));
+            indexItem.Add(new Int32Field(
+                "levelRequirement",
+                ItemHelper.GetLevelRequirement(itemWrapper.item, itemStatDef),
+                Field.Store.YES));
 
             if (rarity != null)
                 indexItem.AddStringField("rarity", rarity, Field.Store.YES);

@@ -22,6 +22,24 @@ namespace GrimSearch.Tests.FileUtils
             Assert.AreEqual(expectedLevel, result);
         }
 
+        [TestMethod]
+        [DataRow("ItemArtifactFormula", "Blueprints")]
+        [DataRow("ItemDifficultyUnlock", "Difficulty Unlocks")]
+        [DataRow("ItemUsableSkill", "Consumables")]
+        public void GetItemTypeDisplayNameReturnsHumanReadableName(string itemType, string expectedName)
+        {
+            Assert.AreEqual(expectedName, ItemHelper.GetItemTypeDisplayName(itemType));
+        }
+
+        [TestMethod]
+        [DataRow("^kAncient Armor Plate", "Ancient Armor Plate")]
+        [DataRow("Prefix ^kAncient Armor Plate", "Prefix Ancient Armor Plate")]
+        [DataRow("{^k}Ancient Armor Plate", "Ancient Armor Plate")]
+        public void RemoveItemNameFormattingRemovesGrimDawnColorTokens(string itemName, string expectedName)
+        {
+            Assert.AreEqual(expectedName, ItemHelper.RemoveItemNameFormatting(itemName));
+        }
+
         private static ItemRaw CreateItemDefinition(int levelRequirement)
         {
             var definition = new ItemRaw();

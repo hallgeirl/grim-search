@@ -75,7 +75,14 @@ namespace GrimSearch.Utils.DBFiles
             if (!itemDef.NumericalParametersRaw.ContainsKey("hideSuffixName") || itemDef.NumericalParametersRaw["hideSuffixName"] != 0)
                 AddAffixNameToNameComponents(item.suffixName, nameComponents);
 
-            return string.Join(" ", nameComponents.Where(x => x != null));
+            return RemoveItemNameFormatting(string.Join(" ", nameComponents.Where(x => x != null)));
+        }
+
+        internal static string RemoveItemNameFormatting(string itemName)
+        {
+            return itemName == null
+                ? null
+                : Regex.Replace(itemName, @"(?:\{\^[A-Za-z-]\}|\^[A-Za-z-])", "").Trim();
         }
 
         private static void AddAffixNameToNameComponents(string affixPath, List<string> nameComponents)
@@ -128,6 +135,12 @@ namespace GrimSearch.Utils.DBFiles
                     return "Relics";
                 case "ItemRelic":
                     return "Components";
+                case "ItemArtifactFormula":
+                    return "Blueprints";
+                case "ItemDifficultyUnlock":
+                    return "Difficulty Unlocks";
+                case "ItemUsableSkill":
+                    return "Consumables";
                 case "WeaponMelee_Axe":
                     return "Axes";
                 case "WeaponMelee_Sword":

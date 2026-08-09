@@ -429,6 +429,17 @@ namespace GrimSearch.ViewModels
         #region Settings
         public async Task SaveSettingsAsync(bool skipIndexBuild = false)
         {
+            var selectedItemQualities = ItemQualities?
+                .Where(item => item.Selected)
+                .Select(item => item.Value)
+                .ToArray() ?? _loadedSettings.SelectedItemQualities;
+            var selectedItemTypes = ItemTypes.Count == 0
+                ? _loadedSettings.SelectedItemTypes
+                : ItemTypes
+                    .Where(item => item.Selected)
+                    .Select(item => item.Value)
+                    .ToArray();
+
             var storedSettings = new StoredSettings()
             {
                 GrimDawnDirectory = GrimDawnDirectory,
@@ -437,6 +448,8 @@ namespace GrimSearch.ViewModels
                 IncludeBlueprints = IncludeBlueprints,
                 LastSearchMode = SearchMode,
                 LastSearchText = SearchString,
+                SelectedItemQualities = selectedItemQualities,
+                SelectedItemTypes = selectedItemTypes,
                 KeepExtractedDBFiles = _loadedSettings.KeepExtractedDBFiles,
                 SearchEngine = SearchEngine
             };
@@ -448,6 +461,7 @@ namespace GrimSearch.ViewModels
                 StringsCache.Instance.IsDirty = true;
 
                 File.WriteAllText(settingsFile, JsonConvert.SerializeObject(storedSettings));
+                _loadedSettings = storedSettings;
 
                 if (!skipIndexBuild)
                     await BuildIndexAsync();
@@ -596,11 +610,23 @@ namespace GrimSearch.ViewModels
                 Dispatcher.Invoke((Action)(() =>
                 {
                     var itemQualities = new ObservableCollection<MultiselectComboItem>();
-                    itemQualities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem() { Selected = (x != "Common" && x != "Rare" && x != "Magical"), Value = x, DisplayText = x }));
+                    itemQualities.AddRange(result.ItemRarities.Select(x => new MultiselectComboItem()
+                    {
+                        Selected = _loadedSettings.SelectedItemQualities == null
+                            ? x != "Common" && x != "Rare" && x != "Magical"
+                            : _loadedSettings.SelectedItemQualities.Contains(x),
+                        Value = x,
+                        DisplayText = x
+                    }));
                     ItemQualities = itemQualities;
 
                     ItemTypes.Clear();
-                    ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem() { Selected = true, Value = x, DisplayText = ItemHelper.GetItemTypeDisplayName(x) }).OrderBy(x => x.DisplayText));
+                    ItemTypes.AddRange(result.ItemTypes.Select(x => new MultiselectComboItem()
+                    {
+                        Selected = _loadedSettings.SelectedItemTypes == null || _loadedSettings.SelectedItemTypes.Contains(x),
+                        Value = x,
+                        DisplayText = ItemHelper.GetItemTypeDisplayName(x)
+                    }).OrderBy(x => x.DisplayText));
 
                     AllCharacters.Clear();
                     AllCharacters.Add("(select character)");

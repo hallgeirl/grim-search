@@ -8,6 +8,7 @@ using GrimSearch.Utils.DBFiles;
 
 public abstract class IndexBase : IIndex
 {
+    private static readonly object _buildLock = new object();
     protected ItemCache _itemCache = ItemCache.Instance;
     protected StringsCache _stringsCache = StringsCache.Instance;
 
@@ -51,6 +52,14 @@ public abstract class IndexBase : IIndex
     protected abstract SearchResult FindUnique(string search, IndexFilter filter);
 
     private IndexSummary Build(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
+    {
+        lock (_buildLock)
+        {
+            return BuildCore(grimDawnDirectory, grimDawnSavesDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback);
+        }
+    }
+
+    private IndexSummary BuildCore(string grimDawnDirectory, string grimDawnSavesDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
     {
         var sw = new Stopwatch();
         sw.Start();

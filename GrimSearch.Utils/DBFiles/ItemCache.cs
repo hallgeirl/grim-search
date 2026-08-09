@@ -13,6 +13,7 @@ namespace GrimSearch.Utils.DBFiles
     {
         private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         const string CurrentVersion = "1.2";
+        private readonly object _cacheLock = new object();
         ItemCacheContainer _cache = new ItemCacheContainer();
 
         public string CacheFilename { get; set; }
@@ -25,13 +26,24 @@ namespace GrimSearch.Utils.DBFiles
 
         public ItemRaw GetItem(string path)
         {
-            if (_cache.Items.ContainsKey(path))
-                return _cache.Items[path];
+            lock (_cacheLock)
+            {
+                if (_cache.Items.ContainsKey(path))
+                    return _cache.Items[path];
+            }
 
             return null;
         }
 
         public void LoadAllItems(string grimDawnDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
+        {
+            lock (_cacheLock)
+            {
+                LoadAllItemsCore(grimDawnDirectory, keepExtractedFiles, skipVersionCheck, stateChangeCallback);
+            }
+        }
+
+        private void LoadAllItemsCore(string grimDawnDirectory, bool keepExtractedFiles, bool skipVersionCheck, Action<string> stateChangeCallback)
         {
             if (File.Exists(CacheFilename))
             {
@@ -69,10 +81,13 @@ namespace GrimSearch.Utils.DBFiles
 
         public void ClearCache()
         {
-            IsDirty = true;
-            if (File.Exists(CacheFilename))
+            lock (_cacheLock)
             {
-                File.Delete(CacheFilename);
+                IsDirty = true;
+                if (File.Exists(CacheFilename))
+                {
+                    File.Delete(CacheFilename);
+                }
             }
         }
 
@@ -114,13 +129,18 @@ namespace GrimSearch.Utils.DBFiles
 
                 var extractPath = Path.Combine(Path.GetTempPath(), "GDArchiveTempPath", Path.GetFileNameWithoutExtension(file) + "_" + Guid.NewGuid().ToString());
 
-                ArzExtractor.ExtractArz(file, grimDawnDirectory, extractPath);
+                try
+                {
+                    ArzExtractor.ExtractArz(file, grimDawnDirectory, extractPath);
 
-                stateChangeCallback("Reading items (file " + i + " of " + dbFiles.Length + ")");
-                PopulateAllItems(extractPath, stateChangeCallback);
-
-                if (!keepExtractedFiles)
-                    Directory.Delete(extractPath, true);
+                    stateChangeCallback("Reading items (file " + i + " of " + dbFiles.Length + ")");
+                    PopulateAllItems(extractPath, stateChangeCallback);
+                }
+                finally
+                {
+                    if (!keepExtractedFiles && Directory.Exists(extractPath))
+                        Directory.Delete(extractPath, true);
+                }
 
                 MD5Store.Instance.SetHash(file);
             }

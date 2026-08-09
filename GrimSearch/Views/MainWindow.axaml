@@ -189,7 +189,7 @@
                         <ComboBox Name="SearchEngineComboBox" SelectedValue="{Binding SearchEngine}" ItemsSource="{Binding SearchEngines}" Grid.Column="1" Grid.Row="3" />
                     </Grid>
                     <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save will load all items from the Grim Dawn data files, if not previously loaded. This WILL take some time!" VerticalAlignment="Top"/>
-                    <Button Content="Detect settings from running Steam process" Name="DetectGDSettings" Width="350" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />
+                    <Button Content="Detect Grim Dawn settings" Name="DetectGDSettings" Width="350" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Save" Name="SaveSettingsButton" Width="50" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding SaveSettingsCommand}" />
                         <Button Content="Clear items cache" Name="RemoveItemCacheButton" Width="150" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding ClearCacheCommand}" />

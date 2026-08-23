@@ -91,7 +91,7 @@ public partial class MainWindow : Window
     private string GetGDToolsURLForItem(ItemViewModel item)
     {
         var searchNameInURL = Uri.EscapeDataString(item.Name);
-        return "https://www.grimtools.com/db/search?query=" + searchNameInURL + "&in_description=0&exact_match=1";
+        return "https://www.grimtools.com/db/search?query=" + searchNameInURL + "&in_description=0&exact_match=0";
     }
 
     private async void ResultsListView_KeyUp(object sender, KeyEventArgs e)

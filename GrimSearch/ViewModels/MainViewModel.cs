@@ -25,6 +25,7 @@ namespace GrimSearch.ViewModels
     {
         private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly Window _window;
+        private readonly DispatcherTimer _lastRefreshedTimer;
         public MainViewModel(Dispatcher dispatcher, Window window) : this()
         {
             Dispatcher = dispatcher;
@@ -61,6 +62,14 @@ namespace GrimSearch.ViewModels
             {
                 UpdateSearchBoxVisibility();
             });
+
+            _lastRefreshedTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _lastRefreshedTimer.Tick += (_, _) => UpdateLastRefreshedText();
+            _lastRefreshedTimer.Start();
+
             this.PropertyChanged += SearchablePropertyChanged;
         }
 
@@ -141,6 +150,37 @@ namespace GrimSearch.ViewModels
         {
             get { return _loadedSettings.AutoRefresh; }
             set { _loadedSettings.AutoRefresh = value; this.RaisePropertyChanged("AutoRefresh"); }
+        }
+
+        private string _lastRefreshedText = "";
+        public string LastRefreshedText
+        {
+            get { return _lastRefreshedText; }
+            set { _lastRefreshedText = value; this.RaisePropertyChanged("LastRefreshedText"); }
+        }
+
+        private void UpdateLastRefreshed()
+        {
+            _lastRefreshed = DateTime.Now;
+            Dispatcher.Invoke(UpdateLastRefreshedText);
+        }
+
+        private void UpdateLastRefreshedText()
+        {
+            if (_lastRefreshed.Year == 2000)
+                return;
+
+            var elapsed = DateTimeOffset.Now - _lastRefreshed;
+            var elapsedText = elapsed.TotalMinutes < 1
+                ? FormatElapsedTime(Math.Max(0, (int)elapsed.TotalSeconds), "second")
+                : FormatElapsedTime((int)elapsed.TotalMinutes, "minute");
+
+            LastRefreshedText = $"(Last refreshed: {elapsedText} ago)";
+        }
+
+        private static string FormatElapsedTime(int value, string unit)
+        {
+            return $"{value} {unit}{(value == 1 ? "" : "s")}";
         }
 
         private bool _enableInput = true;
@@ -604,6 +644,7 @@ namespace GrimSearch.ViewModels
             IIndex newIndex = SearchEngine == "Lucene" ? new LuceneIndex() : new Index();
             result = await newIndex.BuildAsync(GrimDawnDirectory, GrimDawnSavesDirectory, _loadedSettings.KeepExtractedDBFiles, false, (msg) => SetStatusbarText(msg)).ConfigureAwait(false);
             _index = newIndex;
+            UpdateLastRefreshed();
 
             if (!skipItemTypesReload)
             {

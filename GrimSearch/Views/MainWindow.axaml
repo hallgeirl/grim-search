@@ -93,14 +93,15 @@
                                 <Label Content="Results" FontWeight="Bold" />
                                 <TextBlock Text="{Binding SearchResultText}" FontWeight="Bold" VerticalAlignment="Center" />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
-                                <Button Margin="0,0,0,0" Command="{Binding RefreshCommand}">
+                            <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+                                <Button Command="{Binding RefreshCommand}" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/arrow_refresh.png"></Image>
                                         <TextBlock Text="Refresh" />
                                     </StackPanel>
                                 </Button>
-                                <CheckBox Margin="10,5,0,0" IsChecked="{Binding AutoRefresh, Mode=TwoWay}">Auto refresh</CheckBox>
+                                <CheckBox Margin="10,0,0,0" IsChecked="{Binding AutoRefresh, Mode=TwoWay}" VerticalAlignment="Center">Auto refresh</CheckBox>
+                                <TextBlock Margin="10,0,0,0" Text="{Binding LastRefreshedText}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Grid>
 

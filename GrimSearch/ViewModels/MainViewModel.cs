@@ -532,12 +532,12 @@ namespace GrimSearch.ViewModels
                     AutoRefresh = _loadedSettings.AutoRefresh;
                     IncludeBlueprints = _loadedSettings.IncludeBlueprints;
                     SearchMode = _loadedSettings.LastSearchMode;
-                    SearchString = _loadedSettings.LastSearchText;
                     SearchEngine = _loadedSettings.SearchEngine ?? "Classic";
 
 
                     await BuildIndexAsync();
 
+                    SearchString = _loadedSettings.LastSearchText;
                     _initialized = true;
 
                     await SearchAsync();

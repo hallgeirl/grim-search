@@ -4,6 +4,23 @@ Someone that has played Grim Dawn for a while may start losing track of all his 
 
 There is also a thread on the Grim Dawn forums: https://forums.crateentertainment.com/t/tool-grim-search/45671
 
+## Installation
+
+### Linux
+
+The Linux install script downloads the latest Grim Search release, installs it to `/usr/share/grimsearch`, and adds an application launcher. Run it from the repository root:
+
+```sh
+cd installscripts
+sudo ./install-linux.sh
+```
+
+The script requires `curl`, `jq`, `wget`, `unzip`, and `desktop-file-install`. See the [install scripts documentation](installscripts/README.md) for additional details and caveats.
+
+### Windows
+
+There is currently no automated Windows installer. Download the Windows archive from the [latest release](https://github.com/hallgeirl/grim-search/releases/latest), extract it, and run `GrimSearch.exe`.
+
 ## First time setup
 Go to the Settings tab to configure your save path and path to Grim Dawn. Click "Detect Grim Dawn settings" to detect standard Steam or GOG locations automatically. Steam does not need to be running. If detection fails, you can enter the paths manually.
 

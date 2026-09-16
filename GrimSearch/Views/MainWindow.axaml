@@ -5,7 +5,7 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335" FontFamily="{Binding ItemFontFamily}">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -179,6 +179,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Label Name="GDDirLabel" Grid.Column="0" Content="Grim Dawn directory" Margin="0,0,0,0" />
                         <Label Name="GDSavesDirLabel" Grid.Column="0" Grid.Row="1" Content="Saves directory" Margin="0,0,0,0" />
@@ -188,6 +189,8 @@
                         <SelectableTextBlock Name="ConfigFolderTextBlock" Text="{Binding ConfigFolder}" Grid.Column="1" Grid.Row="2" />
                         <Label Name="SearchEngineLabel" Grid.Column="0" Grid.Row="3" Content="Search engine" Margin="0,0,0,0" />
                         <ComboBox Name="SearchEngineComboBox" SelectedValue="{Binding SearchEngine}" ItemsSource="{Binding SearchEngines}" Grid.Column="1" Grid.Row="3" />
+                        <Label Name="ItemLanguageLabel" Grid.Column="0" Grid.Row="4" Content="Item language" Margin="0,0,0,0" />
+                        <ComboBox Name="ItemLanguageComboBox" SelectedItem="{Binding SelectedItemLanguage, Mode=TwoWay}" ItemsSource="{Binding ItemLanguages}" Grid.Column="1" Grid.Row="4" />
                     </Grid>
                     <TextBlock HorizontalAlignment="Left" Margin="0,10,0,0" TextWrapping="Wrap" Text="Clicking Save will load all items from the Grim Dawn data files, if not previously loaded. This WILL take some time!" VerticalAlignment="Top"/>
                     <Button Content="Detect Grim Dawn settings" Name="DetectGDSettings" Width="350" HorizontalAlignment="Left" Margin="5,5,0,0" Command="{Binding DetectGDSettingsCommand}" />

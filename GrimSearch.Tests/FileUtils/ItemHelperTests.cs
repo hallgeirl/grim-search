@@ -1,4 +1,5 @@
 using GrimSearch.Utils.DBFiles;
+using GrimSearch.Utils.CharacterFiles;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GrimSearch.Tests.FileUtils
@@ -38,6 +39,47 @@ namespace GrimSearch.Tests.FileUtils
         public void RemoveItemNameFormattingRemovesGrimDawnColorTokens(string itemName, string expectedName)
         {
             Assert.AreEqual(expectedName, ItemHelper.RemoveItemNameFormatting(itemName));
+        }
+
+        [TestMethod]
+        [DataRow("神話級", "ウルテスの斧", "神話級 ウルテスの斧")]
+        [DataRow("Мифический", "Топор Ультоса", "Мифический Топор Ультоса")]
+        [DataRow("أسطوري", "فأس أولتوس", "أسطوري فأس أولتوس")]
+        public void GetFullItemNameSupportsUnicodeLocalizations(string style, string baseName, string expected)
+        {
+            var item = new Item();
+            var definition = new ItemRaw();
+            definition.StringParametersRaw["Class"] = "WeaponMelee_Axe2h";
+            definition.StringParametersRaw["itemNameTag"] = "item";
+            definition.StringParametersRaw["itemStyleTag"] = "style";
+            var strings = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["item"] = baseName,
+                ["style"] = style
+            };
+
+            Assert.AreEqual(expected, ItemHelper.GetFullItemName(item, definition, tag => strings[tag]));
+        }
+
+        [TestMethod]
+        [DataRow("[ms]Mythischer[fs]Mythische[ns]Mythisches[mp]Mythische[fp]Mythische[np]Mythische", "[ms]Avatar des Chaos", "Mythischer Avatar des Chaos")]
+        [DataRow("[ms]Mythischer[fs]Mythische[ns]Mythisches", "[fs]Klinge", "Mythische Klinge")]
+        [DataRow("[ms]Mythischer[fs]Mythische[ns]Mythisches", "[ns]Schwert", "Mythisches Schwert")]
+        [DataRow("[ms]Anciens[fs]Anciennes[mp]Anciens[fp]Anciennes", "[fp]Lames", "Anciennes Lames")]
+        public void GetFullItemNameResolvesGrammaticalVariants(string style, string baseName, string expected)
+        {
+            var item = new Item();
+            var definition = new ItemRaw();
+            definition.StringParametersRaw["Class"] = "WeaponMelee_Sword";
+            definition.StringParametersRaw["itemNameTag"] = "item";
+            definition.StringParametersRaw["itemStyleTag"] = "style";
+            var strings = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["item"] = baseName,
+                ["style"] = style
+            };
+
+            Assert.AreEqual(expected, ItemHelper.GetFullItemName(item, definition, tag => strings[tag]));
         }
 
         private static ItemRaw CreateItemDefinition(int levelRequirement)

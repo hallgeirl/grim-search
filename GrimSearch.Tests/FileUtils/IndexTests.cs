@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using Newtonsoft.Json;
 using Index = GrimSearch.Utils.Index;
 
 namespace GrimSearch.Tests.FileUtils
@@ -16,6 +18,8 @@ namespace GrimSearch.Tests.FileUtils
         public void Initialize()
         {
             StringsCache.Instance.CacheFilename = "Resources/TagsCache.json";
+            StringsCache.Instance.Language = "EN";
+            StringsCache.Instance.IsDirty = true;
             ItemCache.Instance.CacheFilename = "Resources/ItemsCache.json";
         }
 
@@ -74,6 +78,27 @@ namespace GrimSearch.Tests.FileUtils
             var results = await index.FindAsync("ulTos", new IndexFilter() { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 });
 
             Assert.IsTrue(results.Results.Count(x => x.ItemName == "Mythical Ultos' Stormseeker") > 0);
+        }
+
+        [TestMethod]
+        public async Task FindsLocalizedAndEnglishItemNames()
+        {
+            var english = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("Resources/TagsCache.json"));
+            var localized = new Dictionary<string, string>
+            {
+                ["tagWeaponMelee2hD010"] = "ウルテスの嵐探し",
+                ["tagStyleUniqueTier3"] = "神話級"
+            };
+            StringsCache.Instance.SetStringsForTesting(localized, english, "JA");
+            var index = new Index();
+            await index.BuildAsync(null, "Resources/Saves", false, true);
+            var filter = new IndexFilter { IncludeEquipped = true, SearchMode = "Regular", PageSize = 1000 };
+
+            var localizedResults = await index.FindAsync("嵐探し", filter);
+            var englishResults = await index.FindAsync("stormseeker", filter);
+
+            Assert.IsTrue(localizedResults.Results.Any(x => x.ItemName == "神話級 ウルテスの嵐探し"));
+            Assert.IsTrue(englishResults.Results.Any(x => x.ItemName == "神話級 ウルテスの嵐探し"));
         }
 
         [TestMethod]

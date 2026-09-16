@@ -18,6 +18,7 @@ using GrimSearch.Utils.Steam;
 using System.ComponentModel;
 using GrimSearch.Views;
 using Avalonia.Controls;
+using Avalonia.Media;
 
 namespace GrimSearch.ViewModels
 {
@@ -368,7 +369,12 @@ namespace GrimSearch.ViewModels
         public string GrimDawnDirectory
         {
             get { return _loadedSettings.GrimDawnDirectory; }
-            set { _loadedSettings.GrimDawnDirectory = value; this.RaisePropertyChanged("GrimDawnDirectory"); }
+            set
+            {
+                _loadedSettings.GrimDawnDirectory = value;
+                this.RaisePropertyChanged("GrimDawnDirectory");
+                UpdateItemLanguages();
+            }
         }
 
 
@@ -400,6 +406,77 @@ namespace GrimSearch.ViewModels
         {
             get { return _searchEngines; }
             set { _searchEngines = value; this.RaisePropertyChanged("SearchEngines"); }
+        }
+
+        public string ItemLanguage
+        {
+            get => _loadedSettings.ItemLanguage ?? "EN";
+            set
+            {
+                // Replacing a ComboBox ItemsSource temporarily clears SelectedItem. Do not
+                // let that binding transition overwrite the persisted language with English.
+                if (string.IsNullOrWhiteSpace(value))
+                    return;
+
+                _loadedSettings.ItemLanguage = value.ToUpperInvariant();
+                this.RaisePropertyChanged("ItemLanguage");
+                ItemFontFamily = ResolveItemFontFamily(_loadedSettings.ItemLanguage);
+            }
+        }
+
+        private FontFamily _itemFontFamily = new FontFamily("$Default");
+        public FontFamily ItemFontFamily
+        {
+            get => _itemFontFamily;
+            private set
+            {
+                _itemFontFamily = value;
+                this.RaisePropertyChanged("ItemFontFamily");
+            }
+        }
+
+        private ObservableCollection<ItemLanguageOption> _itemLanguages = new ObservableCollection<ItemLanguageOption> { new ItemLanguageOption("EN") };
+        public ObservableCollection<ItemLanguageOption> ItemLanguages
+        {
+            get => _itemLanguages;
+            set { _itemLanguages = value; this.RaisePropertyChanged("ItemLanguages"); }
+        }
+
+        private ItemLanguageOption _selectedItemLanguage;
+        public ItemLanguageOption SelectedItemLanguage
+        {
+            get => _selectedItemLanguage;
+            set
+            {
+                if (value == null)
+                    return;
+
+                _selectedItemLanguage = value;
+                this.RaisePropertyChanged("SelectedItemLanguage");
+                ItemLanguage = value.Code;
+            }
+        }
+
+        private void UpdateItemLanguages()
+        {
+            var selectedLanguage = ItemLanguage.ToUpperInvariant();
+            var languages = StringsCache.GetAvailableLanguages(_loadedSettings.GrimDawnDirectory);
+            ItemLanguages = new ObservableCollection<ItemLanguageOption>(languages.Select(code => new ItemLanguageOption(code)));
+            SelectedItemLanguage = ItemLanguages.FirstOrDefault(language => language.Code == selectedLanguage)
+                ?? ItemLanguages.First(language => language.Code == "EN");
+        }
+
+        private static FontFamily ResolveItemFontFamily(string language)
+        {
+            switch (language?.ToUpperInvariant())
+            {
+                case "JA":
+                case "ZH":
+                case "KO":
+                    return new FontFamily("avares://GrimSearch/Assets/Fonts#Noto Sans CJK JP");
+                default:
+                    return FontManager.Current.DefaultFontFamily;
+            }
         }
 
         private void WatchDirectory(string value)
@@ -491,7 +568,8 @@ namespace GrimSearch.ViewModels
                 SelectedItemQualities = selectedItemQualities,
                 SelectedItemTypes = selectedItemTypes,
                 KeepExtractedDBFiles = _loadedSettings.KeepExtractedDBFiles,
-                SearchEngine = SearchEngine
+                SearchEngine = SearchEngine,
+                ItemLanguage = ItemLanguage
             };
             try
             {
@@ -533,6 +611,8 @@ namespace GrimSearch.ViewModels
                     IncludeBlueprints = _loadedSettings.IncludeBlueprints;
                     SearchMode = _loadedSettings.LastSearchMode;
                     SearchEngine = _loadedSettings.SearchEngine ?? "Classic";
+                    ItemLanguage = _loadedSettings.ItemLanguage ?? "EN";
+                    UpdateItemLanguages();
 
 
                     await BuildIndexAsync();
@@ -561,12 +641,14 @@ namespace GrimSearch.ViewModels
                     SavesDirectory = "",
                     LastSearchMode = "Regular",
                     KeepExtractedDBFiles = false,
-                    LastSearchText = ""
+                    LastSearchText = "",
+                    ItemLanguage = "EN"
                 };
 
                 GrimDawnDirectory = "";
                 GrimDawnSavesDirectory = "";
                 SearchMode = "Regular";
+                ItemLanguage = "EN";
 
                 SettingsMissing?.Invoke(this, new EventArgs());
             }
@@ -642,6 +724,7 @@ namespace GrimSearch.ViewModels
             IndexSummary result;
 
             IIndex newIndex = SearchEngine == "Lucene" ? new LuceneIndex() : new Index();
+            StringsCache.Instance.Language = ItemLanguage;
             result = await newIndex.BuildAsync(GrimDawnDirectory, GrimDawnSavesDirectory, _loadedSettings.KeepExtractedDBFiles, false, (msg) => SetStatusbarText(msg)).ConfigureAwait(false);
             _index = newIndex;
             UpdateLastRefreshed();

@@ -79,8 +79,7 @@ namespace GrimSearch.Utils
 
                 foreach (var item in characterItems)
                 {
-                    var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
-                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower() && FilterMatch(x, filter));
+                    var dupe = _index.Where(x => x.ItemBaseName == item.ItemBaseName && x.Owner.ToLower() != search.ToLower() && FilterMatch(x, filter));
 
                     if (dupe.Count() > 0)
                     {
@@ -118,8 +117,7 @@ namespace GrimSearch.Utils
 
                 foreach (var item in characterItems)
                 {
-                    var itemName = ItemHelper.GetFullItemName(item.SourceInstance, item.Source);
-                    var dupe = _index.Where(x => x.ItemName.ToLower() == itemName.ToLower() && x.Owner.ToLower() != search.ToLower() && FilterMatch(x, filter));
+                    var dupe = _index.Where(x => x.ItemBaseName == item.ItemBaseName && x.Owner.ToLower() != search.ToLower() && FilterMatch(x, filter));
 
                     if (dupe.Count() == 0)
                     {
@@ -269,6 +267,7 @@ namespace GrimSearch.Utils
 
             var indexItem = new IndexItem();
             indexItem.ItemName = ItemHelper.GetFullItemName(item, itemDef);
+            indexItem.ItemBaseName = ItemHelper.GetItemIdentity(item);
             indexItem.Owner = character.Header.Name;
             indexItem.IsHardcore = character.IsHardcore;
             indexItem.IsDeadHardcore = character.IsDeadHardcore;
@@ -322,6 +321,7 @@ namespace GrimSearch.Utils
             List<string> searchableStrings = new List<string>();
 
             searchableStrings.Add(ItemHelper.GetFullItemName(item, itemDef).ToLower());
+            searchableStrings.Add(ItemHelper.GetFullItemName(item, itemDef, _stringsCache.GetEnglishString).ToLower());
             searchableStrings.AddRange(itemStats);
             searchableStrings.Add(character.Header.Name);
 

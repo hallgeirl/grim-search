@@ -5,7 +5,7 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335" FontFamily="{Binding ItemFontFamily}">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768" x:Class="GrimSearch.Views.MainWindow" x:DataType="vm:MainViewModel" Icon="/Assets/appicon.ico" Title="GrimSearch" Height="800" Width="1335">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -108,7 +108,7 @@
 
                         <TextBlock Text="Double-click a row insvItems the results to open the full item in grimtools (in your default browser)." Margin="5,0,0,5" />
 
-                        <ListBox MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}" DoubleTapped="ResultsListView_MouseDoubleClick" SelectionMode="Multiple" KeyUp="ResultsListView_KeyUp">
+                        <ListBox MinHeight="300" Margin="5,0,0,0" Name="ResultsListView" FontFamily="{Binding ItemFontFamily}" ScrollViewer.VerticalScrollBarVisibility="Hidden" ItemsSource="{Binding SearchResults}" DoubleTapped="ResultsListView_MouseDoubleClick" SelectionMode="Multiple" KeyUp="ResultsListView_KeyUp">
                             <ListBox.Styles>
                             <Style Selector="ListBoxItem">
                                 <Setter Property="Padding" Value="0,5,0,5"/>

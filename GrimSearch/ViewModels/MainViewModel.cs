@@ -420,7 +420,6 @@ namespace GrimSearch.ViewModels
 
                 _loadedSettings.ItemLanguage = value.ToUpperInvariant();
                 this.RaisePropertyChanged("ItemLanguage");
-                ItemFontFamily = ResolveItemFontFamily(_loadedSettings.ItemLanguage);
             }
         }
 
@@ -585,6 +584,9 @@ namespace GrimSearch.ViewModels
                     await BuildIndexAsync();
 
                 _initialized = true;
+
+                if (!skipIndexBuild)
+                    await SearchAsync();
             }
             catch (Exception ex)
             {
@@ -724,9 +726,11 @@ namespace GrimSearch.ViewModels
             IndexSummary result;
 
             IIndex newIndex = SearchEngine == "Lucene" ? new LuceneIndex() : new Index();
-            StringsCache.Instance.Language = ItemLanguage;
+            var itemLanguage = ItemLanguage;
+            StringsCache.Instance.Language = itemLanguage;
             result = await newIndex.BuildAsync(GrimDawnDirectory, GrimDawnSavesDirectory, _loadedSettings.KeepExtractedDBFiles, false, (msg) => SetStatusbarText(msg)).ConfigureAwait(false);
             _index = newIndex;
+            _indexedItemLanguage = itemLanguage;
             UpdateLastRefreshed();
 
             if (!skipItemTypesReload)
@@ -762,6 +766,7 @@ namespace GrimSearch.ViewModels
 
         bool _searchQueued = false;
         bool _searchInProgress = false;
+        string _indexedItemLanguage = "EN";
         int _numberOfItemsShown = 0;
         const int _batchLoadSize = 100;
         IEnumerable<ItemViewModel> _currentSearchResult;
@@ -795,6 +800,7 @@ namespace GrimSearch.ViewModels
 
             Dispatcher.Invoke(() =>
             {
+                ItemFontFamily = ResolveItemFontFamily(_indexedItemLanguage);
                 SearchResults.Clear();
                 LoadMoreItems();
             });

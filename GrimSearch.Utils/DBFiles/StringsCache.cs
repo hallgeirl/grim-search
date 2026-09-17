@@ -14,6 +14,7 @@ namespace GrimSearch.Utils.DBFiles
             public string Language { get; set; }
             public Dictionary<string, string> ActiveStrings { get; set; } = new Dictionary<string, string>();
             public Dictionary<string, string> EnglishStrings { get; set; } = new Dictionary<string, string>();
+            public Dictionary<string, string> ArchiveFingerprints { get; set; } = new Dictionary<string, string>();
         }
 
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
@@ -47,7 +48,7 @@ namespace GrimSearch.Utils.DBFiles
         public void LoadAllStrings(string grimDawnDirectory)
         {
             var language = NormalizeLanguage(Language);
-            if (TryLoadCache(language))
+            if (TryLoadCache(grimDawnDirectory, language))
             {
                 _initialized = true;
                 IsDirty = false;
@@ -63,7 +64,8 @@ namespace GrimSearch.Utils.DBFiles
             {
                 Language = language,
                 ActiveStrings = _activeStrings,
-                EnglishStrings = _englishStrings
+                EnglishStrings = _englishStrings,
+                ArchiveFingerprints = GetArchiveFingerprints(grimDawnDirectory, language)
             };
             File.WriteAllText(CacheFilename, JsonConvert.SerializeObject(cache));
 
@@ -81,8 +83,11 @@ namespace GrimSearch.Utils.DBFiles
             if (!Directory.Exists(resourcesDirectory))
                 return new[] { "EN" };
 
-            var languages = Directory.EnumerateFiles(resourcesDirectory, "Text_*.arc", SearchOption.TopDirectoryOnly)
-                .Select(path => Path.GetFileNameWithoutExtension(path).Substring("Text_".Length))
+            var languages = Directory.EnumerateFiles(resourcesDirectory, "*", SearchOption.TopDirectoryOnly)
+                .Select(Path.GetFileName)
+                .Where(fileName => fileName.StartsWith("Text_", StringComparison.OrdinalIgnoreCase)
+                    && fileName.EndsWith(".arc", StringComparison.OrdinalIgnoreCase))
+                .Select(fileName => fileName.Substring("Text_".Length, fileName.Length - "Text_".Length - ".arc".Length))
                 .Select(NormalizeLanguage)
                 .Where(language => !string.IsNullOrWhiteSpace(language))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -108,7 +113,7 @@ namespace GrimSearch.Utils.DBFiles
             IsDirty = false;
         }
 
-        private bool TryLoadCache(string language)
+        private bool TryLoadCache(string grimDawnDirectory, string language)
         {
             if (!File.Exists(CacheFilename))
                 return false;
@@ -121,6 +126,11 @@ namespace GrimSearch.Utils.DBFiles
                 if (language != "EN")
                     return false;
 
+                // Upgrade the legacy cache when source archives are available so stale strings
+                // cannot be carried forward without any archive metadata.
+                if (GetArchiveFingerprints(grimDawnDirectory, language).Count > 0)
+                    return false;
+
                 _englishStrings = root.ToObject<Dictionary<string, string>>();
                 _activeStrings = new Dictionary<string, string>(_englishStrings);
                 Language = "EN";
@@ -129,6 +139,9 @@ namespace GrimSearch.Utils.DBFiles
 
             var cache = root.ToObject<StringsCacheContainer>();
             if (!string.Equals(NormalizeLanguage(cache.Language), language, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (!ArchiveFingerprintsMatch(cache.ArchiveFingerprints, GetArchiveFingerprints(grimDawnDirectory, language)))
                 return false;
 
             _activeStrings = cache.ActiveStrings ?? new Dictionary<string, string>();
@@ -177,15 +190,56 @@ namespace GrimSearch.Utils.DBFiles
 
             var archiveName = $"Text_{language}.arc";
             if (language != "EN")
-                return new[] { Path.Combine(grimDawnDirectory, "resources", archiveName) };
+            {
+                var archive = FindArchive(Path.Combine(grimDawnDirectory, "resources"), archiveName);
+                return archive == null ? Array.Empty<string>() : new[] { archive };
+            }
 
             return new[]
             {
-                Path.Combine(grimDawnDirectory, "resources", archiveName),
-                Path.Combine(grimDawnDirectory, "gdx1", "resources", archiveName),
-                Path.Combine(grimDawnDirectory, "gdx2", "resources", archiveName),
-                Path.Combine(grimDawnDirectory, "gdx3", "resources", archiveName)
-            };
+                Path.Combine(grimDawnDirectory, "resources"),
+                Path.Combine(grimDawnDirectory, "gdx1", "resources"),
+                Path.Combine(grimDawnDirectory, "gdx2", "resources"),
+                Path.Combine(grimDawnDirectory, "gdx3", "resources")
+            }
+                .Select(directory => FindArchive(directory, archiveName))
+                .Where(path => path != null);
+        }
+
+        private static string FindArchive(string directory, string archiveName)
+        {
+            if (!Directory.Exists(directory))
+                return null;
+
+            return Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault(path => string.Equals(Path.GetFileName(path), archiveName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        internal static Dictionary<string, string> GetArchiveFingerprints(string grimDawnDirectory, string language)
+        {
+            var languages = new[] { "EN", NormalizeLanguage(language) }.Distinct(StringComparer.OrdinalIgnoreCase);
+            return languages
+                .SelectMany(value => GetTagArchives(grimDawnDirectory, value))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(
+                    path => Path.GetRelativePath(grimDawnDirectory, path).Replace('\\', '/'),
+                    path =>
+                    {
+                        var file = new FileInfo(path);
+                        return $"{file.Length}:{file.LastWriteTimeUtc.Ticks}";
+                    },
+                    StringComparer.OrdinalIgnoreCase);
+        }
+
+        internal static bool ArchiveFingerprintsMatch(
+            IReadOnlyDictionary<string, string> cached,
+            IReadOnlyDictionary<string, string> current)
+        {
+            if (cached == null || cached.Count != current.Count)
+                return false;
+
+            return current.All(entry => cached.TryGetValue(entry.Key, out var fingerprint)
+                && string.Equals(fingerprint, entry.Value, StringComparison.Ordinal));
         }
 
         private static string GetTagFileCopy(string tagFilePath)

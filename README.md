@@ -24,6 +24,10 @@ There is currently no automated Windows installer. Download the Windows archive 
 ## First time setup
 Go to the Settings tab to configure your save path and path to Grim Dawn. Click "Detect Grim Dawn settings" to detect standard Steam or GOG locations automatically. Steam does not need to be running. If detection fails, you can enter the paths manually.
 
+The Settings tab also lets you select an item language from the localization archives installed with Grim Dawn. Localized item names are displayed in the selected language and remain searchable by both their localized and English names.
+
+Grim Search bundles Noto Sans CJK JP under the SIL Open Font License so Chinese, Japanese, and Korean item names render consistently without requiring system fonts.
+
 ## Searching for items
 Simply type the item name, or parts of it, in the search box. You can also search by character name or certain stats. Filters are available as well.
 ![Regular search](https://github.com/hallgeirl/gd-item-search/blob/master/assets/GDItemSearchRegularSearch.png)

@@ -69,8 +69,13 @@ namespace GrimSearch.Utils
 
                 foreach (var searchTerm in searchTerms)
                 {
-                    var query = new WildcardQuery(new Term("searchable", searchTerm.ToLowerInvariant() + "*"));
-                    fullQuery.Add(query, Occur.MUST);
+                    var normalizedTerm = searchTerm.ToLowerInvariant();
+                    var termQuery = new BooleanQuery
+                    {
+                        { new WildcardQuery(new Term("searchable", normalizedTerm + "*")), Occur.SHOULD },
+                        { new WildcardQuery(new Term("searchableRaw", "*" + normalizedTerm + "*")), Occur.SHOULD }
+                    };
+                    fullQuery.Add(termQuery, Occur.MUST);
                 }
 
                 AddFilterQueries(fullQuery, filter);
@@ -214,6 +219,8 @@ namespace GrimSearch.Utils
         public struct ItemWrapper
         {
             public string ItemName;
+            public string EnglishItemName;
+            public string Identity;
             public Item item;
             public ItemRaw itemDef;
             public bool IsEquipped;
@@ -265,9 +272,13 @@ namespace GrimSearch.Utils
                     continue;
 
                 var itemName = ItemHelper.GetFullItemName(item, itemDef);
+                var englishItemName = ItemHelper.GetFullItemName(item, itemDef, _stringsCache.GetEnglishString);
+                var identity = ItemHelper.GetItemIdentity(item);
                 var itemWrapper = new ItemWrapper()
                 {
                     ItemName = itemName,
+                    EnglishItemName = englishItemName,
+                    Identity = identity,
                     item = item,
                     itemDef = itemDef,
                     IsEquipped = isEquipped,
@@ -277,11 +288,11 @@ namespace GrimSearch.Utils
                     IsDeadHardcore = character.IsDeadHardcore
                 };
 
-                if (!result.ContainsKey(itemName))
+                if (!result.ContainsKey(identity))
                 {
-                    result.Add(itemName, new List<ItemWrapper>());
+                    result.Add(identity, new List<ItemWrapper>());
                 }
-                result[itemName].Add(itemWrapper);
+                result[identity].Add(itemWrapper);
             }
         }
 
@@ -386,13 +397,14 @@ namespace GrimSearch.Utils
             var allItemStats = itemStats.Union(itemPetStats.Select(x => $"{x} to pets")).ToList();
             indexItem.AddStringField("itemStats", string.Join(",", allItemStats), Field.Store.YES);
 
-            var duplicates = itemsByName[itemWrapper.ItemName].Where(x => x.CharacterName != itemWrapper.CharacterName);
+            var duplicates = itemsByName[itemWrapper.Identity].Where(x => x.CharacterName != itemWrapper.CharacterName);
             indexItem.AddStringField("duplicatesOnNormal", string.Join(",", duplicates.Where(x => !x.IsHardcore).Select(x => x.CharacterName)), Field.Store.YES);
             indexItem.AddStringField("duplicatesOnHardcoreLiving", string.Join(",", duplicates.Where(x => x.IsHardcore && !x.IsDeadHardcore).Select(x => x.CharacterName)), Field.Store.YES);
             indexItem.AddStringField("duplicatesOnHardcoreAll", string.Join(",", duplicates.Where(x => x.IsHardcore).Select(x => x.CharacterName)), Field.Store.YES);
             foreach (var i in GetSearchableStrings(itemWrapper, allItemStats))
             {
                 indexItem.AddTextField("searchable", i, Field.Store.NO);
+                indexItem.AddStringField("searchableRaw", i.ToLowerInvariant(), Field.Store.NO);
             }
 
             UpdateSummary(rarity, itemType, itemWrapper.CharacterName, summary);
@@ -452,6 +464,7 @@ namespace GrimSearch.Utils
             List<string> searchableStrings = new List<string>();
 
             searchableStrings.AddRange(SanitizeSearchString(ItemHelper.GetFullItemName(itemWrapper.item, itemWrapper.itemDef)).Split(" "));
+            searchableStrings.Add(SanitizeSearchString(itemWrapper.EnglishItemName));
             searchableStrings.AddRange(itemStats.Select(x => SanitizeSearchString(x)));
             searchableStrings.Add(SanitizeSearchString(itemWrapper.CharacterName));
 

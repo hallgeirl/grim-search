@@ -16,6 +16,7 @@ namespace GrimSearch
         public string GrimDawnDirectory { get; set; }
         public string SavesDirectory { get; set; }
         public string SearchEngine { get; set; }
+        public string ItemLanguage { get; set; } = "EN";
         public bool AutoRefresh { get; set; }
         public bool IncludeBlueprints { get; set; } = true;
 

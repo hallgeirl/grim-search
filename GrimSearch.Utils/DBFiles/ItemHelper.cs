@@ -58,22 +58,41 @@ namespace GrimSearch.Utils.DBFiles
             return GetItemType(itemDef) == "ItemArtifactFormula";
         }
 
+        public static string GetItemIdentity(Item item)
+        {
+            if (item == null)
+                return "";
+
+            return string.Join("|", new[]
+            {
+                item.baseName,
+                item.prefixName,
+                item.suffixName
+            }.Select(value => value ?? ""));
+        }
+
         public static string GetFullItemName(Item item, ItemRaw itemDef)
         {
-            string baseName = GetItemBasename(item, itemDef);
+            return GetFullItemName(item, itemDef, StringsCache.Instance.GetString);
+        }
 
-            var upgradeLevel = GetItemUpgradeLevel(itemDef);
+        internal static string GetFullItemName(Item item, ItemRaw itemDef, Func<string, string> getString)
+        {
+            string baseName = GetItemBasename(item, itemDef, getString);
+            var genderCode = GetGenderCode(baseName);
+
+            var upgradeLevel = ResolveGenderVariant(GetItemUpgradeLevel(itemDef, getString), genderCode);
 
             List<string> nameComponents = new List<string>();
             nameComponents.Add(upgradeLevel);
 
             if (!itemDef.NumericalParametersRaw.ContainsKey("hidePrefixName") || itemDef.NumericalParametersRaw["hidePrefixName"] != 0)
-                AddAffixNameToNameComponents(item.prefixName, nameComponents);
+                AddAffixNameToNameComponents(item.prefixName, nameComponents, getString, genderCode);
 
-            nameComponents.Add(baseName);
+            nameComponents.Add(ResolveGenderVariant(baseName, genderCode));
 
             if (!itemDef.NumericalParametersRaw.ContainsKey("hideSuffixName") || itemDef.NumericalParametersRaw["hideSuffixName"] != 0)
-                AddAffixNameToNameComponents(item.suffixName, nameComponents);
+                AddAffixNameToNameComponents(item.suffixName, nameComponents, getString, genderCode);
 
             return RemoveItemNameFormatting(string.Join(" ", nameComponents.Where(x => x != null)));
         }
@@ -85,12 +104,50 @@ namespace GrimSearch.Utils.DBFiles
                 : Regex.Replace(itemName, @"(?:\{\^[A-Za-z-]\}|\^[A-Za-z-])", "").Trim();
         }
 
-        private static void AddAffixNameToNameComponents(string affixPath, List<string> nameComponents)
+        internal static string ResolveGenderVariant(string value, string genderCode)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            var matches = Regex.Matches(value, @"\[(ms|fs|ns|mp|fp|np)\]", RegexOptions.IgnoreCase);
+            if (matches.Count == 0)
+                return value;
+
+            var selectedCode = string.IsNullOrEmpty(genderCode)
+                ? matches[0].Groups[1].Value
+                : genderCode;
+
+            for (var i = 0; i < matches.Count; i++)
+            {
+                if (!string.Equals(matches[i].Groups[1].Value, selectedCode, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var start = matches[i].Index + matches[i].Length;
+                var end = i + 1 < matches.Count ? matches[i + 1].Index : value.Length;
+                return value.Substring(start, end - start);
+            }
+
+            // A malformed or incomplete translation is still more useful without engine metadata.
+            var firstStart = matches[0].Index + matches[0].Length;
+            var firstEnd = matches.Count > 1 ? matches[1].Index : value.Length;
+            return value.Substring(firstStart, firstEnd - firstStart);
+        }
+
+        private static string GetGenderCode(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            var match = Regex.Match(value, @"\[(ms|fs|ns|mp|fp|np)\]", RegexOptions.IgnoreCase);
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
+        private static void AddAffixNameToNameComponents(string affixPath, List<string> nameComponents, Func<string, string> getString, string genderCode)
         {
             if (!string.IsNullOrEmpty(affixPath))
             {
                 var affix = ItemCache.Instance.GetItem(affixPath);
-                var affixName = GetAffixName(affix);
+                var affixName = ResolveGenderVariant(GetAffixName(affix, getString), genderCode);
                 if (!string.IsNullOrEmpty(affixName))
                     nameComponents.Add(affixName);
             }
@@ -457,34 +514,34 @@ namespace GrimSearch.Utils.DBFiles
             }
         }
 
-        private static string GetAffixName(ItemRaw itemDef)
+        private static string GetAffixName(ItemRaw itemDef, Func<string, string> getString)
         {
             if (itemDef == null || !itemDef.StringParametersRaw.ContainsKey("lootRandomizerName"))
                 return null;
 
             var tagName = itemDef.StringParametersRaw["lootRandomizerName"];
 
-            return StringsCache.Instance.GetString(tagName);
+            return getString(tagName);
         }
 
-        private static string GetItemBasename(Item item, ItemRaw itemDef)
+        private static string GetItemBasename(Item item, ItemRaw itemDef, Func<string, string> getString)
         {
             if (itemDef.StringParametersRaw.ContainsKey("itemNameTag"))
-                return StringsCache.Instance.GetString(itemDef.StringParametersRaw["itemNameTag"]);
+                return getString(itemDef.StringParametersRaw["itemNameTag"]);
 
             if (itemDef.StringParametersRaw["Class"] != "ItemRelic" && itemDef.StringParametersRaw.ContainsKey("FileDescription"))
                 return itemDef.StringParametersRaw["FileDescription"];
 
             if (itemDef.StringParametersRaw.ContainsKey("description"))
-                return StringsCache.Instance.GetString(itemDef.StringParametersRaw["description"]);
+                return getString(itemDef.StringParametersRaw["description"]);
 
             return "";
         }
 
-        private static string GetItemUpgradeLevel(ItemRaw itemDef)
+        private static string GetItemUpgradeLevel(ItemRaw itemDef, Func<string, string> getString)
         {
             if (itemDef.StringParametersRaw.ContainsKey("itemStyleTag") && !string.IsNullOrEmpty(itemDef.StringParametersRaw["itemStyleTag"]))
-                return StringsCache.Instance.GetString(itemDef.StringParametersRaw["itemStyleTag"]);
+                return getString(itemDef.StringParametersRaw["itemStyleTag"]);
 
             return null;
         }

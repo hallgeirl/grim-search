@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using GrimSearch.ViewModels;
 
 namespace GrimSearch.Tests;
 
@@ -93,5 +94,37 @@ public class SettingsTests
         var settings = JsonConvert.DeserializeObject<StoredSettings>("{}");
 
         Assert.IsNull(settings.SelectedItemTypes);
+    }
+
+    [TestMethod]
+    public void ItemLanguageDefaultsToEnglishForExistingSettings()
+    {
+        var settings = JsonConvert.DeserializeObject<StoredSettings>("{}");
+
+        Assert.AreEqual("EN", settings.ItemLanguage);
+    }
+
+    [TestMethod]
+    public void ItemLanguageRoundTrips()
+    {
+        var json = JsonConvert.SerializeObject(new StoredSettings { ItemLanguage = "JA" });
+        var settings = JsonConvert.DeserializeObject<StoredSettings>(json);
+
+        Assert.AreEqual("JA", settings.ItemLanguage);
+    }
+
+    [TestMethod]
+    [DataRow("DE", "German")]
+    [DataRow("JA", "Japanese")]
+    [DataRow("ZH", "Chinese")]
+    [DataRow("RU", "Russian")]
+    [DataRow("xx", "XX")]
+    public void ItemLanguageOptionMapsCodeToDisplayName(string code, string expectedName)
+    {
+        var language = new ItemLanguageOption(code);
+
+        Assert.AreEqual(code.ToUpperInvariant(), language.Code);
+        Assert.AreEqual(expectedName, language.DisplayName);
+        Assert.AreEqual(expectedName, language.ToString());
     }
 }

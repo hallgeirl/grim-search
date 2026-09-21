@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia;
@@ -23,10 +24,23 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Title = $"GrimSearch {GetVersion()}";
         InitializeInfiniteScrolling();
         this.Opened += Window_Initialized;
         this.Closing += Window_Closing;
 
+    }
+
+    private static string GetVersion()
+    {
+        var assembly = Assembly.GetEntryAssembly();
+        var informationalVersion = assembly?
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion;
+
+        return informationalVersion?.Split('+')[0]
+            ?? assembly?.GetName().Version?.ToString(3)
+            ?? "unknown";
     }
 
     private void InitializeInfiniteScrolling()

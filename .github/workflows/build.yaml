@@ -53,4 +53,7 @@ jobs:
           files: |
             grimsearch-win-x64-${{ steps.gitversion.outputs.semVer }}.zip
             grimsearch-linux-x64-${{ steps.gitversion.outputs.semVer }}.zip
+            installscripts/install-linux.sh
+            installscripts/grimsearch.png
+            installscripts/grimsearch.desktop
             LICENSE

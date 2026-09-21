@@ -8,14 +8,19 @@ There is also a thread on the Grim Dawn forums: https://forums.crateentertainmen
 
 ### Linux
 
-The Linux install script downloads the latest Grim Search release, installs it to `/usr/share/grimsearch`, and adds an application launcher. Run it from the repository root:
+The Linux install script installs Grim Search to `/usr/share/grimsearch` and adds an application launcher and icon. Install the latest release without cloning the repository:
 
 ```sh
-cd installscripts
-sudo ./install-linux.sh
+curl -fsSL https://github.com/hallgeirl/grim-search/releases/latest/download/install-linux.sh | sudo bash
 ```
 
-The script requires `curl`, `jq`, `wget`, `unzip`, and `desktop-file-install`. See the [install scripts documentation](installscripts/README.md) for additional details and caveats.
+Or run the script from a checkout, from any directory:
+
+```sh
+sudo ./installscripts/install-linux.sh
+```
+
+It always installs the latest Linux (x64) release: the application, launcher, and icon are downloaded to a temporary directory, installed, and the temporary files are removed. It requires `curl`, `jq`, and `unzip`; `desktop-file-install` (from `desktop-file-utils`) is optional. See the [install scripts documentation](installscripts/README.md) for additional details.
 
 ### Windows
 

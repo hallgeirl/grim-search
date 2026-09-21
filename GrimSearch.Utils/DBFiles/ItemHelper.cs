@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -330,6 +331,7 @@ namespace GrimSearch.Utils.DBFiles
         /// 
         /// </summary>
         /// <param name="itemNumericalParameters"></param>
+        /// <param name="itemStringParameters"></param>
         /// <returns></returns>
         private static List<string> GetStatsCore(Dictionary<string, List<float>> itemNumericalParameters, Dictionary<string, List<string>> itemStringParameters)
         {
@@ -341,6 +343,11 @@ namespace GrimSearch.Utils.DBFiles
             //Tag name = Damage[Duration]Modifier<type> -- format: {%+.0f0}% {^E}<type> Damage
             foreach (var stat in itemNumericalParameters)
             {
+                // Resistance reduction is rendered separately so that the reduction value is included. Without this
+                // guard the generic flat damage handler would render it without a value.
+                if (GetResistanceReductionTag(stat.Key) != null)
+                    continue;
+
                 AddPercentageDamageModifier(modifiers, stat);
                 AddFlatDamageModifier(modifiers, stat);
                 AddAllSkillsModifier(modifiers, stat);
@@ -348,14 +355,299 @@ namespace GrimSearch.Utils.DBFiles
                 AddRetaliationPercentageDamageModifier(modifiers, stat);
             }
 
+            var resistanceReductions = new Dictionary<string, float>();
+            var resistanceReductionRanks = new Dictionary<string, int>();
+            CollectResistanceReductions(resistanceReductions, resistanceReductionRanks, itemNumericalParameters, itemStringParameters);
+
             foreach (var stat in itemStringParameters)
             {
                 AddMasteryModifier(modifiers, stat);
                 AddSkillModifier(modifiers, stat);
+
+                // Items can grant skills (e.g. procs, relic auras and component abilities) that reduce enemy
+                // resistances. Those skills carry the actual parameters, so they have to be resolved as well.
+                CollectAttachedSkillResistanceReductions(resistanceReductions, resistanceReductionRanks, stat);
+            }
+
+            foreach (var reduction in resistanceReductions)
+            {
+                var rendered = reduction.Key.StartsWith("Defense", StringComparison.Ordinal)
+                    ? RenderDefensiveResistanceReduction(reduction.Key, reduction.Value)
+                    : RenderResistanceReduction(reduction.Key, reduction.Value);
+                if (rendered != null)
+                    modifiers.Add(rendered);
             }
 
             return modifiers;
         }
+
+        #region Resistance reduction
+
+        private static readonly string[] ResistanceReductionDamageTypes = { "Total", "Physical", "Elemental" };
+        private static readonly string[] ResistanceReductionKinds = { "Percent", "Absolute" };
+        private static readonly string[] AttachedSkillParameterNames = { "itemSkillName", "skillName" };
+
+        // The flat "-X% <type> Resistance" reduction is stored on skills (and their buffs) as a negative defensive
+        // resistance. These are the parameter/tag pairs that represent it.
+        private static readonly Dictionary<string, string> DefensiveResistanceReductionTags = new Dictionary<string, string>
+        {
+            ["defensiveElementalResistance"] = "DefenseElementalResistance",
+            ["defensivePhysical"] = "DefensePhysical",
+            ["defensivePierce"] = "DefensePierce",
+            ["defensiveFire"] = "DefenseFire",
+            ["defensiveCold"] = "DefenseCold",
+            ["defensiveLightning"] = "DefenseLightning",
+            ["defensivePoison"] = "DefensePoison",
+            ["defensiveAether"] = "DefenseAether",
+            ["defensiveChaos"] = "DefenseChaos",
+            ["defensiveBleeding"] = "DefenseBleeding",
+            ["defensiveLife"] = "DefenseLife",
+            ["defensiveStun"] = "DefenseStunNegative",
+            ["defensiveFreeze"] = "DefenseFreezeNegative",
+            ["defensiveKnockdown"] = "DefenseKnockdownNegative",
+            ["defensivePetrify"] = "DefensePetrifyNegative",
+            ["defensiveTrap"] = "DefenseTrapNegative",
+            ["defensiveConfusion"] = "DefenseConfusion",
+            ["defensiveSleep"] = "tagDefenseSleep",
+            ["defensiveSlowLifeLeach"] = "DefenseLifeLeach",
+            ["defensiveSlowManaLeach"] = "DefenseManaLeach"
+        };
+
+        /// <summary>
+        /// Maps a resistance reduction parameter (e.g. offensiveTotalResistanceReductionPercentMin) to the
+        /// localization tag that describes it (e.g. DamageTotalResistanceReductionPercent), or null if the
+        /// parameter is not a resistance reduction stat.
+        /// </summary>
+        private static string GetResistanceReductionTag(string parameterName)
+        {
+            if (string.IsNullOrEmpty(parameterName) || !parameterName.StartsWith("offensive", StringComparison.Ordinal))
+                return null;
+
+            foreach (var damageType in ResistanceReductionDamageTypes)
+            {
+                foreach (var kind in ResistanceReductionKinds)
+                {
+                    if (parameterName.StartsWith($"offensive{damageType}ResistanceReduction{kind}", StringComparison.Ordinal))
+                        return $"Damage{damageType}ResistanceReduction{kind}";
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Ranks resistance reduction parameters so that the actual reduction amount is preferred over the
+        /// duration or chance parameters when several of them describe the same reduction.
+        /// </summary>
+        private static int GetResistanceReductionRank(string parameterName)
+        {
+            if (parameterName.EndsWith("DurationMin", StringComparison.Ordinal))
+                return 3;
+
+            if (parameterName.EndsWith("Min", StringComparison.Ordinal))
+                return 1;
+
+            return 2;
+        }
+
+        private static void AddResistanceReduction(
+            Dictionary<string, float> collected,
+            Dictionary<string, int> ranks,
+            string tagName,
+            float value,
+            string parameterName)
+        {
+            var rank = GetResistanceReductionRank(parameterName);
+            if (!collected.ContainsKey(tagName) || rank < ranks[tagName])
+            {
+                collected[tagName] = value;
+                ranks[tagName] = rank;
+            }
+        }
+
+        private static float? ParseFirstParameterValue(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            // Some parameters (notably skills that scale per level) are stored as a semicolon separated list.
+            foreach (var part in value.Split(';'))
+            {
+                if (float.TryParse(part, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
+                    return parsed;
+            }
+
+            return null;
+        }
+
+        private static void CollectResistanceReductions(
+            Dictionary<string, float> collected,
+            Dictionary<string, int> ranks,
+            IReadOnlyDictionary<string, List<float>> numericalParameters,
+            IReadOnlyDictionary<string, List<string>> stringParameters)
+        {
+            foreach (var stat in numericalParameters)
+            {
+                var tagName = GetResistanceReductionTag(stat.Key);
+                if (tagName != null)
+                    AddResistanceReduction(collected, ranks, tagName, stat.Value.Sum(), stat.Key);
+            }
+
+            foreach (var stat in stringParameters)
+            {
+                var tagName = GetResistanceReductionTag(stat.Key);
+                if (tagName == null)
+                    continue;
+
+                foreach (var rawValue in stat.Value)
+                {
+                    var value = ParseFirstParameterValue(rawValue);
+                    if (value != null)
+                    {
+                        AddResistanceReduction(collected, ranks, tagName, value.Value, stat.Key);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private static void CollectResistanceReductions(
+            Dictionary<string, float> collected,
+            Dictionary<string, int> ranks,
+            IReadOnlyDictionary<string, float> numericalParameters,
+            IReadOnlyDictionary<string, string> stringParameters)
+        {
+            foreach (var stat in numericalParameters)
+            {
+                var tagName = GetResistanceReductionTag(stat.Key);
+                if (tagName != null)
+                    AddResistanceReduction(collected, ranks, tagName, stat.Value, stat.Key);
+            }
+
+            foreach (var stat in stringParameters)
+            {
+                var tagName = GetResistanceReductionTag(stat.Key);
+                if (tagName == null)
+                    continue;
+
+                var value = ParseFirstParameterValue(stat.Value);
+                if (value != null)
+                    AddResistanceReduction(collected, ranks, tagName, value.Value, stat.Key);
+            }
+        }
+
+        private static void CollectAttachedSkillResistanceReductions(
+            Dictionary<string, float> collected,
+            Dictionary<string, int> ranks,
+            KeyValuePair<string, List<string>> stat)
+        {
+            if (stat.Value == null || !AttachedSkillParameterNames.Contains(stat.Key))
+                return;
+
+            foreach (var skillPath in stat.Value)
+            {
+                var skill = ItemCache.Instance.GetItem(skillPath);
+                CollectSkillResistanceReductions(collected, ranks, skill, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { skillPath });
+            }
+        }
+
+        private static void CollectSkillResistanceReductions(
+            Dictionary<string, float> collected,
+            Dictionary<string, int> ranks,
+            ItemRaw skill,
+            HashSet<string> visitedSkillPaths)
+        {
+            if (skill == null)
+                return;
+
+            CollectResistanceReductions(collected, ranks, skill.NumericalParametersRaw, skill.StringParametersRaw);
+
+            // Flat negative defensive resistance is only a resistance reduction when the skill is a debuff applied to
+            // enemies. Self buffs (which penalise the player's own resistances) and passives must not be treated as RR.
+            if (IsDebuffSkill(skill))
+                CollectDefensiveResistanceReductions(collected, ranks, skill.NumericalParametersRaw, skill.StringParametersRaw);
+
+            // Some item skills are just triggers that apply a buff. The buff is where the actual stats live.
+            if (skill.StringParametersRaw.TryGetValue("buffSkillName", out var buffSkillName)
+                && !string.IsNullOrEmpty(buffSkillName)
+                && visitedSkillPaths.Add(buffSkillName))
+            {
+                CollectSkillResistanceReductions(collected, ranks, ItemCache.Instance.GetItem(buffSkillName), visitedSkillPaths);
+            }
+        }
+
+        private static bool IsDebuffSkill(ItemRaw skill)
+        {
+            return ContainsDebuffMarker(skill.StringParametersRaw.TryGetValue("templateName", out var template) ? template : null)
+                || ContainsDebuffMarker(skill.StringParametersRaw.TryGetValue("Class", out var className) ? className : null);
+        }
+
+        private static bool ContainsDebuffMarker(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return false;
+
+            return value.IndexOf("debuf", StringComparison.OrdinalIgnoreCase) >= 0
+                || value.IndexOf("contageous", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static void CollectDefensiveResistanceReductions(
+            Dictionary<string, float> collected,
+            Dictionary<string, int> ranks,
+            IReadOnlyDictionary<string, float> numericalParameters,
+            IReadOnlyDictionary<string, string> stringParameters)
+        {
+            foreach (var stat in numericalParameters)
+            {
+                if (stat.Value >= 0 || !DefensiveResistanceReductionTags.TryGetValue(stat.Key, out var tagName))
+                    continue;
+
+                AddResistanceReduction(collected, ranks, tagName, stat.Value, stat.Key);
+            }
+
+            foreach (var stat in stringParameters)
+            {
+                if (!DefensiveResistanceReductionTags.TryGetValue(stat.Key, out var tagName))
+                    continue;
+
+                var value = ParseFirstParameterValue(stat.Value);
+                if (value == null || value.Value >= 0)
+                    continue;
+
+                AddResistanceReduction(collected, ranks, tagName, value.Value, stat.Key);
+            }
+        }
+
+        private static string FormatReductionValue(float value)
+        {
+            return value.ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
+        private static string RenderResistanceReduction(string tagName, float value)
+        {
+            var template = StringsCache.Instance.GetString(tagName);
+            if (string.IsNullOrEmpty(template))
+                return null;
+
+            // The game localizations prepend the reduction value to the tag text (the tag itself starts with "%" for
+            // percentage based reductions and a space for absolute ones).
+            return "-" + FormatReductionValue(value) + template;
+        }
+
+        private static string RenderDefensiveResistanceReduction(string tagName, float value)
+        {
+            var template = StringsCache.Instance.GetString(tagName);
+            if (string.IsNullOrEmpty(template))
+                return null;
+
+            // Flat resistance reductions reuse the defensive resistance tags, which contain the value placeholder.
+            return template
+                .Replace("{%+.0f0}", FormatReductionValue(value))
+                .Replace("{%.0f0}", FormatReductionValue(value))
+                .Replace("{%t0}", FormatReductionValue(value));
+        }
+
+        #endregion
 
         private static void AddMasteryModifier(List<string> modifiers, KeyValuePair<string, List<string>> stat)
         {

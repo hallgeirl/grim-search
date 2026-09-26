@@ -87,7 +87,7 @@ Older releases are also listed on the
 
 ### Changed
 
-- No user-facing changes recorded.
+- Additional logging for easier debugging.
 
 ## [0.8.0] - 2026-08-05
 
@@ -99,7 +99,7 @@ Older releases are also listed on the
 
 ### Changed
 
-- Toolchain updates, including Avalonia 12, NLog 6 and updated CI actions.
+- Updated to Avalonia 12 and newer dependencies/tooling.
 
 ## [0.6.0-beta1] - 2026-07-24
 
@@ -123,7 +123,7 @@ Older releases are also listed on the
 
 ### Changed
 
-- No user-facing changes recorded.
+- Various logging improvements.
 
 ## [0.4.4] - 2024-03-10
 
@@ -135,50 +135,104 @@ Older releases are also listed on the
 
 ### Added
 
-- Logging.
+- Added diagnostics logging. The log files are found in the config directory,
+  which can be seen in the Settings tab.
 
 ## [0.4.1] - 2023-12-17
 
 ### Added
 
-- Infinite scrolling for search results.
+- Added support for continuous scrolling when there are more than 100 hits;
+  search results are no longer limited to a fixed number.
 
 ## [0.4.0] - 2023-12-16
 
+### Added
+
+- Added a new search engine that utilizes Lucene. It should give better
+  performance, especially on lower-end PCs. The old "classic" search engine
+  remains available and is selected as default.
+
 ### Changed
 
-- No user-facing changes recorded.
+- Avoid reloading the items cache and strings cache when not needed, speeding
+  up refreshing characters.
 
 ## [0.3.3] - 2023-11-20
 
-### Fixed
+### Added
 
-- Character loading for Grim Dawn 1.2.
+- Support for Grim Dawn 1.2.
+
+> Beta release. Expect some issues.
 
 ## [0.3.2] - 2023-11-19
 
 ### Added
 
-- Damage numbers and pet damage modifiers are indexed and searchable.
+- Added damage numbers, as well as pet damage modifiers.
+
+> Beta release. Expect some issues.
 
 ## [0.3.1] - 2023-11-18
 
 ### Added
 
-- Linux install script.
+- Added a Linux install script.
 
 ### Changed
 
-- Configuration and logs are stored in the user's home directory instead of the
-  application directory.
+- Store config and cache files in the user's home directory
+  (`~/.local/share/grimsearch` on Linux, and `%LOCALAPPDATA%/grimsearch` on
+  Windows) instead of the same directory as the executable.
+
+> Beta release. Expect some issues.
 
 ## [0.3.0] - 2023-11-18
 
 ### Added
 
-- Linux support; moved to .NET 8 and removed the external ArchiveTool
-  dependency.
-- Automated release workflow.
+- Added support for running on Linux.
+- Removed the use of `ArchiveTool.exe` for extracting Grim Dawn data files,
+  giving a good speed-up for the initial extraction.
+
+> Beta release. Expect some issues.
+
+## [0.2.19+3] - 2021-02-01
+
+### Changed
+
+- No user-facing changes recorded.
+
+## [0.2.18+4] - 2019-09-23
+
+### Fixed
+
+- Fixed a bug where some blueprints, such as Pestilence of Dreeg and Decorated
+  Pauldrons, were not searchable.
+
+## [0.2.17+2] - 2019-07-26
+
+### Added
+
+- Added support for searching the +to all skills modifier (only class-specific
+  +to all skills, like +1 to all skills in Soldier, was supported in 0.2.16).
+- Show the number of total search results and the number of shown results above
+  the search window.
+
+## [0.2.16+5] - 2019-07-26
+
+### Added
+
+- +to skills are now indexed. This means you can search for e.g. "Soldier" to
+  get items with +to all skills to Soldier, or "Righteous Fervor" to search for
+  items with +to Righteous Fervor.
+- The item cache is now automatically reloaded if it is found to be out of date
+  (e.g. if Grim Dawn has been updated, or the cache format itself is updated).
+
+### Changed
+
+- Updating to this version causes a reload of all items into the cache.
 
 [Unreleased]: https://github.com/hallgeirl/grim-search/compare/v0.11.1...HEAD
 [0.11.1]: https://github.com/hallgeirl/grim-search/releases/tag/v0.11.1
@@ -204,3 +258,7 @@ Older releases are also listed on the
 [0.3.2]: https://github.com/hallgeirl/grim-search/releases/tag/v0.3.2
 [0.3.1]: https://github.com/hallgeirl/grim-search/releases/tag/v0.3.1
 [0.3.0]: https://github.com/hallgeirl/grim-search/releases/tag/v0.3.0
+[0.2.19+3]: https://github.com/hallgeirl/grim-search/releases/tag/v0.2.19%2B3
+[0.2.18+4]: https://github.com/hallgeirl/grim-search/releases/tag/v0.2.18%2B4
+[0.2.17+2]: https://github.com/hallgeirl/grim-search/releases/tag/v0.2.17%2B2
+[0.2.16+5]: https://github.com/hallgeirl/grim-search/releases/tag/v0.2.16%2B5

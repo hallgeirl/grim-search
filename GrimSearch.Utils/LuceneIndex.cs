@@ -95,10 +95,10 @@ namespace GrimSearch.Utils
             sw.Start();
             try
             {
-                SanitizeSearchString(search);
+                var owner = NormalizeOwner(search);
 
                 var fullQuery = new BooleanQuery();
-                fullQuery.Add(new TermQuery(new Term("owner", search.ToLowerInvariant())), Occur.MUST);
+                fullQuery.Add(new TermQuery(new Term("ownerNormalized", owner)), Occur.MUST);
                 fullQuery.Add(new TermQuery(new Term(GetDuplicatesField(filter), "")), Occur.MUST_NOT);
                 AddFilterQueries(fullQuery, filter);
 
@@ -117,10 +117,10 @@ namespace GrimSearch.Utils
             sw.Start();
             try
             {
-                SanitizeSearchString(search);
+                var owner = NormalizeOwner(search);
 
                 var fullQuery = new BooleanQuery();
-                fullQuery.Add(new TermQuery(new Term("owner", search.ToLowerInvariant())), Occur.MUST);
+                fullQuery.Add(new TermQuery(new Term("ownerNormalized", owner)), Occur.MUST);
                 fullQuery.Add(new TermQuery(new Term(GetDuplicatesField(filter), "")), Occur.MUST);
                 AddFilterQueries(fullQuery, filter);
 
@@ -194,6 +194,11 @@ namespace GrimSearch.Utils
                 searchString = searchString.Replace(c, "");
             }
             return searchString;
+        }
+
+        private static string NormalizeOwner(string characterName)
+        {
+            return (characterName ?? "").ToLowerInvariant();
         }
 
         private IndexItem DocumentToIndexItem(Document doc, IndexFilter filter)
@@ -381,7 +386,11 @@ namespace GrimSearch.Utils
 
             var indexItem = new Document();
             indexItem.AddTextField("itemName", itemWrapper.ItemName, Field.Store.YES);
-            indexItem.AddTextField("owner", itemWrapper.CharacterName, Field.Store.YES);
+            indexItem.AddStringField("owner", itemWrapper.CharacterName, Field.Store.YES);
+            // Character names may contain spaces. Keep an exact, case-insensitive keyword field so
+            // duplicate/unique searches match the full name instead of relying on an analyzed field
+            // (the standard analyzer would split "The Peismaker" into two terms).
+            indexItem.AddStringField("ownerNormalized", NormalizeOwner(itemWrapper.CharacterName), Field.Store.NO);
             indexItem.AddInt32Field("isFormula", ItemHelper.IsFormula(itemDef) ? 1 : 0, Field.Store.YES);
             indexItem.Add(new Int32Field(
                 "levelRequirement",

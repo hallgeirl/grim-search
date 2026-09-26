@@ -756,11 +756,40 @@ namespace GrimSearch.ViewModels
                         DisplayText = ItemHelper.GetItemTypeDisplayName(x)
                     }).OrderBy(x => x.DisplayText));
 
-                    AllCharacters.Clear();
-                    AllCharacters.Add("(select character)");
-                    AllCharacters.AddRange(result.Characters.OrderBy(x => x));
+                    SyncCharacterList(result.Characters.OrderBy(x => x));
                 }));
             }
+        }
+
+        // Update the character list in place instead of calling Clear()/AddRange(). Clearing the
+        // ComboBox ItemsSource drops the current selection, and restoring the same SearchString
+        // value afterwards does not re-select the item (the bound value did not change), so the
+        // dropdown would appear empty even though the search still used the correct character.
+        private void SyncCharacterList(IEnumerable<string> characters)
+        {
+            var desired = new List<string> { "(select character)" };
+            desired.AddRange(characters);
+
+            for (var i = AllCharacters.Count - 1; i >= 0; i--)
+            {
+                if (!desired.Contains(AllCharacters[i]))
+                    AllCharacters.RemoveAt(i);
+            }
+
+            for (var i = 0; i < desired.Count; i++)
+            {
+                if (i < AllCharacters.Count && AllCharacters[i] == desired[i])
+                    continue;
+
+                var existingIndex = AllCharacters.IndexOf(desired[i]);
+                if (existingIndex >= 0)
+                    AllCharacters.Move(existingIndex, i);
+                else
+                    AllCharacters.Insert(i, desired[i]);
+            }
+
+            while (AllCharacters.Count > desired.Count)
+                AllCharacters.RemoveAt(AllCharacters.Count - 1);
         }
 
 

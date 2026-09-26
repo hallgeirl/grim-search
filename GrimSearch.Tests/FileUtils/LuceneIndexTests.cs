@@ -174,6 +174,32 @@ namespace GrimSearch.Tests.FileUtils
         }
 
         [TestMethod]
+        public async Task TestFindDuplicates_CharacterNameWithSpaces()
+        {
+            using var index = new LuceneIndex();
+            await index.BuildAsync(null, "Resources/Saves", false, true);
+
+            var results = await index.FindDuplicatesAsync("The Peismaker", new IndexFilter() { IncludeEquipped = true, SearchMode = "Find duplicates", PageSize = 1000 });
+
+            Assert.IsTrue(results.Results.Count > 0, "Expected duplicate items for a character name containing a space.");
+            Assert.IsTrue(results.Results.All(x => x.Owner == "The Peismaker"));
+            Assert.IsTrue(results.Results.All(x => x.DuplicatesOnCharacters.Count > 0));
+        }
+
+        [TestMethod]
+        public async Task TestFindUnique_CharacterNameWithSpaces()
+        {
+            using var index = new LuceneIndex();
+            await index.BuildAsync(null, "Resources/Saves", false, true);
+
+            var results = await index.FindUniqueAsync("The Peismaker", new IndexFilter() { IncludeEquipped = true, SearchMode = "Find new items", PageSize = 1000 });
+
+            Assert.IsTrue(results.Results.Count > 0, "Expected unique items for a character name containing a space.");
+            Assert.IsTrue(results.Results.All(x => x.Owner == "The Peismaker"));
+            Assert.IsTrue(results.Results.All(x => x.DuplicatesOnCharacters.Count == 0));
+        }
+
+        [TestMethod]
         public async Task TestFindUnequippedWhenIsEquippedIsChecked()
         {
             var index = new LuceneIndex();

@@ -11,3 +11,5 @@ GrimSearch/DatabaseHashes.json
 GrimSearch/ItemsCache.json
 GrimSearch/TagsCache.json
 **/*.zip
+# hunkwise
+.vscode/hunkwise/

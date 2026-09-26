@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Older releases are also listed on the
 [GitHub releases page](https://github.com/hallgeirl/grim-search/releases).
 
-## [Unreleased]
+## [0.11.2]
 
 ### Fixed
 
@@ -234,7 +234,7 @@ Older releases are also listed on the
 
 - Updating to this version causes a reload of all items into the cache.
 
-[Unreleased]: https://github.com/hallgeirl/grim-search/compare/v0.11.1...HEAD
+[0.11.2]: https://github.com/hallgeirl/grim-search/compare/v0.11.1...HEAD
 [0.11.1]: https://github.com/hallgeirl/grim-search/releases/tag/v0.11.1
 [0.11.0]: https://github.com/hallgeirl/grim-search/releases/tag/v0.11.0
 [0.10.0]: https://github.com/hallgeirl/grim-search/releases/tag/v0.10.0
